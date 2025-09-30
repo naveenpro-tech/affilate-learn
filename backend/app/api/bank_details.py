@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.models.bank_details import BankDetails
 from app.schemas.bank_details import BankDetailsCreate, BankDetailsUpdate, BankDetailsResponse

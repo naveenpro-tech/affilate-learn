@@ -236,17 +236,17 @@ def get_recent_activity(
     """
     # Recent registrations
     recent_users = db.query(User).order_by(User.created_at.desc()).limit(5).all()
-    
+
     # Recent purchases
     recent_purchases = db.query(Payment).filter(
         Payment.status == 'success'
     ).order_by(Payment.completed_at.desc()).limit(5).all()
-    
+
     # Recent commissions
     recent_commissions = db.query(Commission).order_by(
         Commission.created_at.desc()
     ).limit(5).all()
-    
+
     return {
         'recent_users': [
             {
@@ -273,5 +273,278 @@ def get_recent_activity(
                 'created_at': c.created_at
             } for c in recent_commissions
         ]
+    }
+
+
+# ==================== COURSE MANAGEMENT ====================
+
+@router.get("/courses")
+def get_all_courses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+    skip: int = 0,
+    limit: int = 100
+):
+    """
+    Get all courses for admin management
+    """
+    courses = db.query(Course).offset(skip).limit(limit).all()
+    return courses
+
+
+@router.post("/courses")
+def create_course(
+    title: str,
+    description: str,
+    package_tier: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Create a new course
+    """
+    course = Course(
+        title=title,
+        description=description,
+        package_tier=package_tier,
+        is_published=True
+    )
+    db.add(course)
+    db.commit()
+    db.refresh(course)
+    return course
+
+
+@router.put("/courses/{course_id}")
+def update_course(
+    course_id: int,
+    title: str = None,
+    description: str = None,
+    package_tier: str = None,
+    is_published: bool = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Update a course
+    """
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Course not found"
+        )
+
+    if title is not None:
+        course.title = title
+    if description is not None:
+        course.description = description
+    if package_tier is not None:
+        course.package_tier = package_tier
+    if is_published is not None:
+        course.is_published = is_published
+
+    db.commit()
+    db.refresh(course)
+    return course
+
+
+@router.delete("/courses/{course_id}")
+def delete_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Delete a course
+    """
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Course not found"
+        )
+
+    db.delete(course)
+    db.commit()
+    return {"message": "Course deleted successfully"}
+
+
+# ==================== PAYOUT MANAGEMENT ====================
+
+@router.get("/payouts/pending")
+def get_pending_payouts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Get all pending payout requests
+    """
+    payouts = db.query(Payout).filter(
+        Payout.status == 'pending'
+    ).order_by(Payout.created_at.desc()).all()
+
+    result = []
+    for payout in payouts:
+        user = db.query(User).filter(User.id == payout.user_id).first()
+        result.append({
+            'id': payout.id,
+            'user_id': payout.user_id,
+            'user_name': user.full_name if user else 'Unknown',
+            'user_email': user.email if user else 'Unknown',
+            'amount': payout.amount,
+            'status': payout.status,
+            'created_at': payout.created_at,
+            'updated_at': payout.updated_at
+        })
+
+    return result
+
+
+@router.get("/payouts/all")
+def get_all_payouts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+    skip: int = 0,
+    limit: int = 100
+):
+    """
+    Get all payouts with pagination
+    """
+    payouts = db.query(Payout).order_by(
+        Payout.created_at.desc()
+    ).offset(skip).limit(limit).all()
+
+    result = []
+    for payout in payouts:
+        user = db.query(User).filter(User.id == payout.user_id).first()
+        result.append({
+            'id': payout.id,
+            'user_id': payout.user_id,
+            'user_name': user.full_name if user else 'Unknown',
+            'user_email': user.email if user else 'Unknown',
+            'amount': payout.amount,
+            'status': payout.status,
+            'created_at': payout.created_at,
+            'updated_at': payout.updated_at,
+            'processed_at': payout.processed_at
+        })
+
+    return result
+
+
+@router.put("/payouts/{payout_id}/approve")
+def approve_payout(
+    payout_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Approve a payout request
+    """
+    from datetime import datetime
+
+    payout = db.query(Payout).filter(Payout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payout not found"
+        )
+
+    if payout.status != 'pending':
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot approve payout with status: {payout.status}"
+        )
+
+    # Update payout status
+    payout.status = 'processing'
+    payout.processed_at = datetime.utcnow()
+
+    # Update related commissions to 'paid'
+    db.query(Commission).filter(
+        Commission.user_id == payout.user_id,
+        Commission.status == 'pending'
+    ).update({'status': 'paid'})
+
+    db.commit()
+    db.refresh(payout)
+
+    return {
+        'id': payout.id,
+        'status': payout.status,
+        'message': 'Payout approved and processing'
+    }
+
+
+@router.put("/payouts/{payout_id}/reject")
+def reject_payout(
+    payout_id: int,
+    reason: str = "Rejected by admin",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Reject a payout request
+    """
+    payout = db.query(Payout).filter(Payout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payout not found"
+        )
+
+    if payout.status != 'pending':
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot reject payout with status: {payout.status}"
+        )
+
+    payout.status = 'cancelled'
+    db.commit()
+    db.refresh(payout)
+
+    return {
+        'id': payout.id,
+        'status': payout.status,
+        'message': f'Payout rejected: {reason}'
+    }
+
+
+@router.put("/payouts/{payout_id}/complete")
+def complete_payout(
+    payout_id: int,
+    transaction_id: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Mark a payout as completed
+    """
+    from datetime import datetime
+
+    payout = db.query(Payout).filter(Payout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payout not found"
+        )
+
+    if payout.status not in ['pending', 'processing']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot complete payout with status: {payout.status}"
+        )
+
+    payout.status = 'completed'
+    payout.processed_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(payout)
+
+    return {
+        'id': payout.id,
+        'status': payout.status,
+        'message': 'Payout completed successfully'
     }
 
