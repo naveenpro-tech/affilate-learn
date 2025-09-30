@@ -81,7 +81,16 @@ export const coursesAPI = {
 export const payoutsAPI = {
   getMyPayouts: () => api.get('/api/payouts/my-payouts'),
   getPendingAmount: () => api.get('/api/payouts/my-pending-amount'),
+  getAvailableBalance: () => api.get('/api/payouts/available-balance'),
   requestPayout: (data: any) => api.post('/api/payouts/request', data),
+  getHistory: () => api.get('/api/payouts/my-payouts'),
+};
+
+export const bankDetailsAPI = {
+  get: () => api.get('/api/bank-details/'),
+  create: (data: any) => api.post('/api/bank-details/', data),
+  update: (data: any) => api.put('/api/bank-details/', data),
+  delete: () => api.delete('/api/bank-details/'),
 };
 
 export const adminAPI = {
