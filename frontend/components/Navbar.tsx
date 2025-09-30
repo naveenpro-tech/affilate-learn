@@ -38,7 +38,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="text-2xl font-bold text-primary-600">
               Affiliate Learning
             </div>
           </Link>
@@ -51,8 +51,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive(link.href)
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-neutral-700 hover:bg-neutral-100 hover:text-primary-600'
                 }`}
               >
                 {link.label}
@@ -63,8 +63,8 @@ export default function Navbar() {
           {/* Desktop User Menu */}
           <div className="hidden md:flex items-center space-x-4">
             <div className="text-sm">
-              <div className="font-semibold text-gray-900">{user?.full_name}</div>
-              <div className="text-xs text-gray-500">{user?.email}</div>
+              <div className="font-semibold text-neutral-900">{user?.full_name}</div>
+              <div className="text-xs text-neutral-500">{user?.email}</div>
             </div>
             <Button
               onClick={handleLogout}
