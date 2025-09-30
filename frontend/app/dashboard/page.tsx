@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
 import { useAuthStore } from '@/store/authStore';
 import { commissionsAPI, referralsAPI, authAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -68,60 +71,117 @@ export default function DashboardPage() {
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
+
   return (
     <ProtectedRoute>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-gray-600 mb-8">Welcome back, {user?.full_name}!</p>
+          </motion.div>
 
           {/* Stats Cards */}
-          <div className="grid md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="text-sm text-gray-600 mb-2">Current Package</div>
-              <div className="text-2xl font-bold text-indigo-600">
-                {user?.current_package || 'None'}
-              </div>
-              {!user?.current_package && (
-                <button
-                  onClick={() => router.push('/packages')}
-                  className="mt-3 text-sm text-indigo-600 hover:text-indigo-800"
-                >
-                  Buy Package →
-                </button>
-              )}
-            </div>
+          <motion.div
+            className="grid md:grid-cols-4 gap-6 mb-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={itemVariants}>
+              <Card className="hover:scale-105 transition-transform duration-300">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600">Current Package</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {user?.current_package || 'None'}
+                  </div>
+                  {!user?.current_package && (
+                    <Button
+                      onClick={() => router.push('/packages')}
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                    >
+                      Buy Package →
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="text-sm text-gray-600 mb-2">Total Earnings</div>
-              <div className="text-2xl font-bold text-green-600">
-                ₹{commissionSummary?.total_commissions?.toFixed(2) || '0.00'}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                {commissionSummary?.total_count || 0} commissions
-              </div>
-            </div>
+            <motion.div variants={itemVariants}>
+              <Card className="hover:scale-105 transition-transform duration-300 border-l-4 border-green-500">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600">Total Earnings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600">
+                    ₹{commissionSummary?.total_commissions?.toFixed(2) || '0.00'}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {commissionSummary?.total_count || 0} commissions
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="text-sm text-gray-600 mb-2">Pending</div>
-              <div className="text-2xl font-bold text-yellow-600">
-                ₹{commissionSummary?.pending_commissions?.toFixed(2) || '0.00'}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                {commissionSummary?.pending_count || 0} pending
-              </div>
-            </div>
+            <motion.div variants={itemVariants}>
+              <Card className="hover:scale-105 transition-transform duration-300 border-l-4 border-yellow-500">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600">Pending</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-yellow-600">
+                    ₹{commissionSummary?.pending_commissions?.toFixed(2) || '0.00'}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {commissionSummary?.pending_count || 0} pending
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="text-sm text-gray-600 mb-2">Total Referrals</div>
-              <div className="text-2xl font-bold text-blue-600">
-                {referralStats?.total_referrals || 0}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                L1: {referralStats?.level1_referrals || 0} | L2: {referralStats?.level2_referrals || 0}
-              </div>
-            </div>
-          </div>
+            <motion.div variants={itemVariants}>
+              <Card className="hover:scale-105 transition-transform duration-300 border-l-4 border-blue-500">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600">Total Referrals</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {referralStats?.total_referrals || 0}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    L1: {referralStats?.level1_referrals || 0} | L2: {referralStats?.level2_referrals || 0}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </motion.div>
 
           {/* Referral Link Card */}
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 rounded-xl shadow-lg mb-8 text-white">
