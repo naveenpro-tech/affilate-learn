@@ -96,6 +96,31 @@ export const bankDetailsAPI = {
   delete: () => api.delete('/api/bank-details/'),
 };
 
+// Admin API endpoints
+export const adminAPI = {
+  // Dashboard
+  getDashboard: () => api.get('/api/admin/dashboard'),
+  getRecentActivity: () => api.get('/api/admin/recent-activity'),
+
+  // Users
+  getUsers: (skip = 0, limit = 100) => api.get(`/api/admin/users?skip=${skip}&limit=${limit}`),
+  toggleUserActive: (userId: number) => api.put(`/api/admin/users/${userId}/toggle-active`),
+  toggleUserAdmin: (userId: number) => api.put(`/api/admin/users/${userId}/toggle-admin`),
+
+  // Courses
+  getCourses: (skip = 0, limit = 100) => api.get(`/api/admin/courses?skip=${skip}&limit=${limit}`),
+  createCourse: (data: any) => api.post('/api/admin/courses', data),
+  updateCourse: (courseId: number, data: any) => api.put(`/api/admin/courses/${courseId}`, data),
+  deleteCourse: (courseId: number) => api.delete(`/api/admin/courses/${courseId}`),
+
+  // Payouts
+  getPendingPayouts: () => api.get('/api/admin/payouts/pending'),
+  getAllPayouts: (skip = 0, limit = 100) => api.get(`/api/admin/payouts/all?skip=${skip}&limit=${limit}`),
+  approvePayout: (payoutId: number) => api.put(`/api/admin/payouts/${payoutId}/approve`),
+  rejectPayout: (payoutId: number, reason?: string) => api.put(`/api/admin/payouts/${payoutId}/reject`, { reason }),
+  completePayout: (payoutId: number, transactionId?: string) => api.put(`/api/admin/payouts/${payoutId}/complete`, { transaction_id: transactionId }),
+};
+
 export const adminAPI = {
   getDashboard: () => api.get('/api/admin/dashboard'),
   getUsers: (skip?: number, limit?: number) => 
