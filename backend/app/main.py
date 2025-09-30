@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -9,6 +10,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Middleware to disable caching
+class NoCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
+# Add no-cache middleware
+app.add_middleware(NoCacheMiddleware)
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
@@ -16,6 +29,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 

@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   description: 'Learn and earn with our affiliate program',
 };
 
+// Disable caching for all pages
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function RootLayout({
   children,
 }: {
