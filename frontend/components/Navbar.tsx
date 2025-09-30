@@ -1,55 +1,147 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
+import { Button } from './ui/Button';
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, logout } = useAuthStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     router.push('/');
   };
 
+  const navLinks = [
+    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/packages', label: 'Packages' },
+    { href: '/courses', label: 'Courses' },
+    { href: '/referrals', label: 'Referrals' },
+    { href: '/earnings', label: 'Earnings' },
+  ];
+
+  if (user?.is_admin) {
+    navLinks.push({ href: '/admin', label: 'Admin' });
+  }
+
+  const isActive = (path: string) => pathname === path;
+
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <Link href="/dashboard" className="text-2xl font-bold text-indigo-600">
-            Affiliate Learning
+          {/* Logo */}
+          <Link href="/dashboard" className="flex items-center space-x-2">
+            <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Affiliate Learning
+            </div>
           </Link>
 
-          <div className="flex items-center space-x-6">
-            <Link href="/dashboard" className="text-gray-700 hover:text-indigo-600">
-              Dashboard
-            </Link>
-            <Link href="/packages" className="text-gray-700 hover:text-indigo-600">
-              Packages
-            </Link>
-            <Link href="/courses" className="text-gray-700 hover:text-indigo-600">
-              Courses
-            </Link>
-            <Link href="/earnings" className="text-gray-700 hover:text-indigo-600">
-              Earnings
-            </Link>
-            {user?.is_admin && (
-              <Link href="/admin" className="text-gray-700 hover:text-indigo-600">
-                Admin
-              </Link>
-            )}
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">{user?.full_name}</span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive(link.href)
+                    ? 'bg-indigo-100 text-indigo-700'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600'
+                }`}
               >
-                Logout
-              </button>
-            </div>
+                {link.label}
+              </Link>
+            ))}
           </div>
+
+          {/* Desktop User Menu */}
+          <div className="hidden md:flex items-center space-x-4">
+            <div className="text-sm">
+              <div className="font-semibold text-gray-900">{user?.full_name}</div>
+              <div className="text-xs text-gray-500">{user?.email}</div>
+            </div>
+            <Button
+              onClick={handleLogout}
+              variant="destructive"
+              size="sm"
+            >
+              Logout
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              {mobileMenuOpen ? (
+                <path d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-t border-gray-200"
+            >
+              <div className="py-4 space-y-2">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      isActive(link.href)
+                        ? 'bg-indigo-100 text-indigo-700'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <div className="px-4 py-3 border-t border-gray-200 mt-2">
+                  <div className="text-sm font-semibold text-gray-900 mb-1">{user?.full_name}</div>
+                  <div className="text-xs text-gray-500 mb-3">{user?.email}</div>
+                  <Button
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
