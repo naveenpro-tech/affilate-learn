@@ -7,8 +7,9 @@ from app.core.dependencies import get_current_user, get_current_admin_user
 from app.models.user import User
 from app.models.payout import Payout
 from app.models.commission import Commission
+from app.models.bank_details import BankDetails
 from app.schemas.payout import (
-    PayoutResponse, PayoutWithUser, PayoutRequest, PayoutUpdate
+    PayoutResponse, PayoutWithUser, PayoutRequest, PayoutUpdate, AvailableBalanceResponse
 )
 from app.services.payout_service import (
     get_user_payout_history,
@@ -43,25 +44,69 @@ def get_my_pending_amount(
     Get current user's pending payout amount
     """
     from sqlalchemy import func
-    
+
     pending_amount = db.query(func.sum(Commission.amount)).filter(
         Commission.user_id == current_user.id,
         Commission.status == 'pending'
     ).scalar() or 0.0
-    
+
     processing_amount = db.query(func.sum(Commission.amount)).filter(
         Commission.user_id == current_user.id,
         Commission.status == 'processing'
     ).scalar() or 0.0
-    
+
     from app.core.config import settings
-    
+
     return {
         'pending_amount': float(pending_amount),
         'processing_amount': float(processing_amount),
         'total_pending': float(pending_amount + processing_amount),
         'minimum_payout': settings.MINIMUM_PAYOUT_AMOUNT,
         'eligible_for_payout': pending_amount >= settings.MINIMUM_PAYOUT_AMOUNT
+    }
+
+
+@router.get("/available-balance", response_model=AvailableBalanceResponse)
+def get_available_balance(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get available balance for payout"""
+    from sqlalchemy import func
+    from app.core.config import settings
+
+    # Calculate total commissions
+    total_commissions = db.query(func.sum(Commission.amount)).filter(
+        Commission.user_id == current_user.id,
+        Commission.status == "pending"
+    ).scalar() or 0.0
+
+    # Calculate paid amount
+    paid_amount = db.query(func.sum(Payout.amount)).filter(
+        Payout.user_id == current_user.id,
+        Payout.status == "completed"
+    ).scalar() or 0.0
+
+    # Calculate pending payouts
+    pending_payouts = db.query(func.sum(Payout.amount)).filter(
+        Payout.user_id == current_user.id,
+        Payout.status.in_(["pending", "processing"])
+    ).scalar() or 0.0
+
+    # Available balance = total commissions - pending payouts
+    available_balance = total_commissions - pending_payouts
+
+    # Check if user can request payout
+    has_bank_details = db.query(BankDetails).filter(BankDetails.user_id == current_user.id).first() is not None
+    can_request_payout = available_balance >= settings.MINIMUM_PAYOUT_AMOUNT and has_bank_details
+
+    return {
+        "total_commissions": total_commissions,
+        "paid_amount": paid_amount,
+        "available_balance": available_balance,
+        "pending_payouts": pending_payouts,
+        "can_request_payout": can_request_payout,
+        "minimum_payout_amount": settings.MINIMUM_PAYOUT_AMOUNT
     }
 
 
@@ -73,62 +118,70 @@ def request_payout(
 ):
     """
     Request a payout (user must have pending commissions above minimum threshold)
-    
+
     Note: In production, this would trigger an admin approval workflow
     """
     from sqlalchemy import func
     from app.core.config import settings
-    
+
+    # Check if user has bank details
+    bank_details = db.query(BankDetails).filter(BankDetails.user_id == current_user.id).first()
+    if not bank_details:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please add your bank details before requesting a payout"
+        )
+
     # Calculate pending amount
     pending_amount = db.query(func.sum(Commission.amount)).filter(
         Commission.user_id == current_user.id,
         Commission.status == 'pending'
     ).scalar() or 0.0
-    
+
     if pending_amount < settings.MINIMUM_PAYOUT_AMOUNT:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Minimum payout amount is ₹{settings.MINIMUM_PAYOUT_AMOUNT}"
         )
-    
+
     # Check if user already has a pending payout request
     existing_payout = db.query(Payout).filter(
         Payout.user_id == current_user.id,
         Payout.status.in_(['pending', 'processing'])
     ).first()
-    
+
     if existing_payout:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You already have a pending payout request"
         )
-    
-    # Create payout record
+
+    # Create payout record using bank details
     payout = Payout(
         user_id=current_user.id,
         amount=pending_amount,
         status='pending',
-        bank_account_number=payout_request.bank_account_number,
-        bank_ifsc=payout_request.bank_ifsc,
-        upi_id=payout_request.upi_id
+        bank_account_number=bank_details.account_number,
+        bank_ifsc=bank_details.ifsc_code,
+        upi_id=bank_details.upi_id
     )
-    
+
     db.add(payout)
     db.flush()
-    
+
     # Link pending commissions to payout
     pending_commissions = db.query(Commission).filter(
         Commission.user_id == current_user.id,
         Commission.status == 'pending'
     ).all()
-    
+
     for commission in pending_commissions:
         commission.payout_id = payout.id
         commission.status = 'processing'
-    
+
     db.commit()
     db.refresh(payout)
-    
+
     return payout
 
 

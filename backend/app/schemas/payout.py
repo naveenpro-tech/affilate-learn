@@ -54,3 +54,13 @@ class PayoutRequest(BaseModel):
     bank_ifsc: Optional[str] = Field(None, max_length=20)
     upi_id: Optional[str] = Field(None, max_length=100)
 
+
+class AvailableBalanceResponse(BaseModel):
+    """Schema for available balance response"""
+    total_commissions: float
+    paid_amount: float
+    available_balance: float
+    pending_payouts: float
+    can_request_payout: bool
+    minimum_payout_amount: float
+
