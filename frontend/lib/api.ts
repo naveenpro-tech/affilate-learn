@@ -121,12 +121,3 @@ export const adminAPI = {
   completePayout: (payoutId: number, transactionId?: string) => api.put(`/api/admin/payouts/${payoutId}/complete`, { transaction_id: transactionId }),
 };
 
-export const adminAPI = {
-  getDashboard: () => api.get('/api/admin/dashboard'),
-  getUsers: (skip?: number, limit?: number) => 
-    api.get('/api/admin/users', { params: { skip, limit } }),
-  toggleUserActive: (userId: number) => api.put(`/api/admin/users/${userId}/toggle-active`),
-  toggleUserAdmin: (userId: number) => api.put(`/api/admin/users/${userId}/toggle-admin`),
-  getRecentActivity: () => api.get('/api/admin/recent-activity'),
-};
-
