@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
 import { useAuthStore } from '@/store/authStore';
 import { packagesAPI, paymentsAPI } from '@/lib/api';
 import { initiatePayment } from '@/lib/razorpay';
 import toast from 'react-hot-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 export default function PackagesPage() {
   const router = useRouter();
@@ -98,103 +102,156 @@ export default function PackagesPage() {
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
+
   return (
     <ProtectedRoute>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Choose Your Package</h1>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Choose Your Package
+            </h1>
             <p className="text-xl text-gray-600">
               Select the perfect package for your learning journey
             </p>
-          </div>
+          </motion.div>
 
           {user?.current_package && (
-            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-6 py-4 rounded-lg mb-8 text-center">
-              You currently have the <strong>{user.current_package}</strong> package.
-              You can upgrade to a higher tier anytime!
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="mb-8 border-l-4 border-blue-500">
+                <CardContent className="py-4">
+                  <p className="text-blue-700 text-center">
+                    You currently have the <strong>{user.current_package}</strong> package.
+                    You can upgrade to a higher tier anytime!
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <motion.div
+            className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {packages.map((pkg, index) => (
-              <div
+              <motion.div
                 key={pkg.id}
-                className={`bg-white rounded-xl shadow-lg overflow-hidden ${
-                  index === 1 ? 'transform scale-105 border-4 border-indigo-600' : 'border-2 border-gray-200'
-                }`}
+                variants={cardVariants}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+                className={`relative ${index === 1 ? 'md:-mt-4' : ''}`}
               >
-                {index === 1 && (
-                  <div className="bg-indigo-600 text-white text-center py-2 font-semibold">
-                    Most Popular
-                  </div>
-                )}
-                
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
-                  <div className="text-4xl font-bold text-indigo-600 mb-6">
-                    ₹{pkg.final_price?.toLocaleString() || pkg.price?.toLocaleString() || '0'}
-                  </div>
+                <Card className={`h-full ${
+                  index === 1 ? 'border-4 border-indigo-600 shadow-2xl' : 'shadow-lg'
+                }`}>
+                  {index === 1 && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <Badge variant="default" className="px-4 py-2 text-sm">
+                        ⭐ Most Popular
+                      </Badge>
+                    </div>
+                  )}
 
-                  <p className="text-gray-600 mb-6">{pkg.description}</p>
+                  <CardHeader className="text-center pb-4">
+                    <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                      {pkg.name}
+                    </CardTitle>
+                    <div className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+                      ₹{pkg.final_price?.toLocaleString() || pkg.price?.toLocaleString() || '0'}
+                    </div>
+                    <p className="text-gray-600">{pkg.description}</p>
+                  </CardHeader>
 
-                  <div className="space-y-3 mb-8">
-                    {pkg.features && typeof pkg.features === 'object' && Object.entries(pkg.features).map(([key, value]: [string, any]) => (
-                      <div key={key} className="flex items-start">
-                        <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-gray-700">{value}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      {pkg.features && typeof pkg.features === 'object' && Object.entries(pkg.features).map(([key, value]: [string, any]) => (
+                        <div key={key} className="flex items-start">
+                          <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-gray-700">{value}</span>
+                        </div>
+                      ))}
+                    </div>
 
-                  <button
-                    onClick={() => handlePurchase(pkg)}
-                    disabled={purchasing === pkg.id || user?.current_package === pkg.name}
-                    className={`w-full py-3 rounded-lg font-semibold transition ${
-                      user?.current_package === pkg.name
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    <Button
+                      onClick={() => handlePurchase(pkg)}
+                      disabled={purchasing === pkg.id || user?.current_package === pkg.name}
+                      variant={user?.current_package === pkg.name ? "secondary" : "default"}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {user?.current_package === pkg.name
+                        ? '✓ Current Package'
                         : purchasing === pkg.id
-                        ? 'bg-gray-400 text-white cursor-wait'
-                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                    }`}
-                  >
-                    {user?.current_package === pkg.name
-                      ? 'Current Package'
-                      : purchasing === pkg.id
-                      ? 'Processing...'
-                      : 'Buy Now'}
-                  </button>
-                </div>
-              </div>
+                        ? 'Processing...'
+                        : 'Buy Now'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Commission Info */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-center mb-8">Earn While You Learn</h2>
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <p className="text-gray-600 mb-6 text-center">
-                Refer others and earn commissions based on your package tier and their purchase!
-              </p>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">Up to ₹5,625</div>
-                  <div className="text-sm text-gray-600">Level 1 Commission</div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-16 max-w-4xl mx-auto"
+          >
+            <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Earn While You Learn
+            </h2>
+            <Card className="shadow-xl">
+              <CardContent className="p-8">
+                <p className="text-gray-600 mb-8 text-center text-lg">
+                  Refer others and earn commissions based on your package tier and their purchase!
+                </p>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                    <div className="text-4xl font-bold text-blue-600 mb-2">Up to ₹5,625</div>
+                    <div className="text-sm font-medium text-gray-700">Level 1 Commission</div>
+                  </div>
+                  <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                    <div className="text-4xl font-bold text-purple-600 mb-2">Up to ₹1,000</div>
+                    <div className="text-sm font-medium text-gray-700">Level 2 Commission</div>
+                  </div>
+                  <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                    <div className="text-4xl font-bold text-green-600 mb-2">Weekly</div>
+                    <div className="text-sm font-medium text-gray-700">Payout Schedule</div>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">Up to ₹1,000</div>
-                  <div className="text-sm text-gray-600">Level 2 Commission</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">Weekly</div>
-                  <div className="text-sm text-gray-600">Payout Schedule</div>
-                </div>
-              </div>
-            </div>
-          </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </ProtectedRoute>
