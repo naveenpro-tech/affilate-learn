@@ -302,11 +302,46 @@ def create_course(
 ):
     """
     Create a new course
+
+    Note: This endpoint auto-generates slug and maps package_tier to package_id
     """
+    import re
+
+    # Generate slug from title
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+
+    # Check if slug exists, if so, append a number
+    existing_count = db.query(Course).filter(Course.slug.like(f"{slug}%")).count()
+    if existing_count > 0:
+        slug = f"{slug}-{existing_count + 1}"
+
+    # Map package_tier to package_id
+    package_tier_map = {
+        'silver': 1,
+        'gold': 2,
+        'platinum': 3
+    }
+
+    package_id = package_tier_map.get(package_tier.lower())
+    if not package_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid package_tier: {package_tier}. Must be silver, gold, or platinum"
+        )
+
+    # Verify package exists
+    package = db.query(Package).filter(Package.id == package_id).first()
+    if not package:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Package with id {package_id} not found"
+        )
+
     course = Course(
         title=title,
+        slug=slug,
         description=description,
-        package_tier=package_tier,
+        package_id=package_id,
         is_published=True
     )
     db.add(course)
@@ -395,7 +430,7 @@ def get_pending_payouts(
             'amount': payout.amount,
             'status': payout.status,
             'created_at': payout.created_at,
-            'updated_at': payout.updated_at
+            'completed_at': payout.completed_at
         })
 
     return result
@@ -426,11 +461,127 @@ def get_all_payouts(
             'amount': payout.amount,
             'status': payout.status,
             'created_at': payout.created_at,
-            'updated_at': payout.updated_at,
-            'processed_at': payout.processed_at
+            'completed_at': payout.completed_at,
+            'transaction_id': payout.transaction_id
         })
 
     return result
+
+
+@router.put("/payouts/{payout_id}/approve")
+def approve_payout(
+    payout_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Approve a payout request (change status from pending to processing)
+    """
+    payout = db.query(Payout).filter(Payout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payout not found"
+        )
+
+    if payout.status != 'pending':
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot approve payout with status: {payout.status}"
+        )
+
+    payout.status = 'processing'
+    db.commit()
+    db.refresh(payout)
+
+    return payout
+
+
+@router.put("/payouts/{payout_id}/reject")
+def reject_payout(
+    payout_id: int,
+    reason: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Reject a payout request
+    """
+    payout = db.query(Payout).filter(Payout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payout not found"
+        )
+
+    if payout.status not in ['pending', 'processing']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot reject payout with status: {payout.status}"
+        )
+
+    payout.status = 'failed'
+    if reason:
+        payout.notes = reason
+
+    # Revert commissions back to pending
+    commissions = db.query(Commission).filter(
+        Commission.payout_id == payout_id
+    ).all()
+
+    for commission in commissions:
+        commission.status = 'pending'
+        commission.payout_id = None
+
+    db.commit()
+    db.refresh(payout)
+
+    return payout
+
+
+@router.put("/payouts/{payout_id}/complete")
+def complete_payout(
+    payout_id: int,
+    transaction_id: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Mark a payout as completed
+    """
+    from datetime import datetime
+
+    payout = db.query(Payout).filter(Payout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Payout not found"
+        )
+
+    if payout.status not in ['pending', 'processing']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot complete payout with status: {payout.status}"
+        )
+
+    payout.status = 'completed'
+    payout.completed_at = datetime.utcnow()
+
+    if transaction_id:
+        payout.transaction_id = transaction_id
+
+    # Mark commissions as paid
+    commissions = db.query(Commission).filter(
+        Commission.payout_id == payout_id
+    ).all()
+
+    for commission in commissions:
+        commission.status = 'paid'
+
+    db.commit()
+    db.refresh(payout)
+
+    return payout
 
 
 @router.put("/payouts/{payout_id}/approve")
