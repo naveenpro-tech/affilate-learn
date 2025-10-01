@@ -8,7 +8,7 @@ class ReferralBase(BaseModel):
     referrer_id: int
     referee_id: int
     level: int
-    package_id: int
+    package_id: Optional[int] = None
 
 
 class ReferralResponse(ReferralBase):

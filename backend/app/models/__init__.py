@@ -8,6 +8,7 @@ from app.models.payout import Payout
 from app.models.course import Course
 from app.models.video import Video
 from app.models.payment import Payment
+from app.models.bank_details import BankDetails
 
 __all__ = [
     "User",
@@ -19,5 +20,6 @@ __all__ = [
     "Course",
     "Video",
     "Payment",
+    "BankDetails",
 ]
 
