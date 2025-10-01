@@ -36,6 +36,44 @@ export default function PackagesPage() {
     }
   };
 
+  // Package tier hierarchy
+  const packageTiers: { [key: string]: number } = {
+    'Silver': 1,
+    'Gold': 2,
+    'Platinum': 3
+  };
+
+  // Get current package tier level
+  const getCurrentTierLevel = () => {
+    if (!user?.current_package) return 0;
+    return packageTiers[user.current_package] || 0;
+  };
+
+  // Check if package is a downgrade
+  const isDowngrade = (packageName: string) => {
+    const currentLevel = getCurrentTierLevel();
+    const packageLevel = packageTiers[packageName] || 0;
+    return currentLevel > 0 && packageLevel < currentLevel;
+  };
+
+  // Check if user has highest package
+  const hasHighestPackage = () => {
+    const currentLevel = getCurrentTierLevel();
+    return currentLevel === 3; // Platinum is level 3
+  };
+
+  // Filter packages to show only upgrades or equal tier
+  const getAvailablePackages = () => {
+    if (!user?.current_package) {
+      return packages; // Show all if no package
+    }
+    const currentLevel = getCurrentTierLevel();
+    return packages.filter(pkg => {
+      const pkgLevel = packageTiers[pkg.name] || 0;
+      return pkgLevel >= currentLevel; // Show current and higher tiers only
+    });
+  };
+
   const handlePurchase = async (pkg: any) => {
     if (!user) {
       toast.error('Please login first');
@@ -144,24 +182,54 @@ export default function PackagesPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="mb-8 border-l-4 border-blue-500">
+              <Card className={`mb-8 border-l-4 ${hasHighestPackage() ? 'border-green-500' : 'border-blue-500'}`}>
                 <CardContent className="py-4">
-                  <p className="text-blue-700 text-center">
-                    You currently have the <strong>{user.current_package}</strong> package.
-                    You can upgrade to a higher tier anytime!
-                  </p>
+                  {hasHighestPackage() ? (
+                    <div className="text-center">
+                      <p className="text-green-700 text-lg font-semibold mb-2">
+                        🎉 Congratulations! You have the <strong>{user.current_package}</strong> package.
+                      </p>
+                      <p className="text-green-600">
+                        You're enjoying our highest tier with all premium features!
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-blue-700 text-center">
+                      You currently have the <strong>{user.current_package}</strong> package.
+                      You can upgrade to a higher tier anytime!
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
           )}
 
-          <motion.div
-            className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {packages.map((pkg, index) => (
+          {hasHighestPackage() ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center py-12"
+            >
+              <div className="text-6xl mb-4">🏆</div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                You're at the Top!
+              </h2>
+              <p className="text-xl text-gray-600 mb-8">
+                You have access to all premium features and courses.
+              </p>
+              <Button onClick={() => router.push('/courses')} size="lg">
+                Explore Courses
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {getAvailablePackages().map((pkg, index) => (
               <motion.div
                 key={pkg.id}
                 variants={cardVariants}
@@ -203,13 +271,15 @@ export default function PackagesPage() {
 
                     <Button
                       onClick={() => handlePurchase(pkg)}
-                      disabled={purchasing === pkg.id || user?.current_package === pkg.name}
-                      variant={user?.current_package === pkg.name ? "secondary" : "default"}
+                      disabled={purchasing === pkg.id || user?.current_package === pkg.name || isDowngrade(pkg.name)}
+                      variant={user?.current_package === pkg.name ? "secondary" : isDowngrade(pkg.name) ? "outline" : "default"}
                       className="w-full"
                       size="lg"
                     >
                       {user?.current_package === pkg.name
                         ? '✓ Current Package'
+                        : isDowngrade(pkg.name)
+                        ? '⚠️ Downgrade Not Allowed'
                         : purchasing === pkg.id
                         ? 'Processing...'
                         : 'Buy Now'}
@@ -217,8 +287,9 @@ export default function PackagesPage() {
                   </CardContent>
                 </Card>
               </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           {/* Commission Info */}
           <motion.div

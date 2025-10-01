@@ -225,8 +225,8 @@ export default function AdminCoursesPage() {
                   <Card className="h-full hover:shadow-medium transition-shadow">
                     <CardHeader>
                       <div className="flex justify-between items-start mb-2">
-                        <Badge variant={course.package_tier as any}>
-                          {course.package_tier.toUpperCase()}
+                        <Badge variant={(course.package_tier || 'default') as any}>
+                          {course.package_tier?.toUpperCase() || 'N/A'}
                         </Badge>
                         <Badge variant={course.is_published ? 'success' : 'warning'}>
                           {course.is_published ? 'Published' : 'Draft'}
