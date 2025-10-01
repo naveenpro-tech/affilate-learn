@@ -5,6 +5,22 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.rate_limit import limiter
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
+
+# Initialize Sentry for error tracking
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.ENVIRONMENT,
+        traces_sample_rate=1.0 if settings.ENVIRONMENT == "development" else 0.1,
+        profiles_sample_rate=1.0 if settings.ENVIRONMENT == "development" else 0.1,
+        integrations=[
+            FastApiIntegration(),
+            StarletteIntegration(),
+        ],
+    )
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -55,6 +71,14 @@ async def root():
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
+
+
+@app.get("/sentry-test")
+async def sentry_test():
+    """Test endpoint to trigger Sentry error tracking"""
+    # This will trigger a division by zero error
+    result = 1 / 0
+    return {"result": result}
 
 
 # Import and include routers

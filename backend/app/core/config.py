@@ -37,7 +37,11 @@ class Settings(BaseSettings):
     # Payout
     PAYOUT_DAY: str = "MONDAY"
     MINIMUM_PAYOUT_AMOUNT: float = 500.0
-    
+
+    # Sentry (Error Tracking)
+    SENTRY_DSN: Optional[str] = None
+    ENVIRONMENT: str = "development"
+
     class Config:
         env_file = ".env"
         case_sensitive = True
