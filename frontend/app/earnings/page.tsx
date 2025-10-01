@@ -167,39 +167,39 @@ export default function EarningsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Date</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Type</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Referee</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Package</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Amount</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Status</th>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Date</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Type</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Referee</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Package</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Amount</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {commissions.map((commission) => (
-                        <tr key={commission.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4 text-sm">
+                        <tr key={commission.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm text-gray-900">
                             {new Date(commission.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4 text-sm">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              commission.level === 1 
-                                ? 'bg-blue-100 text-blue-800' 
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              commission.level === 1
+                                ? 'bg-blue-100 text-blue-800'
                                 : 'bg-purple-100 text-purple-800'
                             }`}>
                               Level {commission.level}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-sm">{commission.referee_email || 'N/A'}</td>
-                          <td className="py-3 px-4 text-sm">{commission.package_name || 'N/A'}</td>
+                          <td className="py-3 px-4 text-sm text-gray-900">{commission.referee_email || 'N/A'}</td>
+                          <td className="py-3 px-4 text-sm text-gray-900">{commission.package_name || 'N/A'}</td>
                           <td className="py-3 px-4 text-sm font-semibold text-green-600">
                             ₹{commission.amount.toFixed(2)}
                           </td>
                           <td className="py-3 px-4 text-sm">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              commission.status === 'paid' 
-                                ? 'bg-green-100 text-green-800' 
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              commission.status === 'paid'
+                                ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
                             }`}>
                               {commission.status}
@@ -216,29 +216,29 @@ export default function EarningsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Date</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Amount</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Method</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Transaction ID</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Status</th>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Date</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Amount</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Method</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Transaction ID</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {payouts.map((payout) => (
-                        <tr key={payout.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4 text-sm">
+                        <tr key={payout.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm text-gray-900">
                             {new Date(payout.created_at).toLocaleDateString()}
                           </td>
-                          <td className="py-3 px-4 text-sm font-semibold">
+                          <td className="py-3 px-4 text-sm font-semibold text-gray-900">
                             ₹{payout.amount.toFixed(2)}
                           </td>
-                          <td className="py-3 px-4 text-sm">{payout.payment_method || 'Pending'}</td>
-                          <td className="py-3 px-4 text-sm">{payout.transaction_id || '-'}</td>
+                          <td className="py-3 px-4 text-sm text-gray-900">{payout.payment_method || 'Pending'}</td>
+                          <td className="py-3 px-4 text-sm text-gray-600">{payout.transaction_id || '-'}</td>
                           <td className="py-3 px-4 text-sm">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              payout.status === 'completed' 
-                                ? 'bg-green-100 text-green-800' 
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              payout.status === 'completed'
+                                ? 'bg-green-100 text-green-800'
                                 : payout.status === 'pending'
                                 ? 'bg-yellow-100 text-yellow-800'
                                 : 'bg-red-100 text-red-800'
@@ -257,31 +257,31 @@ export default function EarningsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Date</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Level</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Referee</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Package</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Commission</th>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Date</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Level</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Referee</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Package</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Commission</th>
                       </tr>
                     </thead>
                     <tbody>
                       {referrals.map((referral) => (
-                        <tr key={referral.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4 text-sm">
+                        <tr key={referral.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm text-gray-900">
                             {new Date(referral.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4 text-sm">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              referral.level === 1 
-                                ? 'bg-blue-100 text-blue-800' 
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              referral.level === 1
+                                ? 'bg-blue-100 text-blue-800'
                                 : 'bg-purple-100 text-purple-800'
                             }`}>
                               Level {referral.level}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-sm">{referral.referee_email || 'N/A'}</td>
-                          <td className="py-3 px-4 text-sm">{referral.package_name || 'N/A'}</td>
+                          <td className="py-3 px-4 text-sm text-gray-900">{referral.referee_email || 'N/A'}</td>
+                          <td className="py-3 px-4 text-sm text-gray-900">{referral.package_name || 'N/A'}</td>
                           <td className="py-3 px-4 text-sm font-semibold text-green-600">
                             ₹{referral.commission_amount?.toFixed(2) || '0.00'}
                           </td>
@@ -300,35 +300,35 @@ export default function EarningsPage() {
       {showPayoutModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold mb-6">Request Payout</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Request Payout</h2>
             <form onSubmit={handleRequestPayout} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Bank Account Number</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Bank Account Number</label>
                 <input
                   type="text"
                   value={payoutForm.bank_account_number}
                   onChange={(e) => setPayoutForm({ ...payoutForm, bank_account_number: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="1234567890"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">IFSC Code</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">IFSC Code</label>
                 <input
                   type="text"
                   value={payoutForm.bank_ifsc}
                   onChange={(e) => setPayoutForm({ ...payoutForm, bank_ifsc: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="SBIN0001234"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">UPI ID (Optional)</label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">UPI ID (Optional)</label>
                 <input
                   type="text"
                   value={payoutForm.upi_id}
                   onChange={(e) => setPayoutForm({ ...payoutForm, upi_id: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="user@upi"
                 />
               </div>
@@ -342,13 +342,13 @@ export default function EarningsPage() {
                 <button
                   type="button"
                   onClick={() => setShowPayoutModal(false)}
-                  className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-50 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
                 >
                   Submit Request
                 </button>
