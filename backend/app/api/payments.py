@@ -6,6 +6,7 @@ from typing import List
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.models.user import User
 from app.models.package import Package
 from app.models.payment import Payment
@@ -19,7 +20,9 @@ router = APIRouter()
 
 
 @router.post("/create-order", response_model=PaymentOrderResponse)
+@limiter.limit("5/minute")  # 5 payment attempts per minute per IP
 def create_payment_order(
+    request: Request,
     payment_data: PaymentCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -95,7 +98,9 @@ def create_payment_order(
 
 
 @router.post("/verify", response_model=PaymentResponse)
+@limiter.limit("10/minute")  # 10 verification attempts per minute per IP
 def verify_payment(
+    request: Request,
     verification_data: PaymentVerification,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)

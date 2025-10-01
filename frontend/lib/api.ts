@@ -49,6 +49,11 @@ export const authAPI = {
   register: (data: any) => api.post('/api/auth/register', data),
   login: (data: any) => api.post('/api/auth/login', data),
   getMe: () => api.get('/api/auth/me'),
+  updateProfile: (data: any) => api.put('/api/auth/profile', data),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post('/api/auth/change-password', null, {
+      params: { current_password: currentPassword, new_password: newPassword }
+    }),
 };
 
 export const packagesAPI = {

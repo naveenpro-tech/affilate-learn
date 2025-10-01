@@ -2,6 +2,9 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from starlette.middleware.base import BaseHTTPMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.core.rate_limit import limiter
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -9,6 +12,10 @@ app = FastAPI(
     description="Affiliate Video Learning Platform API",
     version="1.0.0"
 )
+
+# Add rate limiter to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Middleware to disable caching
 class NoCacheMiddleware(BaseHTTPMiddleware):

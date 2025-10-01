@@ -41,15 +41,15 @@ export default function ProfilePage() {
 
   const handleEditProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
-      // Note: This would need a backend endpoint to update profile
-      // For now, we'll just show a success message
-      toast.success('Profile update feature coming soon!');
+      await authAPI.updateProfile(editFormData);
+      await fetchUser(); // Refresh user data
+      toast.success('Profile updated successfully!');
       setIsEditModalOpen(false);
-    } catch (error) {
-      toast.error('Failed to update profile');
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export default function ProfilePage() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordFormData.new_password !== passwordFormData.confirm_password) {
       toast.error('Passwords do not match');
       return;
@@ -70,16 +70,19 @@ export default function ProfilePage() {
 
     try {
       setLoading(true);
-      // Note: This would need a backend endpoint to change password
-      toast.success('Password change feature coming soon!');
+      await authAPI.changePassword(
+        passwordFormData.current_password,
+        passwordFormData.new_password
+      );
+      toast.success('Password changed successfully!');
       setIsPasswordModalOpen(false);
       setPasswordFormData({
         current_password: '',
         new_password: '',
         confirm_password: '',
       });
-    } catch (error) {
-      toast.error('Failed to change password');
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Failed to change password');
     } finally {
       setLoading(false);
     }

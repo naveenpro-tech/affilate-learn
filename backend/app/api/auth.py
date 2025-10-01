@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
@@ -6,15 +6,17 @@ from app.core.database import get_db
 from app.core.security import verify_password, get_password_hash, create_access_token
 from app.core.config import settings
 from app.core.dependencies import get_current_user
+from app.core.rate_limit import limiter
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserResponse, Token, UserWithPackage
+from app.schemas.user import UserCreate, UserLogin, UserResponse, Token, UserWithPackage, UserUpdate
 from app.utils.referral_code import generate_referral_code
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-def register(user_data: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/hour")  # 5 registrations per hour per IP
+def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new user and return JWT token
 
@@ -77,7 +79,8 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-def login(credentials: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")  # 10 login attempts per minute per IP
+def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db)):
     """
     Login user and return JWT token
     
@@ -206,4 +209,64 @@ def get_referral_stats(current_user: User = Depends(get_current_user), db: Sessi
         "pending_earnings": float(pending_earnings),
         "paid_earnings": float(paid_earnings)
     }
+
+
+@router.put("/profile", response_model=UserResponse)
+def update_profile(
+    profile_data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update current user's profile
+
+    - Updates full_name and/or phone
+    - Returns updated user data
+    """
+    # Update only provided fields
+    if profile_data.full_name is not None:
+        current_user.full_name = profile_data.full_name
+
+    if profile_data.phone is not None:
+        current_user.phone = profile_data.phone
+
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user
+
+
+@router.post("/change-password")
+def change_password(
+    current_password: str,
+    new_password: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Change current user's password
+
+    - Verifies current password
+    - Updates to new password
+    - Returns success message
+    """
+    # Verify current password
+    if not verify_password(current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+
+    # Validate new password length
+    if len(new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 8 characters long"
+        )
+
+    # Update password
+    current_user.hashed_password = get_password_hash(new_password)
+    db.commit()
+
+    return {"message": "Password changed successfully"}
 
