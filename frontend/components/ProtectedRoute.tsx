@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
+import toast from 'react-hot-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -19,16 +20,18 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     }
 
     if (!isLoading && isAuthenticated && requireAdmin && !user?.is_admin) {
+      toast.error('Access denied. Admin privileges required.');
       router.push('/dashboard');
     }
   }, [isAuthenticated, isLoading, requireAdmin, user, router]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto"></div>
+          <p className="mt-6 text-lg font-medium text-gray-900">Loading...</p>
+          <p className="mt-2 text-sm text-gray-600">Please wait while we load your content</p>
         </div>
       </div>
     );
@@ -39,7 +42,23 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   }
 
   if (requireAdmin && !user?.is_admin) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-6">
+            You don't have permission to access this page. Admin privileges are required.
+          </p>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

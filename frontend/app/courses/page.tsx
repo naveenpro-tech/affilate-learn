@@ -34,17 +34,32 @@ export default function CoursesPage() {
 
   useEffect(() => {
     loadCourses();
+
+    // Add loading timeout
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        toast.error('Loading timeout. Please refresh the page.');
+      }
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const loadCourses = async () => {
     try {
+      setLoading(true);
       const response = await coursesAPI.getAll();
       // Filter only published courses
       const publishedCourses = response.data.filter((course: Course) => course.is_published);
       setCourses(publishedCourses);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading courses:', error);
-      toast.error('Failed to load courses');
+      if (error.response?.status === 403) {
+        toast.error('Access denied. Please purchase a package first.');
+      } else {
+        toast.error('Failed to load courses. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -63,7 +78,11 @@ export default function CoursesPage() {
       <ProtectedRoute>
         <Navbar />
         <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mx-auto"></div>
+            <p className="mt-6 text-lg font-medium text-gray-900">Loading Courses...</p>
+            <p className="mt-2 text-sm text-gray-600">Please wait while we fetch your courses</p>
+          </div>
         </div>
       </ProtectedRoute>
     );
