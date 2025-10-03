@@ -128,8 +128,18 @@ export default function ReferralsPage() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-neutral-900 mb-2">My Referrals</h1>
-            <p className="text-neutral-600">Share your referral link and earn commissions</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-neutral-900 mb-2">My Referrals</h1>
+                <p className="text-neutral-600">Share your referral link and earn commissions</p>
+              </div>
+              <Button
+                onClick={() => window.location.href = '/referrals/tree'}
+                variant="outline"
+              >
+                🌳 View Network Tree
+              </Button>
+            </div>
           </motion.div>
 
           {/* Referral Link Card */}

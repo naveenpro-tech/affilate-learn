@@ -22,7 +22,11 @@ class User(Base):
     # Account status
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
-    
+
+    # Password reset
+    reset_token = Column(String, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
+
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

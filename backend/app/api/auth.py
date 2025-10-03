@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from datetime import timedelta
+import logging
 
 from app.core.database import get_db
 from app.core.security import verify_password, get_password_hash, create_access_token
@@ -10,6 +11,10 @@ from app.core.rate_limit import limiter
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse, Token, UserWithPackage, UserUpdate
 from app.utils.referral_code import generate_referral_code
+from app.utils.email import send_welcome_email, send_password_reset_email
+import secrets
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -67,6 +72,18 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # Send welcome email (non-blocking - don't fail registration if email fails)
+    try:
+        send_welcome_email(
+            to_email=new_user.email,
+            user_name=new_user.full_name,
+            referral_code=new_user.referral_code
+        )
+        logger.info(f"Welcome email sent to {new_user.email}")
+    except Exception as e:
+        logger.error(f"Failed to send welcome email to {new_user.email}: {str(e)}")
+        # Continue with registration even if email fails
 
     # Generate JWT token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -269,4 +286,93 @@ def change_password(
     db.commit()
 
     return {"message": "Password changed successfully"}
+
+
+@router.post("/forgot-password")
+@limiter.limit("3/hour")  # 3 password reset requests per hour per IP
+def forgot_password(request: Request, email: str, db: Session = Depends(get_db)):
+    """
+    Request password reset
+
+    - Generates reset token
+    - Sends reset email
+    - Returns success message (even if email doesn't exist for security)
+    """
+    # Find user by email
+    user = db.query(User).filter(User.email == email).first()
+
+    if user:
+        # Generate secure reset token
+        reset_token = secrets.token_urlsafe(32)
+
+        # Set token expiration (1 hour from now)
+        from datetime import datetime, timedelta
+        user.reset_token = reset_token
+        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+
+        db.commit()
+
+        # Send password reset email
+        try:
+            send_password_reset_email(
+                to_email=user.email,
+                reset_token=reset_token
+            )
+            logger.info(f"Password reset email sent to {user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
+
+    # Always return success message (don't reveal if email exists)
+    return {"message": "If the email exists, a password reset link has been sent"}
+
+
+@router.post("/reset-password")
+@limiter.limit("5/hour")  # 5 password reset attempts per hour per IP
+def reset_password(
+    request: Request,
+    token: str,
+    new_password: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Reset password using token
+
+    - Validates reset token
+    - Checks token expiration
+    - Updates password
+    - Clears reset token
+    """
+    from datetime import datetime
+
+    # Find user by reset token
+    user = db.query(User).filter(User.reset_token == token).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+
+    # Check if token is expired
+    if not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reset token has expired"
+        )
+
+    # Validate new password length
+    if len(new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long"
+        )
+
+    # Update password and clear reset token
+    user.hashed_password = get_password_hash(new_password)
+    user.reset_token = None
+    user.reset_token_expires = None
+
+    db.commit()
+
+    return {"message": "Password reset successfully"}
 

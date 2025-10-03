@@ -9,56 +9,71 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, packagesAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface Course {
   id: number;
   title: string;
+  slug: string;
   description: string;
-  package_tier: string;
+  package_id: number;
+  package_name?: string;
   is_published: boolean;
   created_at: string;
+  video_count?: number;
+}
+
+interface Package {
+  id: number;
+  name: string;
+  price: number;
 }
 
 export default function AdminCoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterTier, setFilterTier] = useState<string>('all');
-  
+  const [filterPackage, setFilterPackage] = useState<string>('all');
+
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  
+
   // Form states
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     description: '',
-    package_tier: 'silver',
+    package_id: 1,
   });
 
   useEffect(() => {
-    loadCourses();
+    loadData();
   }, []);
 
-  const loadCourses = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const response = await adminAPI.getCourses();
-      setCourses(response.data);
+      const [coursesRes, packagesRes] = await Promise.all([
+        adminAPI.getCourses(),
+        packagesAPI.getAll()
+      ]);
+      setCourses(coursesRes.data);
+      setPackages(packagesRes.data);
     } catch (error) {
-      console.error('Error loading courses:', error);
-      toast.error('Failed to load courses');
+      console.error('Error loading data:', error);
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateCourse = async () => {
-    if (!formData.title || !formData.description) {
+    if (!formData.title || !formData.slug || !formData.description) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -67,30 +82,35 @@ export default function AdminCoursesPage() {
       await adminAPI.createCourse(formData);
       toast.success('Course created successfully');
       setIsCreateDialogOpen(false);
-      setFormData({ title: '', description: '', package_tier: 'silver' });
-      loadCourses();
-    } catch (error) {
+      setFormData({ title: '', slug: '', description: '', package_id: 1 });
+      loadData();
+    } catch (error: any) {
       console.error('Error creating course:', error);
-      toast.error('Failed to create course');
+      toast.error(error.response?.data?.detail || 'Failed to create course');
     }
   };
 
   const handleUpdateCourse = async () => {
-    if (!selectedCourse || !formData.title || !formData.description) {
-      toast.error('Please fill in all fields');
+    if (!selectedCourse || !formData.title) {
+      toast.error('Please fill in required fields');
       return;
     }
 
     try {
-      await adminAPI.updateCourse(selectedCourse.id, formData);
+      // Only send fields that can be updated
+      const updateData: any = {};
+      if (formData.title) updateData.title = formData.title;
+      if (formData.description) updateData.description = formData.description;
+
+      await adminAPI.updateCourse(selectedCourse.id, updateData);
       toast.success('Course updated successfully');
       setIsEditDialogOpen(false);
       setSelectedCourse(null);
-      setFormData({ title: '', description: '', package_tier: 'silver' });
-      loadCourses();
-    } catch (error) {
+      setFormData({ title: '', slug: '', description: '', package_id: 1 });
+      loadData();
+    } catch (error: any) {
       console.error('Error updating course:', error);
-      toast.error('Failed to update course');
+      toast.error(error.response?.data?.detail || 'Failed to update course');
     }
   };
 
@@ -102,10 +122,10 @@ export default function AdminCoursesPage() {
       toast.success('Course deleted successfully');
       setIsDeleteDialogOpen(false);
       setSelectedCourse(null);
-      loadCourses();
-    } catch (error) {
+      loadData();
+    } catch (error: any) {
       console.error('Error deleting course:', error);
-      toast.error('Failed to delete course');
+      toast.error(error.response?.data?.detail || 'Failed to delete course');
     }
   };
 
@@ -115,10 +135,10 @@ export default function AdminCoursesPage() {
         is_published: !course.is_published,
       });
       toast.success(`Course ${!course.is_published ? 'published' : 'unpublished'} successfully`);
-      loadCourses();
-    } catch (error) {
+      loadData();
+    } catch (error: any) {
       console.error('Error toggling publish status:', error);
-      toast.error('Failed to update course status');
+      toast.error(error.response?.data?.detail || 'Failed to update course status');
     }
   };
 
@@ -126,8 +146,9 @@ export default function AdminCoursesPage() {
     setSelectedCourse(course);
     setFormData({
       title: course.title,
-      description: course.description,
-      package_tier: course.package_tier,
+      slug: course.slug,
+      description: course.description || '',
+      package_id: course.package_id,
     });
     setIsEditDialogOpen(true);
   };
@@ -139,9 +160,9 @@ export default function AdminCoursesPage() {
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTier = filterTier === 'all' || course.package_tier === filterTier;
-    return matchesSearch && matchesTier;
+                         (course.description && course.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesPackage = filterPackage === 'all' || course.package_id.toString() === filterPackage;
+    return matchesSearch && matchesPackage;
   });
 
   if (loading) {
@@ -193,14 +214,14 @@ export default function AdminCoursesPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   <select
-                    value={filterTier}
-                    onChange={(e) => setFilterTier(e.target.value)}
+                    value={filterPackage}
+                    onChange={(e) => setFilterPackage(e.target.value)}
                     className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
-                    <option value="all">All Tiers</option>
-                    <option value="silver">Silver</option>
-                    <option value="gold">Gold</option>
-                    <option value="platinum">Platinum</option>
+                    <option value="all">All Packages</option>
+                    {packages.map(pkg => (
+                      <option key={pkg.id} value={pkg.id.toString()}>{pkg.name}</option>
+                    ))}
                   </select>
                 </div>
               </CardContent>
@@ -225,8 +246,8 @@ export default function AdminCoursesPage() {
                   <Card className="h-full hover:shadow-medium transition-shadow">
                     <CardHeader>
                       <div className="flex justify-between items-start mb-2">
-                        <Badge variant={(course.package_tier || 'default') as any}>
-                          {course.package_tier?.toUpperCase() || 'N/A'}
+                        <Badge variant={(course.package_name?.toLowerCase() || 'default') as any}>
+                          {course.package_name?.toUpperCase() || 'N/A'}
                         </Badge>
                         <Badge variant={course.is_published ? 'success' : 'warning'}>
                           {course.is_published ? 'Published' : 'Draft'}
@@ -236,8 +257,11 @@ export default function AdminCoursesPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-neutral-600 text-sm mb-4 line-clamp-3">
-                        {course.description}
+                        {course.description || 'No description'}
                       </p>
+                      <div className="text-xs text-neutral-500 mb-2">
+                        {course.video_count || 0} videos
+                      </div>
                       <div className="text-xs text-neutral-500 mb-4">
                         Created: {new Date(course.created_at).toLocaleDateString()}
                       </div>
@@ -291,7 +315,7 @@ export default function AdminCoursesPage() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Title</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Title *</label>
               <Input
                 placeholder="Course title"
                 value={formData.title}
@@ -299,7 +323,15 @@ export default function AdminCoursesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Slug *</label>
+              <Input
+                placeholder="course-slug (URL-friendly)"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Description *</label>
               <textarea
                 placeholder="Course description"
                 value={formData.description}
@@ -309,15 +341,15 @@ export default function AdminCoursesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Package Tier</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Package *</label>
               <select
-                value={formData.package_tier}
-                onChange={(e) => setFormData({ ...formData, package_tier: e.target.value })}
+                value={formData.package_id}
+                onChange={(e) => setFormData({ ...formData, package_id: parseInt(e.target.value) })}
                 className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="silver">Silver</option>
-                <option value="gold">Gold</option>
-                <option value="platinum">Platinum</option>
+                {packages.map(pkg => (
+                  <option key={pkg.id} value={pkg.id}>{pkg.name} - ₹{pkg.price}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -347,6 +379,15 @@ export default function AdminCoursesPage() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Slug (read-only)</label>
+              <Input
+                placeholder="course-slug"
+                value={formData.slug}
+                disabled
+                className="bg-neutral-100"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
               <textarea
                 placeholder="Course description"
@@ -357,15 +398,15 @@ export default function AdminCoursesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Package Tier</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Package (read-only)</label>
               <select
-                value={formData.package_tier}
-                onChange={(e) => setFormData({ ...formData, package_tier: e.target.value })}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                value={formData.package_id}
+                disabled
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-neutral-100"
               >
-                <option value="silver">Silver</option>
-                <option value="gold">Gold</option>
-                <option value="platinum">Platinum</option>
+                {packages.map(pkg => (
+                  <option key={pkg.id} value={pkg.id}>{pkg.name}</option>
+                ))}
               </select>
             </div>
           </div>

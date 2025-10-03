@@ -24,6 +24,7 @@ export default function Navbar() {
     { href: '/courses', label: 'Courses' },
     { href: '/referrals', label: 'Referrals' },
     { href: '/earnings', label: 'Earnings' },
+    { href: '/leaderboard', label: '🏆 Leaderboard' },
   ];
 
   if (user?.is_admin) {

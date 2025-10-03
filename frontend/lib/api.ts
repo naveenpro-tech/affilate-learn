@@ -54,6 +54,14 @@ export const authAPI = {
     api.post('/api/auth/change-password', null, {
       params: { current_password: currentPassword, new_password: newPassword }
     }),
+  forgotPassword: (email: string) =>
+    api.post('/api/auth/forgot-password', null, {
+      params: { email }
+    }),
+  resetPassword: (token: string, newPassword: string) =>
+    api.post('/api/auth/reset-password', null, {
+      params: { token, new_password: newPassword }
+    }),
 };
 
 export const packagesAPI = {
@@ -74,9 +82,11 @@ export const referralsAPI = {
 };
 
 export const commissionsAPI = {
-  getMyCommissions: (status?: string) => 
+  getMyCommissions: (status?: string) =>
     api.get('/api/commissions/my-commissions', { params: { status_filter: status } }),
   getSummary: () => api.get('/api/commissions/summary'),
+  getTopEarners: (limit?: number) =>
+    api.get('/api/commissions/top-earners', { params: { limit: limit || 10 } }),
 };
 
 export const coursesAPI = {
@@ -112,11 +122,21 @@ export const adminAPI = {
   toggleUserActive: (userId: number) => api.put(`/api/admin/users/${userId}/toggle-active`),
   toggleUserAdmin: (userId: number) => api.put(`/api/admin/users/${userId}/toggle-admin`),
 
-  // Courses
-  getCourses: (skip = 0, limit = 100) => api.get(`/api/admin/courses?skip=${skip}&limit=${limit}`),
-  createCourse: (data: any) => api.post('/api/admin/courses', data),
-  updateCourse: (courseId: number, data: any) => api.put(`/api/admin/courses/${courseId}`, data),
-  deleteCourse: (courseId: number) => api.delete(`/api/admin/courses/${courseId}`),
+  // Courses (using /api/courses endpoints with admin auth)
+  getCourses: () => api.get('/api/courses/'),
+  createCourse: (data: any) => api.post('/api/courses/', data),
+  updateCourse: (courseId: number, data: any) => api.put(`/api/courses/${courseId}`, data),
+  deleteCourse: (courseId: number) => api.delete(`/api/courses/${courseId}`),
+
+  // Videos
+  uploadVideo: (courseId: number, formData: FormData) =>
+    api.post(`/api/courses/${courseId}/videos`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  updateVideo: (courseId: number, videoId: number, data: any) =>
+    api.put(`/api/courses/${courseId}/videos/${videoId}`, data),
+  deleteVideo: (courseId: number, videoId: number) =>
+    api.delete(`/api/courses/${courseId}/videos/${videoId}`),
 
   // Payouts
   getPendingPayouts: () => api.get('/api/admin/payouts/pending'),

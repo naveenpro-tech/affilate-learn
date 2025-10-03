@@ -71,6 +71,54 @@ def get_my_commissions(
     return result
 
 
+@router.get("/top-earners")
+def get_top_earners(
+    db: Session = Depends(get_db),
+    limit: int = 10
+):
+    """
+    Get top earners leaderboard
+
+    Query params:
+    - limit: Number of top earners to return (default: 10)
+    """
+    from sqlalchemy import func
+
+    # Get top earners by total commission amount
+    top_earners = db.query(
+        User.id,
+        User.full_name,
+        User.email,
+        User.referral_code,
+        User.current_package,
+        func.sum(Commission.amount).label('total_earnings'),
+        func.count(Commission.id).label('commission_count')
+    ).join(
+        Commission, Commission.user_id == User.id
+    ).filter(
+        Commission.status.in_(['pending', 'paid'])  # Include both pending and paid
+    ).group_by(
+        User.id
+    ).order_by(
+        func.sum(Commission.amount).desc()
+    ).limit(limit).all()
+
+    result = []
+    for rank, earner in enumerate(top_earners, start=1):
+        result.append({
+            "rank": rank,
+            "user_id": earner.id,
+            "full_name": earner.full_name,
+            "email": earner.email,
+            "referral_code": earner.referral_code,
+            "current_package": earner.current_package,
+            "total_earnings": float(earner.total_earnings or 0),
+            "commission_count": earner.commission_count
+        })
+
+    return result
+
+
 @router.get("/summary", response_model=CommissionSummary)
 def get_commission_summary(
     current_user: User = Depends(get_current_user),
