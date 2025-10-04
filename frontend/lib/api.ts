@@ -134,6 +134,18 @@ export const certificatesAPI = {
   verifyCertificate: (certificateNumber: string) => api.get(`/api/certificates/verify/${certificateNumber}`),
 };
 
+export const notificationsAPI = {
+  getAll: (skip = 0, limit = 50, unreadOnly = false) =>
+    api.get('/api/notifications/', { params: { skip, limit, unread_only: unreadOnly } }),
+  getStats: () => api.get('/api/notifications/stats'),
+  getById: (id: number) => api.get(`/api/notifications/${id}`),
+  markAsRead: (id: number) => api.patch(`/api/notifications/${id}/read`),
+  markAsUnread: (id: number) => api.patch(`/api/notifications/${id}/unread`),
+  markAllAsRead: () => api.post('/api/notifications/mark-all-read'),
+  delete: (id: number) => api.delete(`/api/notifications/${id}`),
+  create: (data: any) => api.post('/api/notifications/create', data),
+};
+
 // Admin API endpoints
 export const adminAPI = {
   // Dashboard

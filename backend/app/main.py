@@ -82,7 +82,7 @@ async def sentry_test():
 
 
 # Import and include routers
-from app.api import auth, packages, payments, referrals, commissions, courses, payouts, admin, bank_details, profile, modules, certificates
+from app.api import auth, packages, payments, referrals, commissions, courses, payouts, admin, bank_details, profile, modules, certificates, notifications
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(packages.router, prefix="/api/packages", tags=["Packages"])
@@ -92,6 +92,7 @@ app.include_router(commissions.router, prefix="/api/commissions", tags=["Commiss
 app.include_router(courses.router, prefix="/api/courses", tags=["Courses"])
 app.include_router(modules.router, prefix="/api/modules", tags=["Modules & Topics"])
 app.include_router(certificates.router, prefix="/api/certificates", tags=["Certificates"])
+app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 app.include_router(payouts.router, prefix="/api/payouts", tags=["Payouts"])
 app.include_router(bank_details.router, prefix="/api/bank-details", tags=["Bank Details"])
 app.include_router(profile.router, prefix="/api/profile", tags=["Profile"])

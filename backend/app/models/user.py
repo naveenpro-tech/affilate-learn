@@ -47,6 +47,7 @@ class User(Base):
     payouts = relationship("Payout", back_populates="user")
     payments = relationship("Payment", back_populates="user")
     bank_details = relationship("BankDetails", back_populates="user", uselist=False)
+    notifications = relationship("Notification", back_populates="user")
     
     def __repr__(self):
         return f"<User {self.email}>"

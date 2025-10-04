@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from './ui/Button';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function Navbar() {
     { href: '/earnings', label: '💰 Earnings' },
     { href: '/payouts', label: '💸 Payouts' },
     { href: '/certificates', label: '🏆 Certificates' },
+    { href: '/notifications', label: '🔔 Notifications' },
     { href: '/leaderboard', label: '🥇 Leaderboard' },
     { href: '/profile', label: '👤 Profile' },
   ];
@@ -69,6 +71,7 @@ export default function Navbar() {
 
           {/* Desktop User Menu */}
           <div className="hidden md:flex items-center space-x-4">
+            <NotificationBell />
             <div className="text-sm">
               <div className="font-semibold text-neutral-900">{user?.full_name}</div>
               <div className="text-xs text-neutral-500">{user?.email}</div>
