@@ -1,0 +1,7 @@
+-- Add new columns to users table for profile enhancements
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50) UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bio VARCHAR(500);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram_url VARCHAR(200);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS twitter_url VARCHAR(200);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(200);
+
