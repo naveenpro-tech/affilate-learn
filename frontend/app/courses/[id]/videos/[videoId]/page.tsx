@@ -17,6 +17,7 @@ export default function VideoPlayerPage() {
   const [course, setCourse] = useState<any>(null);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [lastSentAt, setLastSentAt] = useState<number>(0);
 
   useEffect(() => {
     if (courseId && videoId) {
@@ -46,7 +47,10 @@ export default function VideoPlayerPage() {
     }
   };
 
-  const handleVideoEnd = () => {
+  const handleVideoEnd = async () => {
+    try {
+      await coursesAPI.setVideoProgress(parseInt(courseId), parseInt(videoId), currentVideo?.duration || 0, true);
+    } catch {}
     // Find next video
     if (course?.videos) {
       const currentIndex = course.videos.findIndex((v: any) => v.id === parseInt(videoId));
@@ -102,6 +106,18 @@ export default function VideoPlayerPage() {
               <VideoPlayer
                 publicId={currentVideo.cloudinary_public_id}
                 onEnded={handleVideoEnd}
+                onTimeUpdate={async (sec) => {
+                  // Throttle network calls to once every ~5 seconds
+                  const now = Date.now();
+                  if (now - lastSentAt > 5000) {
+                    setLastSentAt(now);
+                    try {
+                      await coursesAPI.setVideoProgress(parseInt(courseId), parseInt(videoId), sec, false);
+                    } catch (e) {
+                      // ignore transient errors
+                    }
+                  }
+                }}
               />
               
               <div className="bg-gray-800 text-white p-6 rounded-b-lg">

@@ -92,8 +92,12 @@ export const commissionsAPI = {
 export const coursesAPI = {
   getAll: () => api.get('/api/courses/'),
   getById: (id: number) => api.get(`/api/courses/${id}`),
-  getVideo: (courseId: number, videoId: number) => 
+  getVideo: (courseId: number, videoId: number) =>
     api.get(`/api/courses/${courseId}/videos/${videoId}`),
+  getVideoProgress: (courseId: number, videoId: number) =>
+    api.get(`/api/courses/${courseId}/videos/${videoId}/progress`),
+  setVideoProgress: (courseId: number, videoId: number, watchedSeconds: number, completed = false) =>
+    api.post(`/api/courses/${courseId}/videos/${videoId}/progress`, { watched_seconds: watchedSeconds, completed }),
 };
 
 export const payoutsAPI = {

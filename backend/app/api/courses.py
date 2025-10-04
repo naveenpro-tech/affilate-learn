@@ -16,6 +16,8 @@ from app.schemas.course import (
     VideoResponse, VideoCreate, VideoUpdate
 )
 from app.services.cloudinary_service import cloudinary_service
+from app.models.video_progress import VideoProgress
+from app.schemas.progress import VideoProgressCreate, VideoProgressResponse
 
 router = APIRouter()
 
@@ -332,6 +334,77 @@ def get_video(
         )
 
     return video
+
+
+@router.get("/{course_id}/videos/{video_id}/progress", response_model=VideoProgressResponse)
+def get_video_progress(
+    course_id: int,
+    video_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get current user's progress for a video"""
+    # Ensure table exists (safe if already created)
+    from app.core.database import engine
+    VideoProgress.__table__.create(bind=engine, checkfirst=True)
+
+    # Access control
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not check_user_access(current_user, course, db):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+    vp = db.query(VideoProgress).filter(
+        VideoProgress.user_id == current_user.id,
+        VideoProgress.video_id == video_id,
+    ).first()
+    if not vp:
+        vp = VideoProgress(user_id=current_user.id, video_id=video_id, watched_seconds=0.0, completed=False)
+        db.add(vp)
+        db.commit()
+        db.refresh(vp)
+    return vp
+
+
+@router.post("/{course_id}/videos/{video_id}/progress", response_model=VideoProgressResponse)
+def upsert_video_progress(
+    course_id: int,
+    video_id: int,
+    payload: VideoProgressCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create or update the user's progress for a video"""
+    # Ensure table exists (safe if already created)
+    from app.core.database import engine
+    VideoProgress.__table__.create(bind=engine, checkfirst=True)
+
+    # Access control
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not check_user_access(current_user, course, db):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+    vp = db.query(VideoProgress).filter(
+        VideoProgress.user_id == current_user.id,
+        VideoProgress.video_id == video_id,
+    ).first()
+
+    if vp:
+        # Only increase watched_seconds, do not allow decreasing
+        vp.watched_seconds = max(vp.watched_seconds, float(payload.watched_seconds))
+        if payload.completed:
+            vp.completed = True
+    else:
+        vp = VideoProgress(
+            user_id=current_user.id,
+            video_id=video_id,
+            watched_seconds=float(payload.watched_seconds),
+            completed=bool(payload.completed),
+        )
+        db.add(vp)
+
+    db.commit()
+    db.refresh(vp)
+    return vp
 
 
 @router.put("/{course_id}/videos/{video_id}", response_model=VideoResponse)

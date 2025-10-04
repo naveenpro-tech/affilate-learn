@@ -5,9 +5,10 @@ import { useEffect, useRef } from 'react';
 interface VideoPlayerProps {
   publicId: string;
   onEnded?: () => void;
+  onTimeUpdate?: (seconds: number) => void;
 }
 
-export default function VideoPlayer({ publicId, onEnded }: VideoPlayerProps) {
+export default function VideoPlayer({ publicId, onEnded, onTimeUpdate }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<any>(null);
 
@@ -37,6 +38,16 @@ export default function VideoPlayer({ publicId, onEnded }: VideoPlayerProps) {
 
           if (onEnded) {
             playerRef.current.on('ended', onEnded);
+          }
+          if (onTimeUpdate) {
+            playerRef.current.on('timeupdate', () => {
+              try {
+                const t = playerRef.current.currentTime();
+                if (typeof t === 'number') onTimeUpdate(t);
+              } catch (e) {
+                // ignore
+              }
+            });
           }
         } catch (error) {
           console.error('Error initializing video player:', error);
