@@ -14,6 +14,13 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
     phone = Column(String, nullable=True)
+
+    # Profile fields (PRIORITY 3)
+    username = Column(String(50), unique=True, nullable=True, index=True)
+    bio = Column(String(500), nullable=True)
+    instagram_url = Column(String(200), nullable=True)
+    twitter_url = Column(String(200), nullable=True)
+    linkedin_url = Column(String(200), nullable=True)
     
     # Referral system
     referral_code = Column(String(12), unique=True, index=True, nullable=False)

@@ -4,23 +4,18 @@ from datetime import datetime
 from app.core.database import Base
 
 
-class Course(Base):
-    """Course model for educational content"""
+class Module(Base):
+    """Module model - represents a section within a course"""
     
-    __tablename__ = "courses"
+    __tablename__ = "modules"
     
     id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    
     title = Column(String(200), nullable=False)
-    slug = Column(String(200), unique=True, nullable=False)
     description = Column(Text, nullable=True)
     
-    # Package tier requirement
-    package_id = Column(Integer, ForeignKey("packages.id"), nullable=False)
-    
-    # Thumbnail
-    thumbnail_url = Column(String(500), nullable=True)
-    
-    # Display order
+    # Display order within the course
     display_order = Column(Integer, default=0)
     
     # Status
@@ -31,10 +26,9 @@ class Course(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    package = relationship("Package", back_populates="courses")
-    videos = relationship("Video", back_populates="course", cascade="all, delete-orphan")
-    modules = relationship("Module", back_populates="course", cascade="all, delete-orphan", order_by="Module.display_order")
+    course = relationship("Course", back_populates="modules")
+    topics = relationship("Topic", back_populates="module", cascade="all, delete-orphan")
     
     def __repr__(self):
-        return f"<Course {self.title}>"
+        return f"<Module {self.title}>"
 

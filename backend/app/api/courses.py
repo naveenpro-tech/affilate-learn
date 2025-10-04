@@ -12,12 +12,17 @@ from app.models.video import Video
 from app.models.package import Package
 from app.models.user_package import UserPackage
 from app.schemas.course import (
-    CourseResponse, CourseCreate, CourseUpdate, CourseWithVideos,
+    CourseResponse, CourseCreate, CourseUpdate, CourseWithVideos, CourseWithModules,
     VideoResponse, VideoCreate, VideoUpdate
 )
+from app.models.module import Module
+from app.models.topic import Topic
 from app.services.cloudinary_service import cloudinary_service
 from app.models.video_progress import VideoProgress
 from app.schemas.progress import VideoProgressCreate, VideoProgressResponse
+
+from app.models.certificate import Certificate
+from app.schemas.certificate import CertificateResponse
 
 router = APIRouter()
 
@@ -26,25 +31,25 @@ def check_user_access(user: User, course: Course, db: Session) -> bool:
     """Check if user has access to a course based on their package"""
     if user.is_admin:
         return True
-    
+
     # Get user's active package
     user_package = db.query(UserPackage).filter(
         UserPackage.user_id == user.id,
         UserPackage.status == "active"
     ).order_by(UserPackage.purchase_date.desc()).first()
-    
+
     if not user_package:
         return False
-    
+
     # Get package hierarchy
     package_hierarchy = {"Silver": 1, "Gold": 2, "Platinum": 3}
-    
+
     user_pkg = db.query(Package).filter(Package.id == user_package.package_id).first()
     course_pkg = db.query(Package).filter(Package.id == course.package_id).first()
-    
+
     if not user_pkg or not course_pkg:
         return False
-    
+
     # User can access courses of their package level or lower
     return package_hierarchy.get(user_pkg.name, 0) >= package_hierarchy.get(course_pkg.name, 0)
 
@@ -62,10 +67,10 @@ def get_courses(
         UserPackage.user_id == current_user.id,
         UserPackage.status == "active"
     ).order_by(UserPackage.purchase_date.desc()).first()
-    
+
     if not user_package and not current_user.is_admin:
         return []
-    
+
     # Get accessible courses
     if current_user.is_admin:
         courses = db.query(Course).order_by(Course.display_order).all()
@@ -74,19 +79,19 @@ def get_courses(
         package_hierarchy = {"Silver": 1, "Gold": 2, "Platinum": 3}
         user_pkg = db.query(Package).filter(Package.id == user_package.package_id).first()
         user_level = package_hierarchy.get(user_pkg.name, 0)
-        
+
         # Get all packages at or below user's level
         accessible_packages = db.query(Package).filter(
             Package.name.in_([k for k, v in package_hierarchy.items() if v <= user_level])
         ).all()
-        
+
         package_ids = [pkg.id for pkg in accessible_packages]
-        
+
         courses = db.query(Course).filter(
             Course.package_id.in_(package_ids),
             Course.is_published == True
         ).order_by(Course.display_order).all()
-    
+
     # Build response with videos
     result = []
     for course in courses:
@@ -94,9 +99,9 @@ def get_courses(
             Video.course_id == course.id,
             Video.is_published == True
         ).order_by(Video.display_order).all()
-        
+
         package = db.query(Package).filter(Package.id == course.package_id).first()
-        
+
         course_data = {
             **course.__dict__,
             "videos": videos,
@@ -104,7 +109,7 @@ def get_courses(
             "video_count": len(videos)
         }
         result.append(course_data)
-    
+
     return result
 
 
@@ -123,22 +128,65 @@ def get_course(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
-    
+
     # Check access
     if not check_user_access(current_user, course, db):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have access to this course"
         )
-    
+
     # Get videos
     videos = db.query(Video).filter(
+
+
+@router.get("/{course_id}/with-modules", response_model=CourseWithModules)
+def get_course_with_modules(
+    course_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get a course with its modules and topics (new hierarchical structure)
+    """
+    Module.__table__.create(bind=engine, checkfirst=True)
+    Topic.__table__.create(bind=engine, checkfirst=True)
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Course not found"
+        )
+
+    # Check access
+    if not check_user_access(current_user, course, db):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have access to this course"
+        )
+
+    # Get package name
+    package = db.query(Package).filter(Package.id == course.package_id).first()
+
+    # Count total topics
+    total_topics = 0
+    for module in course.modules:
+        total_topics += len(module.topics)
+
+    return {
+        **course.__dict__,
+        "modules": course.modules,
+        "package_name": package.name if package else None,
+        "total_topics": total_topics
+    }
+
         Video.course_id == course.id,
         Video.is_published == True
     ).order_by(Video.display_order).all()
-    
+
     package = db.query(Package).filter(Package.id == course.package_id).first()
-    
+
     return {
         **course.__dict__,
         "videos": videos,
@@ -163,7 +211,7 @@ def create_course(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Course with this slug already exists"
         )
-    
+
     # Verify package exists
     package = db.query(Package).filter(Package.id == course_data.package_id).first()
     if not package:
@@ -171,12 +219,12 @@ def create_course(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Package not found"
         )
-    
+
     new_course = Course(**course_data.dict())
     db.add(new_course)
     db.commit()
     db.refresh(new_course)
-    
+
     return new_course
 
 
@@ -196,14 +244,14 @@ def update_course(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
-    
+
     update_data = course_data.dict(exclude_unset=True)
     for field, value in update_data.items():
         setattr(course, field, value)
-    
+
     db.commit()
     db.refresh(course)
-    
+
     return course
 
 
@@ -222,7 +270,7 @@ def delete_course(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
-    
+
     # Delete associated videos from Cloudinary
     videos = db.query(Video).filter(Video.course_id == course_id).all()
     for video in videos:
@@ -230,7 +278,7 @@ def delete_course(
             cloudinary_service.delete_video(video.cloudinary_public_id)
         except Exception as e:
             print(f"Error deleting video from Cloudinary: {e}")
-    
+
     db.delete(course)
     db.commit()
 
@@ -405,6 +453,53 @@ def upsert_video_progress(
     db.commit()
     db.refresh(vp)
     return vp
+
+@router.post("/{course_id}/certificate/issue", response_model=CertificateResponse)
+def issue_certificate(
+    course_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Issue a completion certificate when all course videos are completed"""
+    # Lazy-create table
+    from app.core.database import engine
+    Certificate.__table__.create(bind=engine, checkfirst=True)
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    if not check_user_access(current_user, course, db):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    videos = db.query(Video).filter(Video.course_id == course_id).all()
+    if not videos:
+        raise HTTPException(status_code=400, detail="Course has no videos")
+
+    # Check completion
+    video_ids = [v.id for v in videos]
+    completed_count = db.query(VideoProgress).filter(
+        VideoProgress.user_id == current_user.id,
+        VideoProgress.video_id.in_(video_ids),
+        VideoProgress.completed == True,
+    ).count()
+    if completed_count != len(videos):
+        raise HTTPException(status_code=400, detail="All videos must be completed to issue certificate")
+
+    # Upsert certificate
+    existing = db.query(Certificate).filter(Certificate.user_id == current_user.id, Certificate.course_id == course_id).first()
+    if existing:
+        return existing
+
+    import uuid
+    cert = Certificate(
+        user_id=current_user.id,
+        course_id=course_id,
+        certificate_number=str(uuid.uuid4())[:8].upper()
+    )
+    db.add(cert)
+    db.commit()
+    db.refresh(cert)
+    return cert
 
 
 @router.put("/{course_id}/videos/{video_id}", response_model=VideoResponse)

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
+from app.schemas.module import ModuleWithTopics
 
 
 class VideoBase(BaseModel):
@@ -82,4 +83,11 @@ class CourseWithVideos(CourseResponse):
     videos: List[VideoResponse] = []
     package_name: Optional[str] = None
     video_count: int = 0
+
+
+class CourseWithModules(CourseResponse):
+    """Course with modules and topics (new hierarchical structure)"""
+    modules: List[ModuleWithTopics] = []
+    package_name: Optional[str] = None
+    total_topics: int = 0
 

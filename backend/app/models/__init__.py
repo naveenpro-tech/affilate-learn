@@ -11,6 +11,9 @@ from app.models.payment import Payment
 from app.models.bank_details import BankDetails
 from app.models.video_progress import VideoProgress
 from app.models.profile import Profile
+from app.models.certificate import Certificate
+from app.models.module import Module
+from app.models.topic import Topic
 
 __all__ = [
     "User",
@@ -25,5 +28,8 @@ __all__ = [
     "BankDetails",
     "VideoProgress",
     "Profile",
+    "Certificate",
+    "Module",
+    "Topic",
 ]
 
