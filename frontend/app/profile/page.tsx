@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Dialog';
 import { useAuthStore } from '@/store/authStore';
-import { authAPI } from '@/lib/api';
+import { authAPI, profileAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
@@ -18,7 +18,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  
+  const [profile, setProfile] = useState<any>(null);
+
   const [editFormData, setEditFormData] = useState({
     full_name: '',
     phone: '',
@@ -38,6 +39,15 @@ export default function ProfilePage() {
       });
     }
   }, [user]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await profileAPI.getMe();
+        setProfile(res.data);
+      } catch {}
+    })();
+  }, []);
+
 
   const handleEditProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,14 +141,41 @@ export default function ProfilePage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Personal Information</CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditModalOpen(true)}
-                  >
-                    Edit Profile
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={profile?.avatar_url || '/avatar-placeholder.png'}
+                      alt="avatar"
+                      className="w-14 h-14 rounded-full object-cover border"
+                    />
+                    <CardTitle>Personal Information</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer">
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          setLoading(true);
+                          await profileAPI.uploadAvatar(file);
+                          const res = await profileAPI.getMe();
+                          setProfile(res.data);
+                          toast.success('Avatar updated');
+                        } catch (err: any) {
+                          toast.error(err.response?.data?.detail || 'Failed to upload');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }} />
+                      <span className="px-3 py-2 border rounded-md text-sm">{loading ? 'Uploading...' : 'Upload Avatar'}</span>
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditModalOpen(true)}
+                    >
+                      Edit Profile
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -238,7 +275,7 @@ export default function ProfilePage() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-primary-50 p-4 rounded-lg border border-primary-200">
                       <div className="text-sm text-primary-700 mb-1">Direct Referrals</div>

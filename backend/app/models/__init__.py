@@ -10,6 +10,7 @@ from app.models.video import Video
 from app.models.payment import Payment
 from app.models.bank_details import BankDetails
 from app.models.video_progress import VideoProgress
+from app.models.profile import Profile
 
 __all__ = [
     "User",
@@ -23,5 +24,6 @@ __all__ = [
     "Payment",
     "BankDetails",
     "VideoProgress",
+    "Profile",
 ]
 

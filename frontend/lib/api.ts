@@ -99,6 +99,17 @@ export const coursesAPI = {
   setVideoProgress: (courseId: number, videoId: number, watchedSeconds: number, completed = false) =>
     api.post(`/api/courses/${courseId}/videos/${videoId}/progress`, { watched_seconds: watchedSeconds, completed }),
 };
+export const profileAPI = {
+  getMe: () => api.get('/api/profile/me'),
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post('/api/profile/avatar', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
 
 export const payoutsAPI = {
   getMyPayouts: () => api.get('/api/payouts/my-payouts'),
