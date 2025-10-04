@@ -25,6 +25,7 @@ export default function Navbar() {
     { href: '/courses', label: '📚 Courses' },
     { href: '/referrals', label: '👥 Referrals' },
     { href: '/earnings', label: '💰 Earnings' },
+    { href: '/wallet', label: '💳 Wallet' },
     { href: '/payouts', label: '💸 Payouts' },
     { href: '/certificates', label: '🏆 Certificates' },
     { href: '/notifications', label: '🔔 Notifications' },

@@ -146,6 +146,25 @@ export const notificationsAPI = {
   create: (data: any) => api.post('/api/notifications/create', data),
 };
 
+export const walletAPI = {
+  getWallet: () => api.get('/api/wallet/'),
+  getStats: () => api.get('/api/wallet/stats'),
+  getTransactions: (skip = 0, limit = 50) =>
+    api.get('/api/wallet/transactions', { params: { skip, limit } }),
+  getWithTransactions: (limit = 10) =>
+    api.get('/api/wallet/with-transactions', { params: { limit } }),
+  credit: (amount: number, description: string, source = 'admin', referenceId?: string) =>
+    api.post('/api/wallet/credit', null, {
+      params: { amount, description, source, reference_id: referenceId }
+    }),
+  debit: (amount: number, description: string, source = 'purchase', referenceId?: string) =>
+    api.post('/api/wallet/debit', null, {
+      params: { amount, description, source, reference_id: referenceId }
+    }),
+  withdraw: (amount: number) =>
+    api.post('/api/wallet/withdraw', null, { params: { amount } }),
+};
+
 // Admin API endpoints
 export const adminAPI = {
   // Dashboard
