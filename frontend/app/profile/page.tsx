@@ -23,6 +23,11 @@ export default function ProfilePage() {
   const [editFormData, setEditFormData] = useState({
     full_name: '',
     phone: '',
+    username: '',
+    bio: '',
+    instagram_url: '',
+    twitter_url: '',
+    linkedin_url: '',
   });
 
   const [passwordFormData, setPasswordFormData] = useState({
@@ -36,6 +41,11 @@ export default function ProfilePage() {
       setEditFormData({
         full_name: user.full_name || '',
         phone: user.phone || '',
+        username: (user as any).username || '',
+        bio: (user as any).bio || '',
+        instagram_url: (user as any).instagram_url || '',
+        twitter_url: (user as any).twitter_url || '',
+        linkedin_url: (user as any).linkedin_url || '',
       });
     }
   }, [user]);
@@ -193,6 +203,37 @@ export default function ProfilePage() {
                     <div className="font-semibold text-neutral-900 text-lg">{user.phone || 'Not provided'}</div>
                   </div>
                   <div>
+                    <label className="text-sm text-neutral-600">Username</label>
+                    <div className="font-semibold text-neutral-900 text-lg">{(user as any).username || 'Not set'}</div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-sm text-neutral-600">Bio</label>
+                    <div className="text-neutral-900">{(user as any).bio || 'No bio added yet'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-neutral-600">Social Links</label>
+                    <div className="flex gap-2 mt-1">
+                      {(user as any).instagram_url && (
+                        <a href={(user as any).instagram_url} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
+                          📷 Instagram
+                        </a>
+                      )}
+                      {(user as any).twitter_url && (
+                        <a href={(user as any).twitter_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 ml-3">
+                          🐦 Twitter
+                        </a>
+                      )}
+                      {(user as any).linkedin_url && (
+                        <a href={(user as any).linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-800 ml-3">
+                          💼 LinkedIn
+                        </a>
+                      )}
+                      {!(user as any).instagram_url && !(user as any).twitter_url && !(user as any).linkedin_url && (
+                        <span className="text-neutral-500">No social links added</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
                     <label className="text-sm text-neutral-600">Account Status</label>
                     <div>
                       <Badge variant={user.is_active ? 'default' : 'secondary'}>
@@ -330,7 +371,7 @@ export default function ProfilePage() {
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleEditProfile} className="space-y-4">
+          <form onSubmit={handleEditProfile} className="space-y-4 max-h-[70vh] overflow-y-auto">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Full Name
@@ -353,7 +394,66 @@ export default function ProfilePage() {
                 onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
               />
             </div>
-            <div className="flex gap-3 justify-end">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Username (Display Name)
+              </label>
+              <Input
+                type="text"
+                placeholder="johndoe123"
+                value={editFormData.username}
+                onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
+              />
+              <p className="text-xs text-neutral-500 mt-1">This will be shown on leaderboard and certificates</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Bio
+              </label>
+              <textarea
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                rows={3}
+                maxLength={500}
+                placeholder="Tell us about yourself..."
+                value={editFormData.bio}
+                onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })}
+              />
+              <p className="text-xs text-neutral-500 mt-1">{editFormData.bio.length}/500 characters</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Instagram URL
+              </label>
+              <Input
+                type="url"
+                placeholder="https://instagram.com/yourusername"
+                value={editFormData.instagram_url}
+                onChange={(e) => setEditFormData({ ...editFormData, instagram_url: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Twitter/X URL
+              </label>
+              <Input
+                type="url"
+                placeholder="https://twitter.com/yourusername"
+                value={editFormData.twitter_url}
+                onChange={(e) => setEditFormData({ ...editFormData, twitter_url: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                LinkedIn URL
+              </label>
+              <Input
+                type="url"
+                placeholder="https://linkedin.com/in/yourusername"
+                value={editFormData.linkedin_url}
+                onChange={(e) => setEditFormData({ ...editFormData, linkedin_url: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-3 justify-end pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"

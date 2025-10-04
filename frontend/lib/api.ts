@@ -92,12 +92,14 @@ export const commissionsAPI = {
 export const coursesAPI = {
   getAll: () => api.get('/api/courses/'),
   getById: (id: number) => api.get(`/api/courses/${id}`),
+  getWithModules: (id: number) => api.get(`/api/courses/${id}/with-modules`),
   getVideo: (courseId: number, videoId: number) =>
     api.get(`/api/courses/${courseId}/videos/${videoId}`),
   getVideoProgress: (courseId: number, videoId: number) =>
     api.get(`/api/courses/${courseId}/videos/${videoId}/progress`),
   setVideoProgress: (courseId: number, videoId: number, watchedSeconds: number, completed = false) =>
     api.post(`/api/courses/${courseId}/videos/${videoId}/progress`, { watched_seconds: watchedSeconds, completed }),
+  issueCertificate: (courseId: number) => api.post(`/api/courses/${courseId}/certificate/issue`),
 };
 export const profileAPI = {
   getMe: () => api.get('/api/profile/me'),
@@ -159,5 +161,20 @@ export const adminAPI = {
   approvePayout: (payoutId: number) => api.put(`/api/payouts/${payoutId}/approve`),
   rejectPayout: (payoutId: number, reason?: string) => api.put(`/api/payouts/${payoutId}/cancel`, null, { params: { reason } }),
   completePayout: (payoutId: number, transactionId?: string) => api.put(`/api/payouts/${payoutId}/process`, { transaction_id: transactionId }),
+
+  // Modules & Topics (Admin)
+  createModule: (data: any) => api.post('/api/modules/', data),
+  getModule: (moduleId: number) => api.get(`/api/modules/${moduleId}`),
+  updateModule: (moduleId: number, data: any) => api.put(`/api/modules/${moduleId}`, data),
+  deleteModule: (moduleId: number) => api.delete(`/api/modules/${moduleId}`),
+
+  createTopic: (moduleId: number, data: any) => api.post(`/api/modules/${moduleId}/topics`, data),
+  uploadTopicVideo: (moduleId: number, formData: FormData) =>
+    api.post(`/api/modules/${moduleId}/topics/upload-video`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  getTopic: (moduleId: number, topicId: number) => api.get(`/api/modules/${moduleId}/topics/${topicId}`),
+  updateTopic: (moduleId: number, topicId: number, data: any) => api.put(`/api/modules/${moduleId}/topics/${topicId}`, data),
+  deleteTopic: (moduleId: number, topicId: number) => api.delete(`/api/modules/${moduleId}/topics/${topicId}`),
 };
 
