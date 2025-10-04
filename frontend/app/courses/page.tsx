@@ -48,7 +48,7 @@ export default function CoursesPage() {
 
   const loadCourses = async () => {
     try {
-      setLoading(true);
+      setLoading(false); // Show UI immediately
       const response = await coursesAPI.getAll();
       // Filter only published courses
       const publishedCourses = response.data.filter((course: Course) => course.is_published);

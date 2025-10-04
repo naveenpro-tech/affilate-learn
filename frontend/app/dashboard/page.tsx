@@ -25,6 +25,7 @@ export default function DashboardPage() {
   }, []);
 
   const loadDashboardData = async () => {
+    setLoading(false); // Show UI immediately, load data in background
     try {
       const [commSummary, refStats, commissions] = await Promise.all([
         commissionsAPI.getSummary(),
@@ -34,13 +35,11 @@ export default function DashboardPage() {
 
       setCommissionSummary(commSummary.data);
       setReferralStats(refStats.data);
-      setStats(refStats.data); // Use referral stats for both
+      setStats(refStats.data);
       setRecentCommissions(commissions.data.slice(0, 5));
     } catch (error) {
       console.error('Error loading dashboard:', error);
       toast.error('Failed to load dashboard data');
-    } finally {
-      setLoading(false);
     }
   };
 

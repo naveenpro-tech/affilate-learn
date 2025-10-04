@@ -19,16 +19,22 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/packages', label: 'Packages' },
-    { href: '/courses', label: 'Courses' },
-    { href: '/referrals', label: 'Referrals' },
-    { href: '/earnings', label: 'Earnings' },
-    { href: '/leaderboard', label: '🏆 Leaderboard' },
+    { href: '/dashboard', label: '🏠 Dashboard' },
+    { href: '/packages', label: '📦 Packages' },
+    { href: '/courses', label: '📚 Courses' },
+    { href: '/referrals', label: '👥 Referrals' },
+    { href: '/earnings', label: '💰 Earnings' },
+    { href: '/payouts', label: '💸 Payouts' },
+    { href: '/certificates', label: '🏆 Certificates' },
+    { href: '/leaderboard', label: '🥇 Leaderboard' },
+    { href: '/profile', label: '👤 Profile' },
   ];
 
   if (user?.is_admin) {
-    navLinks.push({ href: '/admin', label: 'Admin' });
+    navLinks.push(
+      { href: '/admin', label: '⚙️ Admin' },
+      { href: '/admin/modules', label: '📖 Modules' }
+    );
   }
 
   const isActive = (path: string) => pathname === path;
