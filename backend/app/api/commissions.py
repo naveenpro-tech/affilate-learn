@@ -83,6 +83,8 @@ def get_top_earners(
     - limit: Number of top earners to return (default: 10)
     """
     from sqlalchemy import func
+    from app.models.user_package import UserPackage
+    from app.models.package import Package
 
     # Get top earners by total commission amount
     top_earners = db.query(
@@ -90,7 +92,6 @@ def get_top_earners(
         User.full_name,
         User.email,
         User.referral_code,
-        User.current_package,
         func.sum(Commission.amount).label('total_earnings'),
         func.count(Commission.id).label('commission_count')
     ).join(
@@ -105,13 +106,26 @@ def get_top_earners(
 
     result = []
     for rank, earner in enumerate(top_earners, start=1):
+        # Determine the user's current package from their latest active UserPackage
+        current_package_name = None
+        latest_user_package = (
+            db.query(UserPackage)
+            .filter(UserPackage.user_id == earner.id, UserPackage.status == 'active')
+            .order_by(UserPackage.purchase_date.desc())
+            .first()
+        )
+        if latest_user_package:
+            pkg = db.query(Package).filter(Package.id == latest_user_package.package_id).first()
+            if pkg:
+                current_package_name = pkg.name
+
         result.append({
             "rank": rank,
             "user_id": earner.id,
             "full_name": earner.full_name,
             "email": earner.email,
             "referral_code": earner.referral_code,
-            "current_package": earner.current_package,
+            "current_package": current_package_name,
             "total_earnings": float(earner.total_earnings or 0),
             "commission_count": earner.commission_count
         })

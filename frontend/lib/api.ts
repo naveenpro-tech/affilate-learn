@@ -138,11 +138,11 @@ export const adminAPI = {
   deleteVideo: (courseId: number, videoId: number) =>
     api.delete(`/api/courses/${courseId}/videos/${videoId}`),
 
-  // Payouts
-  getPendingPayouts: () => api.get('/api/admin/payouts/pending'),
-  getAllPayouts: (skip = 0, limit = 100) => api.get(`/api/admin/payouts/all?skip=${skip}&limit=${limit}`),
-  approvePayout: (payoutId: number) => api.put(`/api/admin/payouts/${payoutId}/approve`),
-  rejectPayout: (payoutId: number, reason?: string) => api.put(`/api/admin/payouts/${payoutId}/reject`, { reason }),
-  completePayout: (payoutId: number, transactionId?: string) => api.put(`/api/admin/payouts/${payoutId}/complete`, { transaction_id: transactionId }),
+  // Payouts (Admin)
+  getPendingPayouts: () => api.get('/api/payouts/all', { params: { status_filter: 'pending', limit: 100 } }),
+  getAllPayouts: (limit = 100) => api.get('/api/payouts/all', { params: { limit } }),
+  approvePayout: (payoutId: number) => api.put(`/api/payouts/${payoutId}/approve`),
+  rejectPayout: (payoutId: number, reason?: string) => api.put(`/api/payouts/${payoutId}/cancel`, null, { params: { reason } }),
+  completePayout: (payoutId: number, transactionId?: string) => api.put(`/api/payouts/${payoutId}/process`, { transaction_id: transactionId }),
 };
 

@@ -269,6 +269,26 @@ def process_payout_endpoint(
         )
 
 
+@router.put("/{payout_id}/approve", response_model=PayoutResponse)
+def approve_payout_endpoint(
+    payout_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Approve a payout (Admin only) — sets status to 'processing'.
+    """
+    payout = db.query(Payout).filter(Payout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payout not found")
+
+    # Set payout to processing; commissions already set to 'processing' at request time
+    payout.status = 'processing'
+    db.commit()
+    db.refresh(payout)
+    return payout
+
+
 @router.put("/{payout_id}/cancel", response_model=PayoutResponse)
 def cancel_payout_endpoint(
     payout_id: int,
