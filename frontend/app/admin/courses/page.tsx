@@ -193,8 +193,8 @@ export default function AdminCoursesPage() {
                 <h1 className="text-4xl font-bold text-neutral-900 mb-2">Course Management</h1>
                 <p className="text-neutral-600">Create and manage platform courses</p>
               </div>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
-                + Create Course
+              <Button onClick={() => router.push('/admin/courses/new')}>
+                + Create Course with Modules
               </Button>
             </div>
           </motion.div>
@@ -277,9 +277,9 @@ export default function AdminCoursesPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openEditDialog(course)}
+                          onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
                         >
-                          Edit
+                          ✏️ Edit
                         </Button>
                         <Button
                           variant="outline"
