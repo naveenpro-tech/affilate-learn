@@ -137,7 +137,13 @@ def get_course(
         )
 
     # Get videos
-    videos = db.query(Video).filter(
+    videos = db.query(Video).filter(Video.course_id == course_id).order_by(Video.display_order).all()
+
+    return {
+        **course.__dict__,
+        "videos": videos,
+        "package_name": Package.query.filter(Package.id == course.package_tier).first().name if course.package_tier else None
+    }
 
 
 @router.get("/{course_id}/with-modules", response_model=CourseWithModules)
@@ -179,19 +185,6 @@ def get_course_with_modules(
         "modules": course.modules,
         "package_name": package.name if package else None,
         "total_topics": total_topics
-    }
-
-        Video.course_id == course.id,
-        Video.is_published == True
-    ).order_by(Video.display_order).all()
-
-    package = db.query(Package).filter(Package.id == course.package_id).first()
-
-    return {
-        **course.__dict__,
-        "videos": videos,
-        "package_name": package.name if package else None,
-        "video_count": len(videos)
     }
 
 
