@@ -128,6 +128,12 @@ export const bankDetailsAPI = {
   delete: () => api.delete('/api/bank-details/'),
 };
 
+export const certificatesAPI = {
+  getMyCertificates: () => api.get('/api/certificates/my-certificates'),
+  getCertificate: (id: number) => api.get(`/api/certificates/${id}`),
+  verifyCertificate: (certificateNumber: string) => api.get(`/api/certificates/verify/${certificateNumber}`),
+};
+
 // Admin API endpoints
 export const adminAPI = {
   // Dashboard
