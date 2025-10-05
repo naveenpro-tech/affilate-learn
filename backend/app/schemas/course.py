@@ -50,6 +50,8 @@ class CourseBase(BaseModel):
     description: Optional[str] = None
     package_id: int
     display_order: int = Field(default=0)
+    individual_price: Optional[float] = 199.0
+    available_for_individual_purchase: bool = True
 
 
 class CourseCreate(CourseBase):
@@ -64,6 +66,8 @@ class CourseUpdate(BaseModel):
     thumbnail_url: Optional[str] = None
     display_order: Optional[int] = None
     is_published: Optional[bool] = None
+    individual_price: Optional[float] = None
+    available_for_individual_purchase: Optional[bool] = None
 
 
 class CourseResponse(CourseBase):
@@ -73,7 +77,7 @@ class CourseResponse(CourseBase):
     is_published: bool
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -90,4 +94,13 @@ class CourseWithModules(CourseResponse):
     modules: List[ModuleWithTopics] = []
     package_name: Optional[str] = None
     total_topics: int = 0
+
+
+class CourseWithAccess(CourseResponse):
+    """Course with user access information"""
+    package_name: Optional[str] = None
+    video_count: int = 0
+    has_access: bool = False
+    access_type: Optional[str] = None  # "package", "individual", or None
+    is_locked: bool = True
 

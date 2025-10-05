@@ -91,6 +91,7 @@ export const commissionsAPI = {
 
 export const coursesAPI = {
   getAll: () => api.get('/api/courses/'),
+  getAllWithAccess: () => api.get('/api/courses/all-with-access'),
   getById: (id: number) => api.get(`/api/courses/${id}`),
   getWithModules: (id: number) => api.get(`/api/courses/${id}/with-modules`),
   getVideo: (courseId: number, videoId: number) =>
@@ -100,6 +101,22 @@ export const coursesAPI = {
   setVideoProgress: (courseId: number, videoId: number, watchedSeconds: number, completed = false) =>
     api.post(`/api/courses/${courseId}/videos/${videoId}/progress`, { watched_seconds: watchedSeconds, completed }),
   issueCertificate: (courseId: number) => api.post(`/api/courses/${courseId}/certificate/issue`),
+};
+
+export const coursePurchasesAPI = {
+  initiate: (courseId: number, paymentMethod = 'razorpay') =>
+    api.post('/api/course-purchases/initiate', { course_id: courseId, payment_method: paymentMethod }),
+  verify: (orderId: string, paymentId: string, signature: string, courseId: number) =>
+    api.post('/api/course-purchases/verify', null, {
+      params: {
+        razorpay_order_id: orderId,
+        razorpay_payment_id: paymentId,
+        razorpay_signature: signature,
+        course_id: courseId
+      }
+    }),
+  getMyPurchases: () => api.get('/api/course-purchases/my-purchases'),
+  checkAccess: (courseId: number) => api.get(`/api/course-purchases/check-access/${courseId}`),
 };
 export const profileAPI = {
   getMe: () => api.get('/api/profile/me'),

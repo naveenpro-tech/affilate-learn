@@ -22,6 +22,11 @@ interface Course {
   thumbnail_url?: string;
   video_count: number;
   is_published: boolean;
+  individual_price?: number;
+  available_for_individual_purchase?: boolean;
+  has_access?: boolean;
+  access_type?: string | null;
+  is_locked?: boolean;
 }
 
 export default function CoursesPage() {
@@ -49,10 +54,9 @@ export default function CoursesPage() {
   const loadCourses = async () => {
     try {
       setLoading(false); // Show UI immediately
-      const response = await coursesAPI.getAll();
-      // Filter only published courses
-      const publishedCourses = response.data.filter((course: Course) => course.is_published);
-      setCourses(publishedCourses);
+      const response = await coursesAPI.getAllWithAccess();
+      // All courses are returned with access status
+      setCourses(response.data);
     } catch (error: any) {
       console.error('Error loading courses:', error);
       if (error.response?.status === 403) {
@@ -218,8 +222,10 @@ export default function CoursesPage() {
                   transition={{ delay: index * 0.1, duration: 0.5 }}
                 >
                   <Card
-                    className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
-                    onClick={() => router.push(`/courses/${course.id}`)}
+                    className={`overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group ${
+                      course.is_locked ? 'opacity-75' : ''
+                    }`}
+                    onClick={() => !course.is_locked && router.push(`/courses/${course.id}`)}
                   >
                     {/* Thumbnail */}
                     <div className="relative overflow-hidden">
@@ -234,6 +240,17 @@ export default function CoursesPage() {
                           <span className="text-6xl">🎓</span>
                         </div>
                       )}
+
+                      {/* Lock Overlay */}
+                      {course.is_locked && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-6xl mb-2">🔒</div>
+                            <p className="text-white font-semibold">Locked</p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Package Badge */}
                       <div className="absolute top-3 right-3">
                         <Badge
@@ -246,6 +263,15 @@ export default function CoursesPage() {
                           {course.package_name}
                         </Badge>
                       </div>
+
+                      {/* Access Type Badge */}
+                      {course.has_access && course.access_type && (
+                        <div className="absolute top-3 left-3">
+                          <Badge variant="success">
+                            {course.access_type === 'package' ? '✓ Package' : '✓ Purchased'}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
 
                     {/* Content */}
@@ -258,12 +284,35 @@ export default function CoursesPage() {
                         {course.description || 'No description available'}
                       </p>
 
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-sm mb-3">
                         <span className="text-neutral-500">📹 {course.video_count} videos</span>
-                        <span className="text-primary-600 font-semibold group-hover:translate-x-1 transition-transform">
-                          Start Learning →
-                        </span>
+                        {course.is_locked && course.individual_price && (
+                          <span className="text-success-600 font-bold">
+                            ₹{course.individual_price}
+                          </span>
+                        )}
                       </div>
+
+                      {course.is_locked && course.available_for_individual_purchase ? (
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/courses/${course.id}/purchase`);
+                          }}
+                          className="w-full"
+                          variant="primary"
+                        >
+                          🛒 Buy This Course
+                        </Button>
+                      ) : course.is_locked ? (
+                        <div className="text-center text-sm text-neutral-500">
+                          Requires {course.package_name} package
+                        </div>
+                      ) : (
+                        <div className="text-primary-600 font-semibold group-hover:translate-x-1 transition-transform text-center">
+                          Start Learning →
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
