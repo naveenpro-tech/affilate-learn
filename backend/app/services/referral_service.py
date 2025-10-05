@@ -113,8 +113,26 @@ def process_level_1_commission(
     )
     db.add(commission)
     db.commit()
-    
-    print(f"Level 1 commission created: ₹{commission_amount} for user {referrer.id}")
+    db.refresh(commission)
+
+    # Auto-credit commission to wallet
+    try:
+        from app.api.wallet import credit_wallet_internal
+        from app.models.wallet import TransactionSource
+
+        credit_wallet_internal(
+            db=db,
+            user_id=referrer.id,
+            amount=commission_amount,
+            source=TransactionSource.COMMISSION,
+            description=f"Level 1 commission from {referee.full_name}'s {purchased_package.name} package purchase",
+            reference_id=f"commission_{commission.id}"
+        )
+        print(f"Level 1 commission created and credited to wallet: ₹{commission_amount} for user {referrer.id}")
+    except Exception as e:
+        print(f"Error crediting wallet for level 1 commission: {e}")
+        # Don't fail commission creation if wallet credit fails
+        print(f"Level 1 commission created (wallet credit failed): ₹{commission_amount} for user {referrer.id}")
 
 
 def process_level_2_commission(
@@ -169,8 +187,26 @@ def process_level_2_commission(
     )
     db.add(commission)
     db.commit()
-    
-    print(f"Level 2 commission created: ₹{commission_amount} for user {referrer.id}")
+    db.refresh(commission)
+
+    # Auto-credit commission to wallet
+    try:
+        from app.api.wallet import credit_wallet_internal
+        from app.models.wallet import TransactionSource
+
+        credit_wallet_internal(
+            db=db,
+            user_id=referrer.id,
+            amount=commission_amount,
+            source=TransactionSource.COMMISSION,
+            description=f"Level 2 commission from {referee.full_name}'s {purchased_package.name} package purchase",
+            reference_id=f"commission_{commission.id}"
+        )
+        print(f"Level 2 commission created and credited to wallet: ₹{commission_amount} for user {referrer.id}")
+    except Exception as e:
+        print(f"Error crediting wallet for level 2 commission: {e}")
+        # Don't fail commission creation if wallet credit fails
+        print(f"Level 2 commission created (wallet credit failed): ₹{commission_amount} for user {referrer.id}")
 
 
 def get_user_current_package(user_id: int, db: Session) -> Package:
