@@ -130,7 +130,7 @@ export default function CoursesPage() {
             className="mb-8"
           >
             <h1 className="text-4xl font-bold text-neutral-900 mb-2">My Courses</h1>
-            <p className="text-neutral-600">
+            <div className="text-neutral-600">
               Your current package:{' '}
               <Badge variant={
                 user.current_package === 'Platinum' ? 'default' :
@@ -139,7 +139,7 @@ export default function CoursesPage() {
               }>
                 {user.current_package}
               </Badge>
-            </p>
+            </div>
           </motion.div>
 
           {/* Search and Filter */}

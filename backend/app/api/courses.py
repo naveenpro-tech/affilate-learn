@@ -154,6 +154,7 @@ def get_course_with_modules(
 ):
     """
     Get a course with its modules and topics (new hierarchical structure)
+    Admins can access all courses, regular users need package access
     """
     Module.__table__.create(bind=engine, checkfirst=True)
     Topic.__table__.create(bind=engine, checkfirst=True)
@@ -165,8 +166,8 @@ def get_course_with_modules(
             detail="Course not found"
         )
 
-    # Check access
-    if not check_user_access(current_user, course, db):
+    # Check access - skip for admins
+    if not current_user.is_admin and not check_user_access(current_user, course, db):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have access to this course"
