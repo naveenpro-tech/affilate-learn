@@ -127,6 +127,7 @@ export default function RegisterPage() {
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                   placeholder="John Doe"
                   autoComplete="name"
+                  data-testid="register-fullname"
                 />
               </motion.div>
 
@@ -146,6 +147,7 @@ export default function RegisterPage() {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="your@email.com"
                   autoComplete="email"
+                  data-testid="register-email"
                 />
               </motion.div>
 
@@ -165,6 +167,7 @@ export default function RegisterPage() {
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+91 9876543210"
                   autoComplete="tel"
+                  data-testid="register-phone"
                 />
               </motion.div>
 
@@ -185,6 +188,7 @@ export default function RegisterPage() {
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="••••••••"
                     autoComplete="new-password"
+                    data-testid="register-password"
                   />
                   <button
                     type="button"
@@ -274,6 +278,7 @@ export default function RegisterPage() {
                   type="submit"
                   disabled={isLoading}
                   className="w-full"
+                  data-testid="register-submit"
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
