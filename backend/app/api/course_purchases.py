@@ -117,6 +117,11 @@ def verify_course_purchase(
     """
     Verify Razorpay payment and grant course access
     """
+    print(f"[COURSE PURCHASE VERIFY] User: {current_user.email}")
+    print(f"[COURSE PURCHASE VERIFY] Order ID: {razorpay_order_id}")
+    print(f"[COURSE PURCHASE VERIFY] Payment ID: {razorpay_payment_id}")
+    print(f"[COURSE PURCHASE VERIFY] Course ID: {course_id}")
+
     # Verify payment signature
     try:
         razorpay_client.utility.verify_payment_signature({
@@ -124,10 +129,12 @@ def verify_course_purchase(
             'razorpay_payment_id': razorpay_payment_id,
             'razorpay_signature': razorpay_signature
         })
+        print(f"[COURSE PURCHASE VERIFY] Payment signature verified successfully")
     except Exception as e:
+        print(f"[COURSE PURCHASE VERIFY] Payment verification failed: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Payment verification failed"
+            detail=f"Payment verification failed: {str(e)}"
         )
     
     # Get course

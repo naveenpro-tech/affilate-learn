@@ -101,19 +101,28 @@ export default function CoursePurchasePage() {
           order_id: order_id,
           handler: async function (response: any) {
             try {
+              console.log('[PURCHASE] Verifying payment...', {
+                order_id: response.razorpay_order_id,
+                payment_id: response.razorpay_payment_id,
+                course_id: courseId
+              });
+
               // Verify payment
-              await coursePurchasesAPI.verify(
+              const verifyResponse = await coursePurchasesAPI.verify(
                 response.razorpay_order_id,
                 response.razorpay_payment_id,
                 response.razorpay_signature,
                 courseId
               );
-              
+
+              console.log('[PURCHASE] Verification successful:', verifyResponse.data);
               toast.success('Course purchased successfully!');
-              router.push(`/courses/${courseId}`);
-            } catch (error) {
-              console.error('Payment verification failed:', error);
-              toast.error('Payment verification failed. Please contact support.');
+              router.push(`/courses/${courseId}/learn`);
+            } catch (error: any) {
+              console.error('[PURCHASE] Payment verification failed:', error);
+              console.error('[PURCHASE] Error response:', error.response?.data);
+              const errorMessage = error.response?.data?.detail || error.message || 'Payment verification failed';
+              toast.error(`Payment verification failed: ${errorMessage}`);
             }
           },
           prefill: {

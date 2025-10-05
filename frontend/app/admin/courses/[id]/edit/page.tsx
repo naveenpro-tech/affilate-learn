@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { adminAPI, coursesAPI } from '@/lib/api';
+import { adminAPI, coursesAPI, packagesAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function EditCoursePage() {
@@ -20,10 +20,21 @@ export default function EditCoursePage() {
   const [course, setCourse] = useState<any>(null);
   const [modules, setModules] = useState<any[]>([]);
   const [expandedModule, setExpandedModule] = useState<number | null>(null);
+  const [packages, setPackages] = useState<any[]>([]);
 
   useEffect(() => {
     loadCourseData();
+    loadPackages();
   }, [courseId]);
+
+  const loadPackages = async () => {
+    try {
+      const response = await packagesAPI.getAll();
+      setPackages(response.data);
+    } catch (error) {
+      console.error('Error loading packages:', error);
+    }
+  };
 
   const loadCourseData = async () => {
     try {
@@ -136,6 +147,9 @@ export default function EditCoursePage() {
         title: course.title,
         description: course.description,
         is_published: course.is_published,
+        package_id: course.package_id,
+        individual_price: course.individual_price,
+        available_for_individual_purchase: course.available_for_individual_purchase,
       });
       toast.success('Course updated successfully');
       router.push('/admin/courses');
@@ -203,17 +217,65 @@ export default function EditCoursePage() {
                 />
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="is_published"
-                  checked={course.is_published}
-                  onChange={(e) => setCourse({ ...course, is_published: e.target.checked })}
-                  className="mr-2"
-                />
-                <label htmlFor="is_published" className="text-sm font-medium text-neutral-700">
-                  Published
-                </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Package Tier *
+                  </label>
+                  <select
+                    value={course.package_id}
+                    onChange={(e) => setCourse({ ...course, package_id: parseInt(e.target.value) })}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    {packages.map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} - ₹{pkg.final_price}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Individual Price (₹)
+                  </label>
+                  <Input
+                    type="number"
+                    value={course.individual_price || 199}
+                    onChange={(e) => setCourse({ ...course, individual_price: parseFloat(e.target.value) || 199 })}
+                    placeholder="199"
+                    min="0"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="available_for_individual_purchase"
+                    checked={course.available_for_individual_purchase}
+                    onChange={(e) => setCourse({ ...course, available_for_individual_purchase: e.target.checked })}
+                    className="mr-2"
+                  />
+                  <label htmlFor="available_for_individual_purchase" className="text-sm font-medium text-neutral-700">
+                    Available for Individual Purchase
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="is_published"
+                    checked={course.is_published}
+                    onChange={(e) => setCourse({ ...course, is_published: e.target.checked })}
+                    className="mr-2"
+                  />
+                  <label htmlFor="is_published" className="text-sm font-medium text-neutral-700">
+                    Published
+                  </label>
+                </div>
               </div>
             </CardContent>
           </Card>

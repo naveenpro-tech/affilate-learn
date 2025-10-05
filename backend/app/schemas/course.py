@@ -66,6 +66,7 @@ class CourseUpdate(BaseModel):
     thumbnail_url: Optional[str] = None
     display_order: Optional[int] = None
     is_published: Optional[bool] = None
+    package_id: Optional[int] = None
     individual_price: Optional[float] = None
     available_for_individual_purchase: Optional[bool] = None
 
