@@ -19,6 +19,34 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get("/validate-referral-code")
+def validate_referral_code(code: str, db: Session = Depends(get_db)):
+    """
+    Validate referral code and return referrer's name
+
+    Args:
+        code: Referral code to validate
+        db: Database session
+
+    Returns:
+        dict with valid status and referrer_name if valid
+    """
+    if not code:
+        return {"valid": False, "referrer_name": None}
+
+    # Find user with this referral code
+    referrer = db.query(User).filter(User.referral_code == code.upper()).first()
+
+    if referrer:
+        return {
+            "valid": True,
+            "referrer_name": referrer.full_name,
+            "referrer_email": referrer.email
+        }
+    else:
+        return {"valid": False, "referrer_name": None}
+
+
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/hour")  # 5 registrations per hour per IP
 def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):

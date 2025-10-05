@@ -189,7 +189,24 @@ def verify_payment(
     except Exception as e:
         print(f"Error processing referral commissions: {e}")
         # Don't fail the payment if commission calculation fails
-    
+
+    # Send purchase confirmation email
+    try:
+        from app.utils.email import send_purchase_confirmation_email
+        package = db.query(Package).filter(Package.id == payment.package_id).first()
+        if package:
+            send_purchase_confirmation_email(
+                to_email=current_user.email,
+                user_name=current_user.full_name,
+                package_name=package.name,
+                package_price=package.final_price,
+                transaction_id=payment.razorpay_payment_id,
+                purchase_date=payment.completed_at
+            )
+    except Exception as e:
+        print(f"Error sending purchase confirmation email: {e}")
+        # Don't fail the payment if email fails
+
     return payment
 
 

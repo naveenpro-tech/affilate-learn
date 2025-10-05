@@ -352,3 +352,319 @@ def send_notification_email(to_email: str, subject: str, body: str) -> bool:
     
     return send_email(to_email, subject, html_content, body)
 
+
+def send_purchase_confirmation_email(
+    to_email: str,
+    user_name: str,
+    package_name: str,
+    package_price: float,
+    transaction_id: str,
+    purchase_date
+) -> bool:
+    """
+    Send package purchase confirmation email
+
+    Args:
+        to_email: User's email address
+        user_name: User's full name
+        package_name: Name of purchased package
+        package_price: Price of the package
+        transaction_id: Razorpay transaction ID
+        purchase_date: Date of purchase
+
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    subject = f"Package Purchase Confirmation - {package_name}"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            .header {{
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+                border-radius: 10px 10px 0 0;
+            }}
+            .content {{
+                background: #f9f9f9;
+                padding: 30px;
+                border-radius: 0 0 10px 10px;
+            }}
+            .details-box {{
+                background: white;
+                border: 1px solid #ddd;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .detail-row {{
+                display: flex;
+                justify-content: space-between;
+                padding: 10px 0;
+                border-bottom: 1px solid #eee;
+            }}
+            .detail-label {{
+                font-weight: bold;
+                color: #666;
+            }}
+            .detail-value {{
+                color: #333;
+            }}
+            .button {{
+                display: inline-block;
+                background: #667eea;
+                color: white;
+                padding: 12px 30px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 20px 0;
+            }}
+            .success-icon {{
+                font-size: 48px;
+                color: #28a745;
+                text-align: center;
+                margin: 20px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Purchase Successful! 🎉</h1>
+        </div>
+        <div class="content">
+            <div class="success-icon">✓</div>
+
+            <h2>Hello {user_name}!</h2>
+
+            <p>Thank you for purchasing the <strong>{package_name}</strong> package!</p>
+
+            <div class="details-box">
+                <h3>Purchase Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Package:</span>
+                    <span class="detail-value">{package_name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Price:</span>
+                    <span class="detail-value">₹{package_price:,.2f}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction ID:</span>
+                    <span class="detail-value">{transaction_id}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Purchase Date:</span>
+                    <span class="detail-value">{purchase_date.strftime('%B %d, %Y at %I:%M %p') if purchase_date else 'N/A'}</span>
+                </div>
+            </div>
+
+            <p>You can now access all courses included in your package!</p>
+
+            <center>
+                <a href="{settings.FRONTEND_URL}/courses" class="button">Access Your Courses</a>
+            </center>
+
+            <p>If you have any questions about your purchase, please don't hesitate to contact our support team.</p>
+
+            <p>Best regards,<br>
+            The {settings.APP_NAME} Team</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    Package Purchase Confirmation - {package_name}
+
+    Hello {user_name}!
+
+    Thank you for purchasing the {package_name} package!
+
+    Purchase Details:
+    - Package: {package_name}
+    - Price: ₹{package_price:,.2f}
+    - Transaction ID: {transaction_id}
+    - Purchase Date: {purchase_date.strftime('%B %d, %Y at %I:%M %p') if purchase_date else 'N/A'}
+
+    You can now access all courses included in your package!
+
+    Access Your Courses: {settings.FRONTEND_URL}/courses
+
+    Best regards,
+    The {settings.APP_NAME} Team
+    """
+
+    return send_email(to_email, subject, html_content, text_content)
+
+
+def send_commission_notification_email(
+    to_email: str,
+    referrer_name: str,
+    commission_amount: float,
+    level: int,
+    referee_name: str,
+    package_name: str
+) -> bool:
+    """
+    Send commission notification email to referrer
+
+    Args:
+        to_email: Referrer's email address
+        referrer_name: Referrer's full name
+        commission_amount: Commission amount earned
+        level: Commission level (1 or 2)
+        referee_name: Name of person who made purchase
+        package_name: Package purchased
+
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    subject = f"You Earned a Commission! 💰 ₹{commission_amount:,.2f}"
+
+    level_text = "Direct" if level == 1 else "Indirect"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            .header {{
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+                border-radius: 10px 10px 0 0;
+            }}
+            .content {{
+                background: #f9f9f9;
+                padding: 30px;
+                border-radius: 0 0 10px 10px;
+            }}
+            .commission-box {{
+                background: white;
+                border: 2px solid #28a745;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+                text-align: center;
+            }}
+            .commission-amount {{
+                font-size: 36px;
+                font-weight: bold;
+                color: #28a745;
+                margin: 10px 0;
+            }}
+            .details-box {{
+                background: white;
+                border: 1px solid #ddd;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .detail-row {{
+                padding: 8px 0;
+                border-bottom: 1px solid #eee;
+            }}
+            .detail-label {{
+                font-weight: bold;
+                color: #666;
+            }}
+            .button {{
+                display: inline-block;
+                background: #28a745;
+                color: white;
+                padding: 12px 30px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 20px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🎉 Congratulations!</h1>
+            <h2>You Earned a Commission!</h2>
+        </div>
+        <div class="content">
+            <h2>Hello {referrer_name}!</h2>
+
+            <p>Great news! You've earned a commission from your referral network.</p>
+
+            <div class="commission-box">
+                <h3>Commission Earned</h3>
+                <div class="commission-amount">₹{commission_amount:,.2f}</div>
+                <p>This amount has been automatically credited to your wallet!</p>
+            </div>
+
+            <div class="details-box">
+                <h3>Commission Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Level:</span> Level {level} ({level_text} Referral)
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">From:</span> {referee_name}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Package Purchased:</span> {package_name}
+                </div>
+            </div>
+
+            <p>Keep referring to earn more commissions! Share your referral link with friends and family.</p>
+
+            <center>
+                <a href="{settings.FRONTEND_URL}/wallet" class="button">View Your Wallet</a>
+            </center>
+
+            <p>Best regards,<br>
+            The {settings.APP_NAME} Team</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    You Earned a Commission! 💰
+
+    Hello {referrer_name}!
+
+    Great news! You've earned a commission from your referral network.
+
+    Commission Earned: ₹{commission_amount:,.2f}
+
+    Commission Details:
+    - Level: Level {level} ({level_text} Referral)
+    - From: {referee_name}
+    - Package Purchased: {package_name}
+
+    This amount has been automatically credited to your wallet!
+
+    View Your Wallet: {settings.FRONTEND_URL}/wallet
+
+    Keep referring to earn more commissions!
+
+    Best regards,
+    The {settings.APP_NAME} Team
+    """
+
+    return send_email(to_email, subject, html_content, text_content)
+

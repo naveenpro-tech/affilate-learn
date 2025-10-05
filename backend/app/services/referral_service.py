@@ -129,6 +129,22 @@ def process_level_1_commission(
             reference_id=f"commission_{commission.id}"
         )
         print(f"Level 1 commission created and credited to wallet: ₹{commission_amount} for user {referrer.id}")
+
+        # Send commission notification email
+        try:
+            from app.utils.email import send_commission_notification_email
+            send_commission_notification_email(
+                to_email=referrer.email,
+                referrer_name=referrer.full_name,
+                commission_amount=commission_amount,
+                level=1,
+                referee_name=referee.full_name,
+                package_name=purchased_package.name
+            )
+        except Exception as e:
+            print(f"Error sending commission notification email: {e}")
+            # Don't fail if email fails
+
     except Exception as e:
         print(f"Error crediting wallet for level 1 commission: {e}")
         # Don't fail commission creation if wallet credit fails
@@ -203,6 +219,22 @@ def process_level_2_commission(
             reference_id=f"commission_{commission.id}"
         )
         print(f"Level 2 commission created and credited to wallet: ₹{commission_amount} for user {referrer.id}")
+
+        # Send commission notification email
+        try:
+            from app.utils.email import send_commission_notification_email
+            send_commission_notification_email(
+                to_email=referrer.email,
+                referrer_name=referrer.full_name,
+                commission_amount=commission_amount,
+                level=2,
+                referee_name=referee.full_name,
+                package_name=purchased_package.name
+            )
+        except Exception as e:
+            print(f"Error sending commission notification email: {e}")
+            # Don't fail if email fails
+
     except Exception as e:
         print(f"Error crediting wallet for level 2 commission: {e}")
         # Don't fail commission creation if wallet credit fails

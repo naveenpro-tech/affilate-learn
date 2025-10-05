@@ -26,6 +26,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: '', color: '' });
   const [referralValid, setReferralValid] = useState<boolean | null>(null);
+  const [referrerName, setReferrerName] = useState<string | null>(null);
+  const [validatingReferral, setValidatingReferral] = useState(false);
 
   // Calculate password strength
   useEffect(() => {
@@ -64,16 +66,48 @@ export default function RegisterPage() {
     setPasswordStrength({ score, text, color });
   }, [formData.password]);
 
-  // Validate referral code format
+  // Validate referral code with API
   useEffect(() => {
     if (!formData.referred_by_code) {
       setReferralValid(null);
+      setReferrerName(null);
       return;
     }
 
     const code = formData.referred_by_code.trim().toUpperCase();
-    const isValid = code.length >= 6 && code.length <= 12 && /^[A-Z0-9]+$/.test(code);
-    setReferralValid(isValid);
+
+    // Basic format validation
+    if (code.length < 6 || code.length > 12 || !/^[A-Z0-9]+$/.test(code)) {
+      setReferralValid(false);
+      setReferrerName(null);
+      return;
+    }
+
+    // Validate with API
+    const validateCode = async () => {
+      setValidatingReferral(true);
+      try {
+        const response = await fetch(`http://localhost:8000/api/auth/validate-referral-code?code=${code}`);
+        const data = await response.json();
+
+        if (data.valid) {
+          setReferralValid(true);
+          setReferrerName(data.referrer_name);
+        } else {
+          setReferralValid(false);
+          setReferrerName(null);
+        }
+      } catch (error) {
+        console.error('Error validating referral code:', error);
+        setReferralValid(false);
+        setReferrerName(null);
+      } finally {
+        setValidatingReferral(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(validateCode, 500);
+    return () => clearTimeout(debounceTimer);
   }, [formData.referred_by_code]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -246,7 +280,12 @@ export default function RegisterPage() {
                       referralValid === false ? 'border-danger-500' : ''
                     }
                   />
-                  {referralValid !== null && (
+                  {validatingReferral && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+                    </div>
+                  )}
+                  {!validatingReferral && referralValid !== null && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {referralValid ? (
                         <span className="text-success-600">✓</span>
@@ -258,13 +297,15 @@ export default function RegisterPage() {
                 </div>
                 {referralValid === false && (
                   <p className="text-xs text-danger-600 mt-1">
-                    Invalid format. Code should be 6-12 alphanumeric characters.
+                    Invalid referral code. Please check and try again.
                   </p>
                 )}
-                {referralValid === true && (
-                  <p className="text-xs text-success-600 mt-1">
-                    Valid referral code format ✓
-                  </p>
+                {referralValid === true && referrerName && (
+                  <div className="mt-2 p-3 bg-success-50 border border-success-200 rounded-lg">
+                    <p className="text-sm text-success-800">
+                      ✓ Valid referral code! You were referred by <strong>{referrerName}</strong>
+                    </p>
+                  </div>
                 )}
               </motion.div>
 
