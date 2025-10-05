@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 import razorpay
@@ -107,10 +107,10 @@ def initiate_course_purchase(
 
 @router.post("/verify")
 def verify_course_purchase(
-    razorpay_order_id: str,
-    razorpay_payment_id: str,
-    razorpay_signature: str,
-    course_id: int,
+    razorpay_order_id: str = Query(..., description="Razorpay order ID"),
+    razorpay_payment_id: str = Query(..., description="Razorpay payment ID"),
+    razorpay_signature: str = Query(..., description="Razorpay signature"),
+    course_id: int = Query(..., description="Course ID"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

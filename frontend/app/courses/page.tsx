@@ -40,20 +40,19 @@ export default function CoursesPage() {
   useEffect(() => {
     loadCourses();
 
-    // Add loading timeout
+    // Add loading timeout (30 seconds for development)
     const timeout = setTimeout(() => {
       if (loading) {
         setLoading(false);
-        toast.error('Loading timeout. Please refresh the page.');
+        console.warn('Course loading timeout - this is normal in development');
       }
-    }, 10000); // 10 second timeout
+    }, 30000); // 30 second timeout
 
     return () => clearTimeout(timeout);
   }, []);
 
   const loadCourses = async () => {
     try {
-      setLoading(false); // Show UI immediately
       const response = await coursesAPI.getAllWithAccess();
       // All courses are returned with access status
       setCourses(response.data);
