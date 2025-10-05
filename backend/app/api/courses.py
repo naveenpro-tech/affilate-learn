@@ -4,7 +4,7 @@ from typing import List, Optional
 import os
 import tempfile
 
-from app.core.database import get_db
+from app.core.database import get_db, engine
 from app.core.dependencies import get_current_user, get_current_admin_user
 from app.models.user import User
 from app.models.course import Course
@@ -202,10 +202,14 @@ def get_course(
     # Get videos
     videos = db.query(Video).filter(Video.course_id == course_id).order_by(Video.display_order).all()
 
+    # Get package name
+    package = db.query(Package).filter(Package.id == course.package_id).first()
+    package_name = package.name if package else None
+
     return {
         **course.__dict__,
         "videos": videos,
-        "package_name": Package.query.filter(Package.id == course.package_tier).first().name if course.package_tier else None
+        "package_name": package_name
     }
 
 

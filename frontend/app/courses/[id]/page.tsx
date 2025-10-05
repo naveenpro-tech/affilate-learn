@@ -23,16 +23,27 @@ export default function CourseDetailPage() {
 
   const loadCourse = async () => {
     try {
-      const response = await coursesAPI.getById(parseInt(courseId));
-      setCourse(response.data);
+      // Use getAllWithAccess to get course with access info
+      const response = await coursesAPI.getAllWithAccess();
+      const foundCourse = response.data.find((c: any) => c.id === parseInt(courseId));
+
+      if (!foundCourse) {
+        toast.error('Course not found');
+        router.push('/courses');
+        return;
+      }
+
+      setCourse(foundCourse);
+
+      // If user doesn't have access, redirect to purchase page
+      if (!foundCourse.has_access) {
+        toast.error('You don\'t have access to this course');
+        router.push(`/courses/${courseId}/purchase`);
+      }
     } catch (error: any) {
       console.error('Error loading course:', error);
-      if (error.response?.status === 403) {
-        toast.error('You don\'t have access to this course');
-        router.push('/packages');
-      } else {
-        toast.error('Failed to load course');
-      }
+      toast.error('Failed to load course');
+      router.push('/courses');
     } finally {
       setLoading(false);
     }
