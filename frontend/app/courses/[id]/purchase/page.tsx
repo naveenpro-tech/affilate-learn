@@ -43,16 +43,28 @@ export default function CoursePurchasePage() {
   const loadCourseData = async () => {
     try {
       setLoading(true);
-      const [courseRes, accessRes] = await Promise.all([
-        coursesAPI.getById(courseId),
-        coursePurchasesAPI.checkAccess(courseId)
-      ]);
-      
-      setCourse(courseRes.data);
-      setAccessStatus(accessRes.data);
-      
+
+      // Get all courses with access status
+      const coursesRes = await coursesAPI.getAllWithAccess();
+      const allCourses = coursesRes.data;
+
+      // Find the specific course
+      const foundCourse = allCourses.find((c: any) => c.id === courseId);
+
+      if (!foundCourse) {
+        toast.error('Course not found');
+        router.push('/courses');
+        return;
+      }
+
+      setCourse(foundCourse);
+      setAccessStatus({
+        has_access: foundCourse.has_access,
+        access_type: foundCourse.access_type
+      });
+
       // If user already has access, redirect to course
-      if (accessRes.data.has_access) {
+      if (foundCourse.has_access) {
         toast.success('You already have access to this course!');
         router.push(`/courses/${courseId}`);
       }
