@@ -4,7 +4,7 @@ from typing import List
 from datetime import datetime
 
 from app.core.database import get_db, engine
-from app.core.auth import get_current_user
+from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.models.wallet import Wallet, WalletTransaction, TransactionType, TransactionSource
 from app.schemas.wallet import (
