@@ -69,6 +69,7 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
 
     # Handle referral code
     referred_by_id = None
+    referrer = None
     if user_data.referred_by_code:
         referrer = db.query(User).filter(User.referral_code == user_data.referred_by_code).first()
         if not referrer:
@@ -100,6 +101,24 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # Create notification for referrer if referred
+    if referrer:
+        try:
+            from app.models.notification import Notification
+            notification = Notification(
+                user_id=referrer.id,
+                title="New Referral! 🎉",
+                message=f"{new_user.full_name} just joined using your referral code! They can now purchase a package to earn you commissions.",
+                type="referral",
+                link="/referrals"
+            )
+            db.add(notification)
+            db.commit()
+            logger.info(f"Referral notification created for user {referrer.id}")
+        except Exception as e:
+            logger.error(f"Failed to create referral notification: {str(e)}")
+            # Continue with registration even if notification fails
 
     # Send welcome email (non-blocking - don't fail registration if email fails)
     try:

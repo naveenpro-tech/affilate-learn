@@ -48,6 +48,8 @@ export default function CreateCoursePage() {
     slug: '',
     description: '',
     package_id: 1,
+    individual_price: 199,
+    available_for_individual_purchase: true,
     is_published: false,
   });
 
@@ -223,6 +225,7 @@ export default function CreateCoursePage() {
           } else {
             // Create topic with external URL
             await adminAPI.createTopic(moduleId, {
+              module_id: moduleId,  // Add module_id to fix 422 error
               title: topic.title,
               description: topic.description,
               video_source_type: topic.video_source_type,
@@ -239,7 +242,26 @@ export default function CreateCoursePage() {
       router.push('/admin/courses');
     } catch (error: any) {
       console.error('Error saving course:', error);
-      toast.error(error.response?.data?.detail || 'Failed to save course');
+
+      // Handle validation errors (422) properly
+      if (error.response?.status === 422 && error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+
+        // If detail is an array of validation errors, format them
+        if (Array.isArray(detail)) {
+          const errorMessages = detail.map((err: any) => {
+            const field = err.loc?.join('.') || 'field';
+            return `${field}: ${err.msg}`;
+          }).join(', ');
+          toast.error(`Validation error: ${errorMessages}`);
+        } else if (typeof detail === 'string') {
+          toast.error(detail);
+        } else {
+          toast.error('Validation error occurred');
+        }
+      } else {
+        toast.error(error.response?.data?.detail || error.message || 'Failed to save course');
+      }
     } finally {
       setSaving(false);
     }
@@ -310,6 +332,43 @@ export default function CreateCoursePage() {
                     <option key={pkg.id} value={pkg.id}>{pkg.name} - ₹{pkg.price}</option>
                   ))}
                 </select>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Users with this package tier will have access to this course
+                </p>
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex items-center mb-3">
+                  <input
+                    type="checkbox"
+                    id="available_for_individual_purchase"
+                    checked={courseData.available_for_individual_purchase}
+                    onChange={(e) => setCourseData({ ...courseData, available_for_individual_purchase: e.target.checked })}
+                    className="mr-2"
+                  />
+                  <label htmlFor="available_for_individual_purchase" className="text-sm font-medium text-neutral-700">
+                    Available for individual purchase
+                  </label>
+                </div>
+
+                {courseData.available_for_individual_purchase && (
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Individual Purchase Price (₹)
+                    </label>
+                    <Input
+                      type="number"
+                      value={courseData.individual_price}
+                      onChange={(e) => setCourseData({ ...courseData, individual_price: parseFloat(e.target.value) || 0 })}
+                      placeholder="199"
+                      min="0"
+                      step="1"
+                    />
+                    <p className="text-xs text-neutral-500 mt-1">
+                      Users can purchase this course individually for this price
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center">
