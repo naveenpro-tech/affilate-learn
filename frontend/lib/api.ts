@@ -232,3 +232,12 @@ export const adminAPI = {
   deleteTopic: (moduleId: number, topicId: number) => api.delete(`/api/modules/${moduleId}/topics/${topicId}`),
 };
 
+// Video Progress API
+export const videoProgressAPI = {
+  updateProgress: (data: any) => api.post('/api/video-progress/update', data),
+  getTopicProgress: (topicId: number) => api.get(`/api/video-progress/topic/${topicId}`),
+  getCourseProgress: (courseId: number) => api.get(`/api/video-progress/course/${courseId}`),
+  getMyProgress: () => api.get('/api/video-progress/my-progress'),
+  markComplete: (topicId: number) => api.post(`/api/video-progress/mark-complete/${topicId}`),
+};
+

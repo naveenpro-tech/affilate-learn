@@ -73,7 +73,7 @@ export default function CoursesPage() {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPackage = filterPackage === 'all' ||
-                          course.package_tier.toLowerCase() === filterPackage;
+                          (course.package_tier && course.package_tier.toLowerCase() === filterPackage);
     return matchesSearch && matchesPackage;
   });
 
@@ -202,7 +202,7 @@ export default function CoursesPage() {
                     className={`overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group ${
                       course.is_locked ? 'opacity-75' : ''
                     }`}
-                    onClick={() => !course.is_locked && router.push(`/courses/${course.id}`)}
+                    onClick={() => !course.is_locked && router.push(`/courses/${course.id}/learn`)}
                   >
                     {/* Thumbnail */}
                     <div className="relative overflow-hidden">
