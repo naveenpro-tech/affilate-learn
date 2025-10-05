@@ -92,35 +92,6 @@ export default function CoursesPage() {
     );
   }
 
-  if (!user?.current_package) {
-    return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center max-w-md"
-          >
-            <Card>
-              <CardContent className="pt-12 pb-12">
-                <div className="text-6xl mb-4">📚</div>
-                <h2 className="text-2xl font-bold text-neutral-900 mb-4">No Package Yet</h2>
-                <p className="text-neutral-600 mb-6">
-                  You need to purchase a package to access courses.
-                </p>
-                <Button onClick={() => router.push('/packages')}>
-                  View Packages
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </ProtectedRoute>
-    );
-  }
-
   return (
     <ProtectedRoute>
       <Navbar />
@@ -133,17 +104,23 @@ export default function CoursesPage() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-neutral-900 mb-2">My Courses</h1>
-            <div className="text-neutral-600">
-              Your current package:{' '}
-              <Badge variant={
-                user.current_package === 'Platinum' ? 'default' :
-                user.current_package === 'Gold' ? 'warning' :
-                'secondary'
-              }>
-                {user.current_package}
-              </Badge>
-            </div>
+            <h1 className="text-4xl font-bold text-neutral-900 mb-2">All Courses</h1>
+            {user?.current_package ? (
+              <div className="text-neutral-600">
+                Your current package:{' '}
+                <Badge variant={
+                  user.current_package === 'Platinum' ? 'default' :
+                  user.current_package === 'Gold' ? 'warning' :
+                  'secondary'
+                }>
+                  {user.current_package}
+                </Badge>
+              </div>
+            ) : (
+              <p className="text-neutral-600">
+                Browse all courses. Purchase a package or buy individual courses to get access.
+              </p>
+            )}
           </motion.div>
 
           {/* Search and Filter */}

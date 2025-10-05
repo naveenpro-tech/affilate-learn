@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'use';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
