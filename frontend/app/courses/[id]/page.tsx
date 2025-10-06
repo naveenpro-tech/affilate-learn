@@ -106,65 +106,25 @@ export default function CourseDetailPage() {
             )}
             
             <div className="mt-4 text-sm text-gray-500">
-              📹 {course.videos?.length || 0} videos
+              📹 {course.video_count || 0} lessons
             </div>
           </div>
 
-          {/* Video List */}
+          {/* Start Learning Button */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold mb-6">Course Content</h2>
-            
-            {!course.videos || course.videos.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <p>No videos available yet. Check back soon!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {course.videos.map((video: any, index: number) => (
-                  <div
-                    key={video.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition"
-                    onClick={() => router.push(`/courses/${courseId}/videos/${video.id}`)}
-                  >
-                    <div className="flex items-start gap-4">
-                      {video.thumbnail_url ? (
-                        <img
-                          src={video.thumbnail_url}
-                          alt={video.title}
-                          className="w-32 h-20 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-32 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded flex items-center justify-center">
-                          <span className="text-2xl">▶️</span>
-                        </div>
-                      )}
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-semibold text-gray-500">
-                            {index + 1}.
-                          </span>
-                          <h3 className="text-lg font-semibold">{video.title}</h3>
-                        </div>
-                        
-                        {video.description && (
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                            {video.description}
-                          </p>
-                        )}
-                        
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          {video.duration && (
-                            <span>⏱️ {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}</span>
-                          )}
-                          <span className="text-indigo-600 font-semibold">Watch Now →</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <h2 className="text-2xl font-bold mb-6">Ready to Learn?</h2>
+
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-6">
+                You have access to this course! Click below to start learning.
+              </p>
+              <button
+                onClick={() => router.push(`/courses/${courseId}/learn`)}
+                className="px-8 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold text-lg transition"
+              >
+                Start Learning →
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -93,21 +93,33 @@ def get_courses(
             Course.is_published == True
         ).order_by(Course.display_order).all()
 
-    # Build response with videos
+    # Build response with topics/videos
     result = []
     for course in courses:
-        videos = db.query(Video).filter(
-            Video.course_id == course.id,
-            Video.is_published == True
-        ).order_by(Video.display_order).all()
+        # Count topics (new structure) - fallback to videos for backward compatibility
+        topic_count = 0
+        for module in course.modules:
+            topic_count += db.query(Topic).filter(
+                Topic.module_id == module.id,
+                Topic.is_published == True
+            ).count()
+
+        # Fallback to video count if no topics
+        videos = []
+        if topic_count == 0:
+            videos = db.query(Video).filter(
+                Video.course_id == course.id,
+                Video.is_published == True
+            ).order_by(Video.display_order).all()
+            topic_count = len(videos)
 
         package = db.query(Package).filter(Package.id == course.package_id).first()
 
         course_data = {
             **course.__dict__,
-            "videos": videos,
+            "videos": videos,  # For backward compatibility
             "package_name": package.name if package else None,
-            "video_count": len(videos)
+            "video_count": topic_count
         }
         result.append(course_data)
 
@@ -154,11 +166,20 @@ def get_all_courses_with_access(
         elif has_individual_access:
             access_type = "individual"
 
-        # Count videos
-        video_count = db.query(Video).filter(
-            Video.course_id == course.id,
-            Video.is_published == True
-        ).count()
+        # Count topics (new structure) - fallback to videos for backward compatibility
+        topic_count = 0
+        for module in course.modules:
+            topic_count += db.query(Topic).filter(
+                Topic.module_id == module.id,
+                Topic.is_published == True
+            ).count()
+
+        # Fallback to video count if no topics
+        if topic_count == 0:
+            topic_count = db.query(Video).filter(
+                Video.course_id == course.id,
+                Video.is_published == True
+            ).count()
 
         # Get package name
         package = db.query(Package).filter(Package.id == course.package_id).first()
@@ -166,7 +187,7 @@ def get_all_courses_with_access(
         course_data = {
             **course.__dict__,
             "package_name": package.name if package else None,
-            "video_count": video_count,
+            "video_count": topic_count,  # Using topic_count for consistency
             "has_access": has_access,
             "access_type": access_type,
             "is_locked": not has_access

@@ -17,6 +17,7 @@ from app.schemas.user_course_purchase import (
     CoursePurchaseInitResponse,
     UserCoursePurchaseResponse
 )
+from app.services.razorpay_service import razorpay_service
 
 router = APIRouter()
 
@@ -122,20 +123,21 @@ def verify_course_purchase(
     print(f"[COURSE PURCHASE VERIFY] Payment ID: {razorpay_payment_id}")
     print(f"[COURSE PURCHASE VERIFY] Course ID: {course_id}")
 
-    # Verify payment signature
-    try:
-        razorpay_client.utility.verify_payment_signature({
-            'razorpay_order_id': razorpay_order_id,
-            'razorpay_payment_id': razorpay_payment_id,
-            'razorpay_signature': razorpay_signature
-        })
-        print(f"[COURSE PURCHASE VERIFY] Payment signature verified successfully")
-    except Exception as e:
-        print(f"[COURSE PURCHASE VERIFY] Payment verification failed: {str(e)}")
+    # Verify payment signature using the same method as package purchases
+    is_valid = razorpay_service.verify_payment_signature(
+        razorpay_order_id=razorpay_order_id,
+        razorpay_payment_id=razorpay_payment_id,
+        razorpay_signature=razorpay_signature
+    )
+
+    if not is_valid:
+        print(f"[COURSE PURCHASE VERIFY] Payment signature verification failed")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Payment verification failed: {str(e)}"
+            detail="Invalid payment signature"
         )
+
+    print(f"[COURSE PURCHASE VERIFY] Payment signature verified successfully")
     
     # Get course
     course = db.query(Course).filter(Course.id == course_id).first()
