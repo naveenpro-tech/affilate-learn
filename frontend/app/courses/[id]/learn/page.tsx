@@ -72,6 +72,29 @@ export default function CourseLearnPage() {
     await loadTopicProgress(topic.id);
   };
 
+  const handleVideoProgress = async (topicId: number, currentTime: number, duration: number) => {
+    try {
+      const completed = currentTime >= duration * 0.9; // 90% watched = completed
+      await videoProgressAPI.updateProgress({
+        topic_id: topicId,
+        watched_seconds: currentTime,
+        last_position: currentTime,
+        completed,
+      });
+
+      // Update local progress
+      await loadTopicProgress(topicId);
+
+      // Reload course progress if completed
+      if (completed) {
+        const progressResponse = await videoProgressAPI.getCourseProgress(parseInt(courseId));
+        setCourseProgress(progressResponse.data);
+      }
+    } catch (error) {
+      console.error('Error updating video progress:', error);
+    }
+  };
+
   const handleMarkComplete = async (topicId: number) => {
     try {
       await videoProgressAPI.markComplete(topicId);
@@ -89,23 +112,30 @@ export default function CourseLearnPage() {
 
   const getVideoEmbedUrl = (topic: any) => {
     if (!topic.external_video_url) return null;
-    
+
     const url = topic.external_video_url;
-    
+    const topicProgress = progress[topic.id];
+    const startTime = topicProgress?.last_position || 0;
+
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.includes('youtu.be') 
+      const videoId = url.includes('youtu.be')
         ? url.split('youtu.be/')[1]?.split('?')[0]
         : url.split('v=')[1]?.split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
+
+      // Add start time parameter if there's progress
+      const timeParam = startTime > 0 ? `&start=${Math.floor(startTime)}` : '';
+      return `https://www.youtube.com/embed/${videoId}?enablejsapi=1${timeParam}`;
     }
-    
+
     // Vimeo
     if (url.includes('vimeo.com')) {
       const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
-      return `https://player.vimeo.com/video/${videoId}`;
+      // Vimeo uses #t= for start time
+      const timeParam = startTime > 0 ? `#t=${Math.floor(startTime)}s` : '';
+      return `https://player.vimeo.com/video/${videoId}${timeParam}`;
     }
-    
+
     return url;
   };
 
@@ -216,18 +246,44 @@ export default function CourseLearnPage() {
                     {/* Topic Info */}
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <div>
+                        <div className="flex-1">
                           <h2 className="text-2xl font-bold mb-2">{selectedTopic.title}</h2>
                           <p className="text-gray-600">{selectedTopic.description}</p>
+
+                          {/* Resume indicator */}
+                          {progress[selectedTopic.id]?.last_position > 0 && !progress[selectedTopic.id]?.completed && (
+                            <div className="mt-3 flex items-center gap-2 text-sm text-blue-600">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>Resuming from {formatDuration(Math.floor(progress[selectedTopic.id].last_position))}</span>
+                            </div>
+                          )}
+
+                          {/* Completed indicator */}
+                          {progress[selectedTopic.id]?.completed && (
+                            <div className="mt-3 flex items-center gap-2 text-sm text-green-600">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>Completed</span>
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={() => handleMarkComplete(selectedTopic.id)}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap"
+                          disabled={progress[selectedTopic.id]?.completed}
+                          className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                            progress[selectedTopic.id]?.completed
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-green-600 text-white hover:bg-green-700'
+                          }`}
                         >
-                          ✓ Mark Complete
+                          {progress[selectedTopic.id]?.completed ? '✓ Completed' : '✓ Mark Complete'}
                         </button>
                       </div>
-                      
+
                       {selectedTopic.duration && (
                         <div className="text-sm text-gray-500">
                           Duration: {formatDuration(selectedTopic.duration)}
