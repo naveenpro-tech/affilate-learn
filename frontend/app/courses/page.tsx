@@ -9,8 +9,11 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { ProgressRing } from '@/components/ui/ProgressRing';
+import { LoadingSpinner, CardSkeleton } from '@/components/ui/LoadingSpinner';
+import { ErrorMessage, EmptyState } from '@/components/ui/ErrorMessage';
 import { useAuthStore } from '@/store/authStore';
-import { coursesAPI } from '@/lib/api';
+import { coursesAPI, videoProgressAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface Course {
@@ -27,6 +30,7 @@ interface Course {
   has_access?: boolean;
   access_type?: string | null;
   is_locked?: boolean;
+  progress?: number; // Progress percentage
 }
 
 export default function CoursesPage() {
@@ -34,35 +38,45 @@ export default function CoursesPage() {
   const { user } = useAuthStore();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPackage, setFilterPackage] = useState<'all' | 'silver' | 'gold' | 'platinum'>('all');
 
   useEffect(() => {
     loadCourses();
-
-    // Add loading timeout (30 seconds for development)
-    const timeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        console.warn('Course loading timeout - this is normal in development');
-      }
-    }, 30000); // 30 second timeout
-
-    return () => clearTimeout(timeout);
   }, []);
 
   const loadCourses = async () => {
     try {
-      const response = await coursesAPI.getAllWithAccess();
-      // All courses are returned with access status
-      setCourses(response.data);
+      setLoading(true);
+      setError(null);
+
+      // Load courses with access info
+      const coursesResponse = await coursesAPI.getAllWithAccess();
+      const coursesData = coursesResponse.data;
+
+      // Load progress for all courses
+      try {
+        const progressResponse = await videoProgressAPI.getMyProgress();
+        const progressMap = new Map(
+          progressResponse.data.map((p: any) => [p.course_id, p.progress_percentage])
+        );
+
+        // Merge progress data with courses
+        const coursesWithProgress = coursesData.map((course: Course) => ({
+          ...course,
+          progress: progressMap.get(course.id) || 0,
+        }));
+
+        setCourses(coursesWithProgress);
+      } catch (progressError) {
+        // If progress fails, just show courses without progress
+        console.warn('Failed to load progress:', progressError);
+        setCourses(coursesData);
+      }
     } catch (error: any) {
       console.error('Error loading courses:', error);
-      if (error.response?.status === 403) {
-        toast.error('Access denied. Please purchase a package first.');
-      } else {
-        toast.error('Failed to load courses. Please try again.');
-      }
+      setError(error.response?.data?.detail || 'Failed to load courses. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -80,11 +94,39 @@ export default function CoursesPage() {
     return (
       <ProtectedRoute>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mx-auto"></div>
-            <p className="mt-6 text-lg font-medium text-gray-900">Loading Courses...</p>
-            <p className="mt-2 text-sm text-gray-600">Please wait while we fetch your courses</p>
+        <div className="min-h-screen bg-neutral-50 py-8">
+          <div className="container mx-auto px-4">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Courses</h1>
+              <p className="text-gray-600">Loading your courses...</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (error) {
+    return (
+      <ProtectedRoute>
+        <Navbar />
+        <div className="min-h-screen bg-neutral-50 py-8">
+          <div className="container mx-auto px-4">
+            <ErrorMessage
+              variant="card"
+              title="Failed to Load Courses"
+              message={error}
+              onRetry={loadCourses}
+              retryText="Try Again"
+            />
           </div>
         </div>
       </ProtectedRoute>
@@ -248,17 +290,48 @@ export default function CoursesPage() {
                           </Badge>
                         </div>
                       )}
+
+                      {/* Progress Ring */}
+                      {course.has_access && course.progress !== undefined && course.progress > 0 && (
+                        <div className="absolute bottom-3 right-3">
+                          <ProgressRing progress={course.progress} size={50} strokeWidth={4} />
+                        </div>
+                      )}
                     </div>
 
                     {/* Content */}
                     <CardContent className="pt-4">
-                      <h3 className="text-xl font-bold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors">
-                        {course.title}
-                      </h3>
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-xl font-bold text-neutral-900 group-hover:text-primary-600 transition-colors flex-1">
+                          {course.title}
+                        </h3>
+                      </div>
 
                       <p className="text-neutral-600 text-sm mb-4 line-clamp-2">
                         {course.description || 'No description available'}
                       </p>
+
+                      {/* Progress Bar for courses with access */}
+                      {course.has_access && course.progress !== undefined && (
+                        <div className="mb-3">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs text-gray-600">Progress</span>
+                            <span className="text-xs font-bold text-gray-900">{Math.round(course.progress)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-500 rounded-full ${
+                                course.progress === 100 ? 'bg-green-500' :
+                                course.progress >= 75 ? 'bg-blue-500' :
+                                course.progress >= 50 ? 'bg-yellow-500' :
+                                course.progress >= 25 ? 'bg-orange-500' :
+                                'bg-red-500'
+                              }`}
+                              style={{ width: `${course.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
 
                       <div className="flex items-center justify-between text-sm mb-3">
                         <span className="text-neutral-500">📹 {course.video_count} videos</span>
