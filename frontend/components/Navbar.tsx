@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from './ui/Button';
 import NotificationBell from './NotificationBell';
+import EmailVerificationBanner from './EmailVerificationBanner';
 
 export default function Navbar() {
   const router = useRouter();
@@ -43,8 +44,10 @@ export default function Navbar() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="container mx-auto px-4">
+    <>
+      <EmailVerificationBanner />
+      <nav className="bg-white shadow-lg sticky top-0 z-50">
+        <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center space-x-2">
@@ -154,7 +157,8 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </div>
-    </nav>
+      </nav>
+    </>
   );
 }
 

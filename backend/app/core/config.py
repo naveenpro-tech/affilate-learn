@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     SMTP_PORT: int
     SMTP_USER: str
     SMTP_PASSWORD: str
+    SMTP_FROM_EMAIL: str = "noreply@bilvanaturals.online"
+    SMTP_USERNAME: str = ""  # Will use SMTP_USER if not set
+    SMTP_USE_TLS: bool = True
     
     # Razorpay
     RAZORPAY_KEY_ID: str

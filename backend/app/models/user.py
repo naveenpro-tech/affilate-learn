@@ -30,6 +30,11 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
 
+    # Email verification
+    email_verified = Column(Boolean, default=False)
+    verification_token = Column(String, nullable=True)
+    verification_token_expires = Column(DateTime, nullable=True)
+
     # Password reset
     reset_token = Column(String, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import toast from 'react-hot-toast';
+import { emailVerificationAPI } from '@/lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -122,6 +123,16 @@ export default function RegisterPage() {
     try {
       await register(formData);
       toast.success('🎉 Registration successful! Welcome aboard!');
+
+      // Send verification email (non-blocking)
+      try {
+        await emailVerificationAPI.sendVerification();
+        toast.success('📧 Verification email sent! Please check your inbox.');
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError);
+        // Don't block registration if email fails
+      }
+
       router.push('/dashboard');
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Registration failed');

@@ -152,6 +152,13 @@ export const certificatesAPI = {
   generateCertificate: (courseId: number) => api.post(`/api/courses/${courseId}/certificate/issue`),
 };
 
+export const emailVerificationAPI = {
+  sendVerification: () => api.post('/api/email-verification/send-verification'),
+  verifyEmail: (token: string) => api.post('/api/email-verification/verify', { token }),
+  getStatus: () => api.get('/api/email-verification/status'),
+  resendVerification: () => api.post('/api/email-verification/resend'),
+};
+
 export const notificationsAPI = {
   getAll: (skip = 0, limit = 50, unreadOnly = false) =>
     api.get('/api/notifications/', { params: { skip, limit, unread_only: unreadOnly } }),
