@@ -29,11 +29,22 @@ router = APIRouter()
 
 
 def check_user_access(user: User, course: Course, db: Session) -> bool:
-    """Check if user has access to a course based on their package"""
+    """Check if user has access to a course based on their package OR individual purchase"""
     if user.is_admin:
         return True
 
-    # Get user's active package
+    # Check individual course purchase first
+    from app.models.user_course_purchase import UserCoursePurchase
+    individual_purchase = db.query(UserCoursePurchase).filter(
+        UserCoursePurchase.user_id == user.id,
+        UserCoursePurchase.course_id == course.id,
+        UserCoursePurchase.is_active == True
+    ).first()
+
+    if individual_purchase:
+        return True
+
+    # Check package-based access
     user_package = db.query(UserPackage).filter(
         UserPackage.user_id == user.id,
         UserPackage.status == "active"

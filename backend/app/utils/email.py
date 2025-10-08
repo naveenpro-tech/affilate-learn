@@ -359,7 +359,8 @@ def send_purchase_confirmation_email(
     package_name: str,
     package_price: float,
     transaction_id: str,
-    purchase_date
+    purchase_date,
+    additional_note: str = ""
 ) -> bool:
     """
     Send package purchase confirmation email
@@ -371,6 +372,7 @@ def send_purchase_confirmation_email(
         package_price: Price of the package
         transaction_id: Razorpay transaction ID
         purchase_date: Date of purchase
+        additional_note: Optional additional note (e.g., about existing individual purchases)
 
     Returns:
         bool: True if email sent successfully, False otherwise
@@ -471,6 +473,8 @@ def send_purchase_confirmation_email(
             </div>
 
             <p>You can now access all courses included in your package!</p>
+
+            {f'<div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px;"><strong>Note:</strong>{additional_note}</div>' if additional_note else ''}
 
             <center>
                 <a href="{settings.FRONTEND_URL}/courses" class="button">Access Your Courses</a>

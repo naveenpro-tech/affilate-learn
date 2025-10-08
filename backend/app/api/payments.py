@@ -169,6 +169,28 @@ def verify_payment(
     payment.status = "success"
     payment.completed_at = datetime.utcnow()
     
+    # Check for existing individual course purchases that are now included in the package
+    from app.models.user_course_purchase import UserCoursePurchase
+    from app.models.course import Course
+
+    # Get all courses in the purchased package
+    package = db.query(Package).filter(Package.id == payment.package_id).first()
+    package_courses = db.query(Course).filter(Course.package_id == payment.package_id).all()
+
+    # Check if user has individual purchases for any of these courses
+    existing_individual_purchases = []
+    for course in package_courses:
+        individual_purchase = db.query(UserCoursePurchase).filter(
+            UserCoursePurchase.user_id == current_user.id,
+            UserCoursePurchase.course_id == course.id,
+            UserCoursePurchase.is_active == True
+        ).first()
+        if individual_purchase:
+            existing_individual_purchases.append({
+                'course_title': course.title,
+                'amount_paid': individual_purchase.amount_paid
+            })
+
     # Create user_package record
     user_package = UserPackage(
         user_id=current_user.id,
@@ -177,10 +199,17 @@ def verify_payment(
         status="active",
         purchase_date=datetime.utcnow()
     )
-    
+
     db.add(user_package)
     db.commit()
     db.refresh(payment)
+
+    # Log the conflict for admin review (don't deactivate individual purchases)
+    if existing_individual_purchases:
+        print(f"[PAYMENT VERIFY] User {current_user.email} purchased package {package.name} but already owns individual courses:")
+        for purchase in existing_individual_purchases:
+            print(f"  - {purchase['course_title']} (₹{purchase['amount_paid']})")
+        # Note: We keep individual purchases active for audit trail
     
     # Trigger referral commission calculation (async task in production)
     from app.services.referral_service import process_referral_commissions
@@ -193,15 +222,23 @@ def verify_payment(
     # Send purchase confirmation email
     try:
         from app.utils.email import send_purchase_confirmation_email
-        package = db.query(Package).filter(Package.id == payment.package_id).first()
         if package:
+            # Add note about existing individual purchases if any
+            additional_note = ""
+            if existing_individual_purchases:
+                additional_note = "\n\nNote: You previously purchased the following courses individually:\n"
+                for purchase in existing_individual_purchases:
+                    additional_note += f"- {purchase['course_title']} (₹{purchase['amount_paid']})\n"
+                additional_note += "\nYou now have full package access to all courses. Your individual purchases remain in your transaction history."
+
             send_purchase_confirmation_email(
                 to_email=current_user.email,
                 user_name=current_user.full_name,
                 package_name=package.name,
                 package_price=package.final_price,
                 transaction_id=payment.razorpay_payment_id,
-                purchase_date=payment.completed_at
+                purchase_date=payment.completed_at,
+                additional_note=additional_note
             )
     except Exception as e:
         print(f"Error sending purchase confirmation email: {e}")
