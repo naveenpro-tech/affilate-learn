@@ -14,8 +14,8 @@ class Payment(Base):
     # User making payment
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     
-    # Package being purchased
-    package_id = Column(Integer, ForeignKey("packages.id"), nullable=False)
+    # Package being purchased (nullable for individual course purchases)
+    package_id = Column(Integer, ForeignKey("packages.id"), nullable=True)
     
     # Razorpay details
     razorpay_order_id = Column(String(100), unique=True, nullable=False)
