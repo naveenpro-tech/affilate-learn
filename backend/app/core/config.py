@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int
     SMTP_USER: str
     SMTP_PASSWORD: str
-    SMTP_FROM_EMAIL: str = "noreply@bilvanaturals.online"
+    SMTP_FROM_EMAIL: str = "roprly@bilvanaturals.online"  # Must match SMTP account
     SMTP_USERNAME: str = ""  # Will use SMTP_USER if not set
     SMTP_USE_TLS: bool = True
     
