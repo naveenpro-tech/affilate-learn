@@ -99,7 +99,7 @@ export default function CourseLearnPage() {
     try {
       await videoProgressAPI.markComplete(topicId);
       toast.success('Topic marked as complete!');
-      
+
       // Reload progress
       const progressResponse = await videoProgressAPI.getCourseProgress(parseInt(courseId));
       setCourseProgress(progressResponse.data);
@@ -107,6 +107,17 @@ export default function CourseLearnPage() {
     } catch (error) {
       console.error('Error marking complete:', error);
       toast.error('Failed to mark topic as complete');
+    }
+  };
+
+  const handleGenerateCertificate = async () => {
+    try {
+      const response = await coursesAPI.issueCertificate(parseInt(courseId));
+      toast.success('Certificate generated successfully!');
+      router.push(`/certificates/${response.data.certificate_number}`);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 'Failed to generate certificate';
+      toast.error(errorMessage);
     }
   };
 
@@ -207,12 +218,22 @@ export default function CourseLearnPage() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => router.push('/courses')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                ← Back to Courses
-              </button>
+              <div className="flex items-center gap-3">
+                {courseProgress && courseProgress.progress_percentage === 100 && (
+                  <button
+                    onClick={handleGenerateCertificate}
+                    className="px-6 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg flex items-center gap-2 font-semibold"
+                  >
+                    🏆 Generate Certificate
+                  </button>
+                )}
+                <button
+                  onClick={() => router.push('/courses')}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  ← Back to Courses
+                </button>
+              </div>
             </div>
           </div>
         </div>
