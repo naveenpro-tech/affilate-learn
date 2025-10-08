@@ -4,13 +4,15 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
+import DashboardLayout from './DashboardLayout';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  useLayout?: boolean; // Option to disable layout for specific pages
 }
 
-export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requireAdmin = false, useLayout = true }: ProtectedRouteProps) {
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuthStore();
 
@@ -59,6 +61,11 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
         </div>
       </div>
     );
+  }
+
+  // Wrap children in DashboardLayout if useLayout is true
+  if (useLayout) {
+    return <DashboardLayout>{children}</DashboardLayout>;
   }
 
   return <>{children}</>;

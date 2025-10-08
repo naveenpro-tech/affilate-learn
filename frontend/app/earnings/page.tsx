@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { walletAPI, commissionsAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -48,7 +47,6 @@ export default function EarningsPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <Navbar />
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
@@ -61,7 +59,6 @@ export default function EarningsPage() {
 
   return (
     <ProtectedRoute>
-      <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}

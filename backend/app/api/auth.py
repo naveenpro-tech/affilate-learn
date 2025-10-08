@@ -146,19 +146,31 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
     # Send verification email (non-blocking)
     try:
         from app.services.email_service import send_verification_email
-        import asyncio
-        # Run async function in background
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(send_verification_email(
-            email=new_user.email,
-            name=new_user.full_name,
-            token=verification_token
-        ))
-        loop.close()
-        logger.info(f"Verification email sent to {new_user.email}")
+        import threading
+
+        def send_email_thread():
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(send_verification_email(
+                    email=new_user.email,
+                    name=new_user.full_name,
+                    token=verification_token
+                ))
+                logger.info(f"Verification email sent to {new_user.email}")
+            except Exception as e:
+                logger.error(f"Failed to send verification email: {str(e)}")
+            finally:
+                loop.close()
+
+        # Start email sending in background thread
+        email_thread = threading.Thread(target=send_email_thread)
+        email_thread.daemon = True
+        email_thread.start()
+        logger.info(f"Verification email queued for {new_user.email}")
     except Exception as e:
-        logger.error(f"Failed to send verification email to {new_user.email}: {str(e)}")
+        logger.error(f"Failed to queue verification email to {new_user.email}: {str(e)}")
         # Continue with registration even if email fails
 
     # Generate JWT token

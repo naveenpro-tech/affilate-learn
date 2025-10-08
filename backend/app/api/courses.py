@@ -553,7 +553,7 @@ def issue_certificate(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Issue a completion certificate when all course videos are completed"""
+    """Issue a completion certificate when all course topics are completed"""
     # Lazy-create table
     from app.core.database import engine
     Certificate.__table__.create(bind=engine, checkfirst=True)
@@ -564,19 +564,41 @@ def issue_certificate(
     if not check_user_access(current_user, course, db):
         raise HTTPException(status_code=403, detail="Access denied")
 
-    videos = db.query(Video).filter(Video.course_id == course_id).all()
-    if not videos:
-        raise HTTPException(status_code=400, detail="Course has no videos")
+    # Get all topics for this course (new structure)
+    topic_ids = []
+    for module in course.modules:
+        for topic in module.topics:
+            if topic.is_published:
+                topic_ids.append(topic.id)
 
-    # Check completion
-    video_ids = [v.id for v in videos]
-    completed_count = db.query(VideoProgress).filter(
-        VideoProgress.user_id == current_user.id,
-        VideoProgress.video_id.in_(video_ids),
-        VideoProgress.completed == True,
-    ).count()
-    if completed_count != len(videos):
-        raise HTTPException(status_code=400, detail="All videos must be completed to issue certificate")
+    if not topic_ids:
+        # Fallback to old video structure
+        videos = db.query(Video).filter(Video.course_id == course_id).all()
+        if not videos:
+            raise HTTPException(status_code=400, detail="Course has no content")
+
+        # Check video completion
+        video_ids = [v.id for v in videos]
+        completed_count = db.query(VideoProgress).filter(
+            VideoProgress.user_id == current_user.id,
+            VideoProgress.video_id.in_(video_ids),
+            VideoProgress.completed == True,
+        ).count()
+        if completed_count != len(videos):
+            raise HTTPException(status_code=400, detail="All videos must be completed to issue certificate")
+    else:
+        # Check topic completion (new structure)
+        from app.models.video_progress import VideoProgress
+        completed_count = db.query(VideoProgress).filter(
+            VideoProgress.user_id == current_user.id,
+            VideoProgress.topic_id.in_(topic_ids),
+            VideoProgress.completed == True,
+        ).count()
+        if completed_count != len(topic_ids):
+            raise HTTPException(
+                status_code=400,
+                detail=f"All topics must be completed to issue certificate. Completed: {completed_count}/{len(topic_ids)}"
+            )
 
     # Upsert certificate
     existing = db.query(Certificate).filter(Certificate.user_id == current_user.id, Certificate.course_id == course_id).first()

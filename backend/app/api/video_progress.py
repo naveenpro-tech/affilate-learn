@@ -262,8 +262,14 @@ async def mark_topic_complete(
             completed=True
         )
         db.add(progress)
-    
+
     db.commit()
-    
-    return {"message": "Topic marked as complete", "topic_id": topic_id}
+    db.refresh(progress)
+
+    return {
+        "message": "Topic marked as complete",
+        "topic_id": topic_id,
+        "completed": progress.completed,
+        "watched_seconds": progress.watched_seconds
+    }
 
