@@ -111,6 +111,11 @@ export default function PayoutsPage() {
               Payouts
             </h1>
             <p className="text-gray-600">Manage your earnings and payout requests</p>
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                💡 <strong>Your wallet balance includes all earned commissions.</strong> When you request a payout, the amount is deducted from your wallet and sent for admin approval.
+              </p>
+            </div>
           </motion.div>
 
           {/* Balance Cards */}
@@ -122,12 +127,13 @@ export default function PayoutsPage() {
             >
               <Card className="border-l-4 border-green-500">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Available Balance</CardTitle>
+                  <CardTitle className="text-sm font-medium text-gray-600">Wallet Balance</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-green-600">
                     ₹{balance?.available_balance?.toFixed(2) || '0.00'}
                   </div>
+                  <p className="text-xs text-gray-500 mt-1">Available for withdrawal</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -145,6 +151,7 @@ export default function PayoutsPage() {
                   <div className="text-3xl font-bold text-blue-600">
                     ₹{balance?.total_commissions?.toFixed(2) || '0.00'}
                   </div>
+                  <p className="text-xs text-gray-500 mt-1">All-time commissions</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -173,12 +180,13 @@ export default function PayoutsPage() {
             >
               <Card className="border-l-4 border-purple-500">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Paid Amount</CardTitle>
+                  <CardTitle className="text-sm font-medium text-gray-600">Total Withdrawn</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-purple-600">
                     ₹{balance?.paid_amount?.toFixed(2) || '0.00'}
                   </div>
+                  <p className="text-xs text-gray-500 mt-1">Completed payouts</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -197,7 +205,10 @@ export default function PayoutsPage() {
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Request Payout</h3>
                     <p className="text-gray-600">
-                      Minimum payout amount: ₹{balance?.minimum_payout_amount || 500}
+                      Withdraw your full wallet balance (₹{balance?.available_balance?.toFixed(2) || '0.00'})
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Minimum: ₹{balance?.minimum_payout_amount || 500} • Funds will be deducted from wallet immediately
                     </p>
                     {!hasBankDetails && (
                       <p className="text-red-600 text-sm mt-1">

@@ -71,40 +71,34 @@ def get_available_balance(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get available balance for payout"""
+    """
+    Get available balance for payout from wallet
+
+    Wallet is the single source of truth for all earnings and payouts.
+    Commissions are auto-credited to wallet when earned.
+    """
     from sqlalchemy import func
     from app.core.config import settings
+    from app.api.wallet import get_or_create_wallet
 
-    # Calculate total commissions
-    total_commissions = db.query(func.sum(Commission.amount)).filter(
-        Commission.user_id == current_user.id,
-        Commission.status == "pending"
-    ).scalar() or 0.0
+    # Get wallet balance (single source of truth)
+    wallet = get_or_create_wallet(db, current_user.id)
 
-    # Calculate paid amount
-    paid_amount = db.query(func.sum(Payout.amount)).filter(
-        Payout.user_id == current_user.id,
-        Payout.status == "completed"
-    ).scalar() or 0.0
-
-    # Calculate pending payouts
+    # Calculate pending payouts (money already requested but not yet paid)
     pending_payouts = db.query(func.sum(Payout.amount)).filter(
         Payout.user_id == current_user.id,
         Payout.status.in_(["pending", "processing"])
     ).scalar() or 0.0
 
-    # Available balance = total commissions - pending payouts
-    available_balance = total_commissions - pending_payouts
-
     # Check if user can request payout
     has_bank_details = db.query(BankDetails).filter(BankDetails.user_id == current_user.id).first() is not None
-    can_request_payout = available_balance >= settings.MINIMUM_PAYOUT_AMOUNT and has_bank_details
+    can_request_payout = wallet.balance >= settings.MINIMUM_PAYOUT_AMOUNT and has_bank_details
 
     return {
-        "total_commissions": total_commissions,
-        "paid_amount": paid_amount,
-        "available_balance": available_balance,
-        "pending_payouts": pending_payouts,
+        "total_commissions": wallet.total_earned,  # Total earned from commissions
+        "paid_amount": wallet.total_withdrawn,     # Total withdrawn via payouts
+        "available_balance": wallet.balance,       # Current wallet balance
+        "pending_payouts": pending_payouts,        # Payouts in pending/processing status
         "can_request_payout": can_request_payout,
         "minimum_payout_amount": settings.MINIMUM_PAYOUT_AMOUNT
     }
@@ -117,12 +111,17 @@ def request_payout(
     db: Session = Depends(get_db)
 ):
     """
-    Request a payout (user must have pending commissions above minimum threshold)
+    Request a payout from wallet balance
 
-    Note: In production, this would trigger an admin approval workflow
+    Wallet is the single source of truth. This endpoint:
+    1. Checks wallet balance
+    2. Debits wallet immediately
+    3. Creates payout request for admin approval
+    4. Creates wallet transaction for audit trail
     """
-    from sqlalchemy import func
     from app.core.config import settings
+    from app.api.wallet import get_or_create_wallet, create_transaction
+    from app.models.wallet import TransactionType, TransactionSource
 
     # Check if user has bank details
     bank_details = db.query(BankDetails).filter(BankDetails.user_id == current_user.id).first()
@@ -132,16 +131,13 @@ def request_payout(
             detail="Please add your bank details before requesting a payout"
         )
 
-    # Calculate pending amount
-    pending_amount = db.query(func.sum(Commission.amount)).filter(
-        Commission.user_id == current_user.id,
-        Commission.status == 'pending'
-    ).scalar() or 0.0
+    # Get wallet balance
+    wallet = get_or_create_wallet(db, current_user.id)
 
-    if pending_amount < settings.MINIMUM_PAYOUT_AMOUNT:
+    if wallet.balance < settings.MINIMUM_PAYOUT_AMOUNT:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Minimum payout amount is ₹{settings.MINIMUM_PAYOUT_AMOUNT}"
+            detail=f"Minimum payout amount is ₹{settings.MINIMUM_PAYOUT_AMOUNT}. Your balance: ₹{wallet.balance}"
         )
 
     # Check if user already has a pending payout request
@@ -156,10 +152,13 @@ def request_payout(
             detail="You already have a pending payout request"
         )
 
+    # Use full wallet balance for payout
+    payout_amount = wallet.balance
+
     # Create payout record using bank details
     payout = Payout(
         user_id=current_user.id,
-        amount=pending_amount,
+        amount=payout_amount,
         status='pending',
         bank_account_number=bank_details.account_number,
         bank_ifsc=bank_details.ifsc_code,
@@ -169,15 +168,16 @@ def request_payout(
     db.add(payout)
     db.flush()
 
-    # Link pending commissions to payout
-    pending_commissions = db.query(Commission).filter(
-        Commission.user_id == current_user.id,
-        Commission.status == 'pending'
-    ).all()
-
-    for commission in pending_commissions:
-        commission.payout_id = payout.id
-        commission.status = 'processing'
+    # Debit wallet immediately (money is now "locked" for payout)
+    transaction = create_transaction(
+        db=db,
+        wallet=wallet,
+        transaction_type=TransactionType.DEBIT,
+        source=TransactionSource.PAYOUT,
+        amount=payout_amount,
+        description=f"Payout request #{payout.id} - Pending admin approval",
+        reference_id=f"payout_{payout.id}"
+    )
 
     db.commit()
     db.refresh(payout)
