@@ -120,6 +120,17 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
             logger.error(f"Failed to create referral notification: {str(e)}")
             # Continue with registration even if notification fails
 
+    # Generate verification token for email verification
+    import secrets
+    from datetime import timedelta
+    verification_token = secrets.token_urlsafe(32)
+    verification_expires = datetime.utcnow() + timedelta(hours=24)
+    new_user.verification_token = verification_token
+    new_user.verification_token_expires = verification_expires
+    new_user.email_verified = False
+    db.commit()
+    db.refresh(new_user)
+
     # Send welcome email (non-blocking - don't fail registration if email fails)
     try:
         send_welcome_email(
@@ -130,6 +141,24 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
         logger.info(f"Welcome email sent to {new_user.email}")
     except Exception as e:
         logger.error(f"Failed to send welcome email to {new_user.email}: {str(e)}")
+        # Continue with registration even if email fails
+
+    # Send verification email (non-blocking)
+    try:
+        from app.services.email_service import send_verification_email
+        import asyncio
+        # Run async function in background
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(send_verification_email(
+            email=new_user.email,
+            name=new_user.full_name,
+            token=verification_token
+        ))
+        loop.close()
+        logger.info(f"Verification email sent to {new_user.email}")
+    except Exception as e:
+        logger.error(f"Failed to send verification email to {new_user.email}: {str(e)}")
         # Continue with registration even if email fails
 
     # Generate JWT token
