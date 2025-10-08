@@ -291,6 +291,15 @@ export default function CoursesPage() {
                         </div>
                       )}
 
+                      {/* Certificate Available Badge */}
+                      {course.progress === 100 && (
+                        <div className="absolute bottom-3 left-3">
+                          <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0">
+                            🎓 Certificate Available
+                          </Badge>
+                        </div>
+                      )}
+
                       {/* Progress Ring */}
                       {course.has_access && course.progress !== undefined && course.progress > 0 && (
                         <div className="absolute bottom-3 right-3">

@@ -149,6 +149,7 @@ export const certificatesAPI = {
   getMyCertificates: () => api.get('/api/certificates/my-certificates'),
   getCertificate: (id: number) => api.get(`/api/certificates/${id}`),
   verifyCertificate: (certificateNumber: string) => api.get(`/api/certificates/verify/${certificateNumber}`),
+  generateCertificate: (courseId: number) => api.post(`/api/courses/${courseId}/certificate/issue`),
 };
 
 export const notificationsAPI = {

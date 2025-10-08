@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
-import { coursesAPI, videoProgressAPI } from '@/lib/api';
+import { coursesAPI, videoProgressAPI, certificatesAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function CourseLearnPage() {
@@ -18,6 +18,8 @@ export default function CourseLearnPage() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<any>({});
   const [courseProgress, setCourseProgress] = useState<any>(null);
+  const [generatingCertificate, setGeneratingCertificate] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   useEffect(() => {
     if (courseId) {
@@ -99,14 +101,39 @@ export default function CourseLearnPage() {
     try {
       await videoProgressAPI.markComplete(topicId);
       toast.success('Topic marked as complete!');
-      
+
       // Reload progress
       const progressResponse = await videoProgressAPI.getCourseProgress(parseInt(courseId));
       setCourseProgress(progressResponse.data);
       await loadTopicProgress(topicId);
+
+      // Check if course is now 100% complete
+      if (progressResponse.data.progress_percentage === 100) {
+        setShowCompletionModal(true);
+      }
     } catch (error) {
       console.error('Error marking complete:', error);
       toast.error('Failed to mark topic as complete');
+    }
+  };
+
+  const handleGenerateCertificate = async () => {
+    try {
+      setGeneratingCertificate(true);
+      const response = await certificatesAPI.generateCertificate(parseInt(courseId));
+      toast.success('🎉 Certificate generated successfully!');
+      setShowCompletionModal(false);
+
+      // Redirect to certificates page
+      setTimeout(() => {
+        router.push('/certificates');
+      }, 1500);
+    } catch (error: any) {
+      console.error('Error generating certificate:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to generate certificate';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+    } finally {
+      setGeneratingCertificate(false);
     }
   };
 
@@ -207,12 +234,32 @@ export default function CourseLearnPage() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => router.push('/courses')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                ← Back to Courses
-              </button>
+              <div className="flex items-center gap-3">
+                {courseProgress?.progress_percentage === 100 && (
+                  <button
+                    onClick={handleGenerateCertificate}
+                    disabled={generatingCertificate}
+                    className="px-6 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 font-semibold shadow-lg flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {generatingCertificate ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        🎓 Generate Certificate
+                      </>
+                    )}
+                  </button>
+                )}
+                <button
+                  onClick={() => router.push('/courses')}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  ← Back to Courses
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -362,6 +409,61 @@ export default function CourseLearnPage() {
             </div>
           </div>
         </div>
+
+        {/* Completion Modal */}
+        {showCompletionModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+              <div className="mb-6">
+                <div className="text-6xl mb-4">🎉</div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  Congratulations!
+                </h2>
+                <p className="text-gray-600">
+                  You've completed all topics in this course!
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-700 mb-2">
+                  <strong>{course.title}</strong>
+                </p>
+                <div className="flex items-center justify-center gap-2 text-green-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-semibold">100% Complete</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleGenerateCertificate}
+                  disabled={generatingCertificate}
+                  className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 font-semibold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {generatingCertificate ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Generating Certificate...
+                    </>
+                  ) : (
+                    <>
+                      🎓 Generate Certificate
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setShowCompletionModal(false)}
+                  className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+                >
+                  Continue Learning
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
