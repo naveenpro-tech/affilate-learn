@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -93,7 +92,6 @@ export default function CoursesPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <Navbar />
         <div className="min-h-screen bg-neutral-50 py-8">
           <div className="container mx-auto px-4">
             <div className="mb-8">
@@ -117,7 +115,6 @@ export default function CoursesPage() {
   if (error) {
     return (
       <ProtectedRoute>
-        <Navbar />
         <div className="min-h-screen bg-neutral-50 py-8">
           <div className="container mx-auto px-4">
             <ErrorMessage
@@ -135,7 +132,6 @@ export default function CoursesPage() {
 
   return (
     <ProtectedRoute>
-      <Navbar />
       <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
@@ -287,15 +283,6 @@ export default function CoursesPage() {
                         <div className="absolute top-3 left-3">
                           <Badge variant="success">
                             {course.access_type === 'package' ? '✓ Package' : '✓ Purchased'}
-                          </Badge>
-                        </div>
-                      )}
-
-                      {/* Certificate Available Badge */}
-                      {course.progress === 100 && (
-                        <div className="absolute bottom-3 left-3">
-                          <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0">
-                            🎓 Certificate Available
                           </Badge>
                         </div>
                       )}

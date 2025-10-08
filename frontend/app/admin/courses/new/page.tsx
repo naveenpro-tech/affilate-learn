@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -268,9 +267,7 @@ export default function CreateCoursePage() {
   };
 
   return (
-    <ProtectedRoute requireAdmin>
-      <Navbar />
-      <div className="min-h-screen bg-neutral-50 py-8">
+    <ProtectedRoute requireAdmin>      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Header */}
           <div className="mb-8">

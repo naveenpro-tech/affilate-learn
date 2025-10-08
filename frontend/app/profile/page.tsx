@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -116,9 +115,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <ProtectedRoute>        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
         </div>
       </ProtectedRoute>
@@ -126,9 +123,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <div className="min-h-screen bg-neutral-50 py-8">
+    <ProtectedRoute>      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <motion.div

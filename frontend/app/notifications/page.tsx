@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -156,9 +155,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <div className="min-h-screen bg-neutral-50 py-8">
+    <ProtectedRoute>      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <div className="mb-6">

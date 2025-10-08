@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import VideoPlayer from '@/components/VideoPlayer';
 import { coursesAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -67,9 +66,7 @@ export default function VideoPlayerPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center">
+      <ProtectedRoute>        <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </ProtectedRoute>
@@ -78,9 +75,7 @@ export default function VideoPlayerPage() {
 
   if (!currentVideo) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <ProtectedRoute>        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Video Not Found</h2>
             <button
@@ -96,9 +91,7 @@ export default function VideoPlayerPage() {
   }
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <div className="min-h-screen bg-gray-900">
+    <ProtectedRoute>      <div className="min-h-screen bg-gray-900">
         <div className="container mx-auto px-4 py-8">
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Video Player */}

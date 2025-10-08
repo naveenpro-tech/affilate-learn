@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { coursesAPI, videoProgressAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -163,9 +162,7 @@ export default function CourseLearnPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center">
+      <ProtectedRoute>        <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </ProtectedRoute>
@@ -174,9 +171,7 @@ export default function CourseLearnPage() {
 
   if (!course) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <ProtectedRoute>        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Course Not Found</h2>
             <button
@@ -192,9 +187,7 @@ export default function CourseLearnPage() {
   }
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <div className="min-h-screen bg-gray-50">
+    <ProtectedRoute>      <div className="min-h-screen bg-gray-50">
         {/* Course Header */}
         <div className="bg-white border-b">
           <div className="container mx-auto px-4 py-4">

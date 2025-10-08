@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { payoutsAPI, bankDetailsAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -87,9 +86,7 @@ export default function PayoutsPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center">
+      <ProtectedRoute>        <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </ProtectedRoute>
@@ -97,9 +94,7 @@ export default function PayoutsPage() {
   }
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+    <ProtectedRoute>      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}

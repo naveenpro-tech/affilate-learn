@@ -594,6 +594,19 @@ def issue_certificate(
             VideoProgress.topic_id.in_(topic_ids),
             VideoProgress.completed == True,
         ).count()
+
+        # Log for debugging
+        print(f"[CERTIFICATE] User {current_user.id} - Course {course_id}")
+        print(f"[CERTIFICATE] Total topics: {len(topic_ids)}, Completed: {completed_count}")
+        print(f"[CERTIFICATE] Topic IDs: {topic_ids}")
+
+        # Get all progress records for debugging
+        all_progress = db.query(VideoProgress).filter(
+            VideoProgress.user_id == current_user.id,
+            VideoProgress.topic_id.in_(topic_ids)
+        ).all()
+        print(f"[CERTIFICATE] Progress records: {[(p.topic_id, p.completed) for p in all_progress]}")
+
         if completed_count != len(topic_ids):
             raise HTTPException(
                 status_code=400,

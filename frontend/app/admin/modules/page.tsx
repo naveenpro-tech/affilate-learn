@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -262,9 +261,7 @@ export default function AdminModulesPage() {
   }
 
   return (
-    <ProtectedRoute requireAdmin>
-      <Navbar />
-      <div className="min-h-screen bg-neutral-50 py-8">
+    <ProtectedRoute requireAdmin>      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
           <motion.div

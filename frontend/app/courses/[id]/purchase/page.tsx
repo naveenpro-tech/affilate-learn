@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { coursesAPI, coursePurchasesAPI } from '@/lib/api';
@@ -153,9 +152,7 @@ export default function CoursePurchasePage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 pt-20 px-4">
+      <ProtectedRoute>        <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 pt-20 px-4">
           <div className="max-w-4xl mx-auto py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
@@ -172,9 +169,7 @@ export default function CoursePurchasePage() {
   }
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 pt-20 px-4">
+    <ProtectedRoute>      <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 pt-20 px-4">
         <div className="max-w-4xl mx-auto py-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

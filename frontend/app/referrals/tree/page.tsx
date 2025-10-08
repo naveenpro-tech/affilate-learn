@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { referralsAPI } from '@/lib/api';
@@ -131,9 +130,7 @@ export default function ReferralTreePage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <ProtectedRoute>        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading referral tree...</p>
@@ -144,9 +141,7 @@ export default function ReferralTreePage() {
   }
 
   return (
-    <ProtectedRoute>
-      <Navbar />
-      <div className="min-h-screen bg-neutral-50 py-8">
+    <ProtectedRoute>      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
           <motion.div

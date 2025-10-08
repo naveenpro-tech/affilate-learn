@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { adminAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -38,9 +37,7 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute requireAdmin>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <ProtectedRoute requireAdmin>        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
         </div>
       </ProtectedRoute>
@@ -58,9 +55,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <ProtectedRoute requireAdmin>
-      <Navbar />
-      <div className="min-h-screen bg-neutral-50 py-8">
+    <ProtectedRoute requireAdmin>      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
