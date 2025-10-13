@@ -1,8 +1,9 @@
 # 📋 PENDING FEATURES - Optional Enhancements
 
-**Last Updated**: 2025-10-03
+**Last Updated**: 2025-01-15 (Verified against actual codebase)
 **Core Platform Status**: ✅ 100% COMPLETE
 **Production Ready**: ✅ YES
+**Audit Status**: ✅ Verified by CODEBASE_AUDIT_REPORT.md
 
 ---
 
@@ -14,8 +15,9 @@ All essential features for a production-ready MLM Affiliate Learning Platform ar
 - User registration with referral tracking
 - Login/logout with JWT
 - Password reset flow (forgot password → email → reset)
-- Profile management
-- Email notifications (welcome, password reset)
+- Email verification system
+- Profile management (username, bio, social links)
+- Email notifications (welcome, password reset, verification)
 
 ### ✅ MLM/Referral System
 - 2-level referral tracking
@@ -38,10 +40,13 @@ All essential features for a production-ready MLM Affiliate Learning Platform ar
 - Transaction records
 
 ### ✅ Course/Content Management
+- Course hierarchy (Course → Modules → Topics)
+- Multi-source video player (Cloudinary, YouTube, Vimeo, External)
 - Course listing with package-based access
-- Video player with Cloudinary
+- Topic video player with progress tracking
 - Course search and filtering
 - Professional video player interface
+- Auto-navigation between topics
 
 ### ✅ Payout/Withdrawal System
 - Bank details management (CRUD)
@@ -66,6 +71,28 @@ All essential features for a production-ready MLM Affiliate Learning Platform ar
 - Form validation
 - Consistent color scheme
 
+### ✅ Wallet System
+- Internal wallet for earnings tracking
+- Wallet balance display
+- Transaction history (credits/debits)
+- Transaction sources (commission, payout, purchase, refund, admin)
+- Total earned, withdrawn, and spent tracking
+
+### ✅ Notifications System
+- In-app notification center
+- Notification types (referral, commission, payout, course, system)
+- Unread count badge
+- Mark as read/unread functionality
+- Notification filtering (all/unread)
+
+### ✅ Certificates System
+- Auto-issuance on course completion
+- Unique certificate numbers
+- Certificate listing page
+- Certificate viewer with print/download
+- Public certificate verification
+- Professional certificate design
+
 ---
 
 ## 🚀 Optional Enhancements (Not Required for Launch)
@@ -75,59 +102,66 @@ These features would enhance the platform but are **NOT required** for productio
 ### **Phase 1: Learning Experience Enhancements** 🟡 MEDIUM PRIORITY
 
 #### 1. Course Progress Tracking
-**Status**: ❌ Not Implemented
-**Completion**: 0%
+**Status**: ✅ Backend Complete, Frontend Partial
+**Completion**: 70%
 **Priority**: Medium
 
-**What's Needed**:
-- [ ] Create VideoProgress model (user_id, video_id, watch_time, completed, last_watched)
-- [ ] Add progress tracking endpoints (POST /api/videos/{id}/progress)
-- [ ] Track video watch time in video player
-- [ ] Send progress updates to backend
-- [ ] Display progress bars on course cards
-- [ ] Show completion percentage
-- [ ] Add "Continue Watching" section to dashboard
-- [ ] Calculate course completion (all videos watched)
+**What's Done**:
+- ✅ VideoProgress model exists (backend/app/models/video_progress.py)
+- ✅ Progress tracking endpoints exist (backend/app/api/video_progress.py)
+- ✅ Video player tracks watch time
 
-**Estimated Time**: 4-6 hours
+**What's Needed**:
+- [ ] Display progress bars on course cards
+- [ ] Show completion percentage on dashboard
+- [ ] Add "Continue Watching" section to dashboard
+- [ ] Calculate course completion (all topics watched)
+
+**Estimated Time**: 2-3 hours
 
 ---
 
 #### 2. Completion Certificates
-**Status**: ❌ Not Implemented
-**Completion**: 0%
-**Priority**: Low
+**Status**: ✅ COMPLETE (Verified in codebase)
+**Completion**: 100%
+**Priority**: N/A
 
-**What's Needed**:
-- [ ] Create Certificate model (user_id, course_id, issued_date, certificate_url)
-- [ ] Design certificate template (PDF)
-- [ ] Generate certificates on course completion
-- [ ] Add certificate download endpoint
-- [ ] Display certificates in user profile
-- [ ] Add certificate verification page
+**What's Done**:
+- ✅ Certificate model exists (backend/app/models/certificate.py)
+- ✅ Certificate API endpoints exist (backend/app/api/certificates.py)
+- ✅ Certificate listing page (frontend/app/certificates/page.tsx)
+- ✅ Certificate viewer page (frontend/app/certificates/[number]/page.tsx)
+- ✅ Public verification endpoint
+- ✅ Professional certificate design with print/download
 
-**Estimated Time**: 6-8 hours
+**Note**: This feature was incorrectly marked as "Not Implemented" in previous docs. It is fully functional.
 
 ---
 
 ### **Phase 2: User Engagement Features** 🟢 LOW PRIORITY
 
 #### 3. Notifications System
-**Status**: ❌ Not Implemented
-**Completion**: 0%
-**Priority**: Low
+**Status**: ✅ COMPLETE (Verified in codebase)
+**Completion**: 100%
+**Priority**: N/A
 
-**What's Needed**:
-- [ ] Create Notification model (user_id, type, message, read, created_at)
-- [ ] Add notification endpoints (GET, POST, PATCH)
-- [ ] Create notification bell icon in navbar
-- [ ] Display unread count badge
-- [ ] Create notifications dropdown
-- [ ] Mark as read functionality
-- [ ] Email notifications for important events
-- [ ] Push notifications (optional)
+**What's Done**:
+- ✅ Notification model exists (backend/app/models/notification.py)
+- ✅ Notification endpoints exist (backend/app/api/notifications.py)
+- ✅ Notifications page (frontend/app/notifications/page.tsx)
+- ✅ Unread count tracking
+- ✅ Mark as read functionality
+- ✅ Notification filtering (all/unread)
+- ✅ Notification types (referral, commission, payout, course, system)
 
-**Estimated Time**: 8-10 hours
+**What's Needed** (Optional Enhancements):
+- [ ] Notification bell icon in navbar with badge
+- [ ] Real-time notifications (WebSocket/SSE)
+- [ ] Push notifications (PWA)
+
+**Estimated Time for Enhancements**: 4-6 hours
+
+**Note**: This feature was incorrectly marked as "Not Implemented" in previous docs. Core functionality is complete.
 
 ---
 
