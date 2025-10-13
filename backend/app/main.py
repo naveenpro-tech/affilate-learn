@@ -8,6 +8,12 @@ from app.core.rate_limit import limiter
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
+from contextlib import asynccontextmanager
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize Sentry for error tracking
 if settings.SENTRY_DSN:
@@ -22,11 +28,61 @@ if settings.SENTRY_DSN:
         ],
     )
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Create admin user if it doesn't exist
+    logger.info("🚀 Starting up application...")
+    try:
+        from app.core.database import SessionLocal
+        from app.models.user import User
+        from app.core.security import get_password_hash
+        import secrets
+        import string
+
+        db = SessionLocal()
+        try:
+            # Check if admin user exists
+            admin = db.query(User).filter(User.email == "naveenvide@gmail.com").first()
+
+            if not admin:
+                # Generate referral code
+                referral_code = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+
+                # Create admin user
+                admin = User(
+                    email="naveenvide@gmail.com",
+                    full_name="Admin User",
+                    hashed_password=get_password_hash("admin123"),
+                    referral_code=referral_code,
+                    is_admin=True,
+                    is_active=True,
+                    phone="9876543210"
+                )
+                db.add(admin)
+                db.commit()
+                logger.info(f"✅ Created admin user: {admin.email}")
+            else:
+                # Ensure admin status
+                if not admin.is_admin:
+                    admin.is_admin = True
+                    db.commit()
+                logger.info(f"✅ Admin user exists: {admin.email}")
+        finally:
+            db.close()
+    except Exception as e:
+        logger.error(f"❌ Error creating admin user: {e}")
+
+    yield
+
+    # Shutdown
+    logger.info("👋 Shutting down application...")
+
 # Initialize FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     description="Affiliate Video Learning Platform API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Add rate limiter to app
