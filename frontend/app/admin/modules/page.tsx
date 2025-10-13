@@ -375,8 +375,8 @@ export default function AdminModulesPage() {
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs text-neutral-500">Topic {topicIndex + 1}</span>
-                                      <Badge size="sm">{topic.video_source_type}</Badge>
-                                      {topic.is_published && <Badge size="sm" variant="success">Published</Badge>}
+                                      <Badge className="text-xs">{topic.video_source_type}</Badge>
+                                      {topic.is_published && <Badge className="text-xs" variant="success">Published</Badge>}
                                     </div>
                                     <h4 className="font-medium text-neutral-900 mt-1">{topic.title}</h4>
                                     <p className="text-xs text-neutral-600 mt-1">{topic.description}</p>
