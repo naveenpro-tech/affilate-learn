@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import toast from 'react-hot-toast';
 import { emailVerificationAPI } from '@/lib/api';
+import { User, Mail, Phone, Lock, Eye, EyeOff, UserPlus, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -140,17 +141,33 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 via-white to-neutral-50 flex items-center justify-center px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="max-w-md w-full"
       >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl text-center">Create Account</CardTitle>
-            <p className="text-center text-neutral-600 mt-2">
+        {/* Logo/Brand */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <Link href="/" className="inline-flex items-center gap-2 group">
+            <Sparkles className="w-8 h-8 text-primary-600 group-hover:scale-110 transition-transform" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+              Affiliate Learning
+            </span>
+          </Link>
+        </motion.div>
+
+        <Card className="shadow-xl border-neutral-200">
+          <CardHeader className="text-center pb-6">
+            <CardTitle className="text-3xl font-bold text-neutral-900 mb-2">
+              Create Account
+            </CardTitle>
+            <p className="text-neutral-600">
               Join our learning platform and start earning
             </p>
           </CardHeader>
@@ -162,18 +179,24 @@ export default function RegisterPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1, duration: 0.3 }}
               >
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Full Name <span className="text-danger-500">*</span>
+                <label htmlFor="fullname" className="block text-sm font-semibold text-neutral-900 mb-2">
+                  Full Name <span className="text-danger-500" aria-label="required">*</span>
                 </label>
-                <Input
-                  type="text"
-                  required
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  placeholder="John Doe"
-                  autoComplete="name"
-                  data-testid="register-fullname"
-                />
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" aria-hidden="true" />
+                  <Input
+                    id="fullname"
+                    type="text"
+                    required
+                    value={formData.full_name}
+                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                    placeholder="John Doe"
+                    autoComplete="name"
+                    data-testid="register-fullname"
+                    className="pl-10"
+                    aria-required="true"
+                  />
+                </div>
               </motion.div>
 
               {/* Email */}
@@ -182,18 +205,24 @@ export default function RegisterPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
               >
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Email <span className="text-danger-500">*</span>
+                <label htmlFor="email" className="block text-sm font-semibold text-neutral-900 mb-2">
+                  Email <span className="text-danger-500" aria-label="required">*</span>
                 </label>
-                <Input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="your@email.com"
-                  autoComplete="email"
-                  data-testid="register-email"
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" aria-hidden="true" />
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="your@email.com"
+                    autoComplete="email"
+                    data-testid="register-email"
+                    className="pl-10"
+                    aria-required="true"
+                  />
+                </div>
               </motion.div>
 
               {/* Phone */}
@@ -202,18 +231,24 @@ export default function RegisterPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3, duration: 0.3 }}
               >
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Phone <span className="text-danger-500">*</span>
+                <label htmlFor="phone" className="block text-sm font-semibold text-neutral-900 mb-2">
+                  Phone <span className="text-danger-500" aria-label="required">*</span>
                 </label>
-                <Input
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+91 9876543210"
-                  autoComplete="tel"
-                  data-testid="register-phone"
-                />
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" aria-hidden="true" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+91 9876543210"
+                    autoComplete="tel"
+                    data-testid="register-phone"
+                    className="pl-10"
+                    aria-required="true"
+                  />
+                </div>
               </motion.div>
 
               {/* Password */}
@@ -222,11 +257,13 @@ export default function RegisterPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4, duration: 0.3 }}
               >
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Password <span className="text-danger-500">*</span>
+                <label htmlFor="password" className="block text-sm font-semibold text-neutral-900 mb-2">
+                  Password <span className="text-danger-500" aria-label="required">*</span>
                 </label>
                 <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" aria-hidden="true" />
                   <Input
+                    id="password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
@@ -234,13 +271,21 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     autoComplete="new-password"
                     data-testid="register-password"
+                    className="pl-10 pr-10"
+                    aria-required="true"
+                    aria-describedby="password-strength"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded p-1"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" aria-hidden="true" />
+                    ) : (
+                      <Eye className="w-5 h-5" aria-hidden="true" />
+                    )}
                   </button>
                 </div>
 
