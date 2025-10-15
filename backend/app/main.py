@@ -90,9 +90,24 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configure CORS - Must be added first to handle preflight requests
+# Allow all Vercel preview and production domains
+allowed_origins = [
+    settings.FRONTEND_URL,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    # Vercel production domains
+    "https://frontend-mu-rust-64.vercel.app",
+    "https://frontend-k01kudwt0-naveenvide-9992s-projects.vercel.app",
+    "https://frontend-asicrx2xr-naveenvide-9992s-projects.vercel.app",
+]
+
+# Also allow all *.vercel.app domains for preview deployments
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Allow all Vercel domains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
