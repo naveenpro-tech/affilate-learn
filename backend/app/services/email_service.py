@@ -10,7 +10,7 @@ from app.core.config import settings
 async def send_email(to_email: str, subject: str, html_content: str):
     """
     Send email using SMTP
-    
+
     Args:
         to_email: Recipient email address
         subject: Email subject
@@ -21,27 +21,33 @@ async def send_email(to_email: str, subject: str, html_content: str):
     message["From"] = settings.SMTP_FROM_EMAIL
     message["To"] = to_email
     message["Subject"] = subject
-    
+
     # Add HTML content
     html_part = MIMEText(html_content, "html")
     message.attach(html_part)
-    
+
     # Use SMTP_USERNAME if set, otherwise use SMTP_USER
     smtp_username = settings.SMTP_USERNAME if settings.SMTP_USERNAME else settings.SMTP_USER
-    
+
     # Send email
     try:
+        # Port 465 requires use_tls=False (it uses implicit SSL)
+        # Port 587 requires use_tls=True (it uses STARTTLS)
+        use_tls = False if settings.SMTP_PORT == 465 else True
+
         await aiosmtplib.send(
             message,
             hostname=settings.SMTP_HOST,
             port=settings.SMTP_PORT,
             username=smtp_username,
             password=settings.SMTP_PASSWORD,
-            use_tls=settings.SMTP_USE_TLS,
+            use_tls=use_tls,
+            start_tls=False if settings.SMTP_PORT == 465 else True,
         )
         print(f"✅ Email sent successfully to {to_email}")
     except Exception as e:
         print(f"❌ Failed to send email to {to_email}: {e}")
+        print(f"   SMTP Config: {settings.SMTP_HOST}:{settings.SMTP_PORT}, TLS={use_tls}")
         raise
 
 
