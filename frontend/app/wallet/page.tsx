@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { walletAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';

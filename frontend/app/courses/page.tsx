@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { LoadingSpinner, CardSkeleton } from '@/components/ui/LoadingSpinner';

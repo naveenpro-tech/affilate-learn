@@ -10,7 +10,7 @@ import { initiatePayment } from '@/lib/razorpay';
 import toast from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 
 export default function PackagesPage() {
   const router = useRouter();
