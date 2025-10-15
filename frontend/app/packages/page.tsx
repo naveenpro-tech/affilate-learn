@@ -8,8 +8,8 @@ import { useAuthStore } from '@/store/authStore';
 import { packagesAPI, paymentsAPI } from '@/lib/api';
 import { initiatePayment } from '@/lib/razorpay';
 import toast from 'react-hot-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/Badge';
 
 export default function PackagesPage() {

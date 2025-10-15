@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
 import { BookOpen, TrendingUp, Wallet, Check, ArrowRight, Sparkles, Users, Award, Target, Zap, Star, Rocket, DollarSign } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { tw, motionVariants } from '@/lib/theme';
 
 export default function Home() {

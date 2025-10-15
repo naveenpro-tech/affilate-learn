@@ -5,9 +5,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
-import { BookOpen, TrendingUp, Wallet, Check, ArrowRight, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { BookOpen, TrendingUp, Wallet, Check, ArrowRight, Sparkles, Zap, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import ModernNavbar from '@/components/ModernNavbar';
 
 export default function Home() {
   const router = useRouter();
@@ -25,103 +27,167 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center gap-4"
         >
-          <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-neutral-600 font-medium">Loading...</p>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full"
+          />
+          <p className="text-slate-300 font-medium">Loading your experience...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 via-white to-neutral-50">
-      {/* Navigation */}
-      <motion.nav
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="border-b border-neutral-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50"
-      >
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center gap-2"
-            >
-              <Sparkles className="w-6 h-6 text-primary-600" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-                Affiliate Learning
-              </h1>
-            </motion.div>
-            <div className="flex items-center gap-3">
-              <Link href="/login">
-                <Button variant="ghost" size="default">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button variant="default" size="default" className="group">
-                  Get Started
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </motion.nav>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 8, repeat: Infinity }}
+          className="absolute top-1/4 -left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{ duration: 10, repeat: Infinity }}
+          className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+        />
+      </div>
+
+      {/* Modern Navigation */}
+      <ModernNavbar />
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
+      <section className="relative container mx-auto px-4 py-20 md:py-32">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center max-w-4xl mx-auto"
+          transition={{ duration: 0.8 }}
+          className="text-center max-w-5xl mx-auto relative z-10"
         >
+          {/* Badge */}
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-full mb-6"
+            transition={{ delay: 0.2, type: 'spring' }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 glass-dark rounded-full mb-8 border border-blue-500/30"
           >
-            <Sparkles className="w-4 h-4 text-primary-600" />
-            <span className="text-sm font-medium text-primary-700">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            >
+              <Sparkles className="w-5 h-5 text-blue-400" />
+            </motion.div>
+            <span className="text-sm font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Join 1000+ learners earning daily
             </span>
+            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
           </motion.div>
 
-          <h2 className="text-5xl md:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
-            Learn, Grow, and{' '}
-            <span className="bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+          {/* Main Heading */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight"
+          >
+            <span className="text-white">Learn, Grow, and </span>
+            <motion.span
+              className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent inline-block"
+              animate={{ backgroundPosition: ['0%', '100%', '0%'] }}
+              transition={{ duration: 5, repeat: Infinity }}
+            >
               Earn
-            </span>
-          </h2>
-          <p className="text-xl text-neutral-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Unlock premium courses and build passive income through our proven 2-level affiliate system
-          </p>
+            </motion.span>
+          </motion.h1>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed"
+          >
+            Unlock premium courses and build{' '}
+            <span className="text-emerald-400 font-semibold">passive income</span> through our proven{' '}
+            <span className="text-blue-400 font-semibold">2-level affiliate system</span>
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          >
             <Link href="/register">
-              <Button size="lg" className="group w-full sm:w-auto">
-                Start Learning Free
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  size="lg"
+                  className="group w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-2xl hover:shadow-blue-500/50 transition-all px-8 py-6 text-lg font-bold"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  Start Learning Free
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
             </Link>
             <Link href="/packages">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                View Packages
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto glass-dark border-slate-600 hover:border-blue-500 text-white px-8 py-6 text-lg font-semibold"
+                >
+                  View Packages
+                </Button>
+              </motion.div>
             </Link>
-          </div>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="grid grid-cols-3 gap-8 mt-20 max-w-3xl mx-auto"
+          >
+            {[
+              { value: '1000+', label: 'Active Learners' },
+              { value: '₹5,625', label: 'Max Earnings' },
+              { value: '100+', label: 'Premium Courses' },
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.7 + index * 0.1 }}
+                className="glass-dark p-6 rounded-2xl border border-slate-700/50"
+              >
+                <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-slate-400 mt-2">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
         </motion.div>
       </section>
 
       {/* Features */}
-      <section className="container mx-auto px-4 py-20 bg-white">
+      <section className="relative container mx-auto px-4 py-20">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -133,43 +199,53 @@ export default function Home() {
               icon: BookOpen,
               title: 'Premium Courses',
               description: 'Access high-quality video courses across Silver, Gold, and Platinum tiers',
-              bgColor: 'bg-primary-50',
-              iconColor: 'text-primary-600',
+              gradient: 'from-blue-500 to-cyan-500',
+              glowColor: 'blue',
             },
             {
               icon: TrendingUp,
               title: 'Earn Commissions',
               description: 'Earn up to ₹5,625 per referral with our proven 2-level system',
-              bgColor: 'bg-success-50',
-              iconColor: 'text-success-600',
+              gradient: 'from-emerald-500 to-teal-500',
+              glowColor: 'emerald',
             },
             {
               icon: Wallet,
               title: 'Weekly Payouts',
               description: 'Get paid weekly directly to your bank account or UPI',
-              bgColor: 'bg-warning-50',
-              iconColor: 'text-warning-600',
+              gradient: 'from-purple-500 to-pink-500',
+              glowColor: 'purple',
             },
           ].map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              transition={{ delay: index * 0.15, type: 'spring' }}
+              whileHover={{ y: -8, transition: { duration: 0.3 } }}
+              className="group"
             >
-              <Card className="h-full border-neutral-200 hover:border-primary-300 hover:shadow-lg transition-all duration-300">
-                <CardHeader>
-                  <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4`}>
-                    <feature.icon className={`w-6 h-6 ${feature.iconColor}`} />
-                  </div>
-                  <CardTitle className="text-xl font-bold text-neutral-900">
+              <Card className="h-full glass-card border-slate-700/50 hover:border-blue-500/50 transition-all duration-500 relative overflow-hidden">
+                {/* Glow Effect on Hover */}
+                <motion.div
+                  className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-xl`}
+                />
+
+                <CardHeader className="relative z-10">
+                  <motion.div
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-lg group-hover:shadow-${feature.glowColor}-500/50 transition-shadow`}
+                  >
+                    <feature.icon className="w-7 h-7 text-white" />
+                  </motion.div>
+                  <CardTitle className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-neutral-600 leading-relaxed">
+                <CardContent className="relative z-10">
+                  <p className="text-slate-300 leading-relaxed text-lg">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -180,19 +256,33 @@ export default function Home() {
       </section>
 
       {/* Packages */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="relative container mx-auto px-4 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h3 className="text-4xl font-bold text-neutral-900 mb-4">
-            Choose Your Package
-          </h3>
-          <p className="text-neutral-600 text-lg max-w-2xl mx-auto">
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-5xl font-black text-white mb-4"
+          >
+            Choose Your{' '}
+            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Package
+            </span>
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-slate-300 text-xl max-w-2xl mx-auto"
+          >
             Select the perfect plan to start your learning and earning journey
-          </p>
+          </motion.p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -202,64 +292,104 @@ export default function Home() {
               price: '2,950',
               features: ['Basic courses', 'Earn commissions', '2-level referrals', 'Weekly payouts'],
               popular: false,
+              gradient: 'from-slate-600 to-slate-700',
             },
             {
               name: 'Gold',
               price: '5,310',
               features: ['All Silver features', 'Advanced courses', 'Higher commissions', 'Priority support'],
               popular: true,
+              gradient: 'from-yellow-500 to-orange-500',
             },
             {
               name: 'Platinum',
               price: '8,850',
               features: ['All Gold features', 'Premium courses', 'Maximum commissions', 'VIP support'],
               popular: false,
+              gradient: 'from-purple-500 to-pink-500',
             },
           ].map((pkg, index) => (
             <motion.div
               key={pkg.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -8, transition: { duration: 0.2 } }}
-              className={pkg.popular ? 'md:scale-105' : ''}
+              transition={{ delay: index * 0.15, type: 'spring' }}
+              whileHover={{ y: -12, scale: 1.02, transition: { duration: 0.3 } }}
+              className={`group ${pkg.popular ? 'md:scale-105' : ''}`}
             >
-              <Card className={`h-full relative ${pkg.popular ? 'border-primary-600 border-2 shadow-xl' : 'border-neutral-200'}`}>
+              <Card className={`h-full relative overflow-hidden ${
+                pkg.popular
+                  ? 'glass-card border-2 border-blue-500/50 shadow-2xl shadow-blue-500/20'
+                  : 'glass-card border-slate-700/50'
+              }`}>
+                {/* Popular Badge */}
                 {pkg.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
-                      Most Popular
-                    </span>
-                  </div>
+                  <motion.div
+                    initial={{ y: -100 }}
+                    animate={{ y: 0 }}
+                    className="absolute -top-0 left-0 right-0"
+                  >
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-center text-sm font-bold">
+                      ⭐ MOST POPULAR ⭐
+                    </div>
+                  </motion.div>
                 )}
-                <CardHeader className="text-center pb-8 pt-8">
-                  <CardTitle className="text-2xl font-bold text-neutral-900 mb-2">
+
+                {/* Gradient Glow */}
+                <motion.div
+                  className={`absolute inset-0 bg-gradient-to-br ${pkg.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-2xl`}
+                />
+
+                <CardHeader className={`text-center ${pkg.popular ? 'pt-16' : 'pt-8'} pb-8 relative z-10`}>
+                  <CardTitle className="text-3xl font-black text-white mb-4">
                     {pkg.name}
                   </CardTitle>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-neutral-600 text-lg">₹</span>
-                    <span className="text-5xl font-bold text-primary-600">{pkg.price}</span>
+                    <span className="text-slate-400 text-xl">₹</span>
+                    <motion.span
+                      whileHover={{ scale: 1.1 }}
+                      className={`text-6xl font-black bg-gradient-to-r ${pkg.gradient} bg-clip-text text-transparent`}
+                    >
+                      {pkg.price}
+                    </motion.span>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
-                    {pkg.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-neutral-700">{feature}</span>
-                      </li>
+
+                <CardContent className="space-y-6 relative z-10">
+                  <ul className="space-y-4">
+                    {pkg.features.map((feature, idx) => (
+                      <motion.li
+                        key={feature}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="flex items-start gap-3"
+                      >
+                        <div className="mt-1">
+                          <Check className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <span className="text-slate-300 text-lg">{feature}</span>
+                      </motion.li>
                     ))}
                   </ul>
-                  <Link href="/register" className="block mt-6">
-                    <Button
-                      variant={pkg.popular ? 'default' : 'outline'}
-                      size="lg"
-                      className="w-full group"
-                    >
-                      Get Started
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
+
+                  <Link href="/register" className="block mt-8">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        size="lg"
+                        className={`w-full group text-lg font-bold ${
+                          pkg.popular
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-blue-500/50'
+                            : 'glass-dark border-slate-600 hover:border-blue-500'
+                        }`}
+                        variant={pkg.popular ? 'default' : 'outline'}
+                      >
+                        Get Started
+                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </motion.div>
                   </Link>
                 </CardContent>
               </Card>
@@ -269,25 +399,51 @@ export default function Home() {
       </section>
 
       {/* Footer CTA */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="relative container mx-auto px-4 py-20 mb-20">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-12 text-center text-white"
+          className="relative overflow-hidden glass-card border-2 border-blue-500/30 rounded-3xl p-12 md:p-16 text-center"
         >
-          <h3 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Start Your Journey?
-          </h3>
-          <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of learners who are already earning while they learn
-          </p>
-          <Link href="/register">
-            <Button size="lg" variant="secondary" className="group">
-              Create Free Account
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
+          {/* Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-pulse" />
+
+          <div className="relative z-10">
+            <motion.h3
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-black text-white mb-6"
+            >
+              Ready to Start Your{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Journey?
+              </span>
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-xl md:text-2xl text-slate-300 mb-10 max-w-2xl mx-auto"
+            >
+              Join thousands of learners who are already{' '}
+              <span className="text-emerald-400 font-semibold">earning while they learn</span>
+            </motion.p>
+            <Link href="/register">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  size="lg"
+                  className="group bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-2xl hover:shadow-blue-500/50 px-10 py-7 text-xl font-bold"
+                >
+                  <Sparkles className="w-6 h-6 mr-2" />
+                  Create Free Account
+                  <ArrowRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
+            </Link>
+          </div>
         </motion.div>
       </section>
     </div>

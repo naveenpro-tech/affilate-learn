@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { payoutsAPI, bankDetailsAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 

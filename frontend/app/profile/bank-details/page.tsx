@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { bankDetailsAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/Badge';
 
 export default function BankDetailsPage() {
