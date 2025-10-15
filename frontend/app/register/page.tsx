@@ -89,7 +89,8 @@ export default function RegisterPage() {
     const validateCode = async () => {
       setValidatingReferral(true);
       try {
-        const response = await fetch(`http://localhost:8000/api/auth/validate-referral-code?code=${code}`);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://affilate-learn.onrender.com';
+        const response = await fetch(`${API_URL}/api/auth/validate-referral-code?code=${code}`);
         const data = await response.json();
 
         if (data.valid) {

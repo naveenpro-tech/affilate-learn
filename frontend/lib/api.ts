@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://affilate-learn.onrender.com';
+
+// Debug: Log the API URL being used
+if (typeof window !== 'undefined') {
+  console.log('🔧 API Configuration:', {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    API_URL: API_URL,
+    environment: process.env.NODE_ENV
+  });
+}
 
 // Create axios instance with no-cache headers
 const api = axios.create({
