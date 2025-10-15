@@ -69,8 +69,8 @@ export default function ModernNavbar() {
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'glass-dark shadow-2xl border-b border-slate-700/50'
-            : 'bg-transparent'
+            ? 'bg-white/80 backdrop-blur-xl shadow-lg border-b border-gray-200/50'
+            : 'bg-white/60 backdrop-blur-md'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -91,7 +91,7 @@ export default function ModernNavbar() {
                   transition={{ duration: 2, repeat: Infinity }}
                 />
               </motion.div>
-              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Affiliate Learning
               </span>
             </Link>
@@ -112,8 +112,8 @@ export default function ModernNavbar() {
                         variant="ghost"
                         className={`relative px-4 py-2 rounded-lg transition-all duration-300 ${
                           isActive
-                            ? 'text-blue-400 bg-blue-500/10'
-                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                            ? 'text-blue-600 bg-blue-50'
+                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                         }`}
                       >
                         <Icon className="w-4 h-4 mr-2" />
@@ -121,7 +121,7 @@ export default function ModernNavbar() {
                         {isActive && (
                           <motion.div
                             layoutId="navbar-indicator"
-                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"
+                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                           />
                         )}
@@ -140,7 +140,7 @@ export default function ModernNavbar() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-slate-800/50 transition-all duration-300"
+                      className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all duration-300"
                     >
                       <Avatar className="w-9 h-9 border-2 border-blue-500/50">
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
@@ -148,37 +148,37 @@ export default function ModernNavbar() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="text-left hidden lg:block">
-                        <p className="text-sm font-medium text-white">{user.full_name}</p>
-                        <p className="text-xs text-slate-400">{user.email}</p>
+                        <p className="text-sm font-medium text-gray-900">{user.full_name}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
                       </div>
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
                     </motion.button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 glass-dark border-slate-700/50">
-                    <DropdownMenuLabel className="text-slate-200">My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-slate-700/50" />
+                  <DropdownMenuContent align="end" className="w-56 bg-white border-gray-200">
+                    <DropdownMenuLabel className="text-gray-900">My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-gray-200" />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="cursor-pointer text-slate-300 hover:text-white">
+                      <Link href="/dashboard" className="cursor-pointer text-gray-700 hover:text-gray-900">
                         <LayoutDashboard className="w-4 h-4 mr-2" />
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                     {user.is_admin && (
                       <DropdownMenuItem asChild>
-                        <Link href="/admin" className="cursor-pointer text-slate-300 hover:text-white">
+                        <Link href="/admin" className="cursor-pointer text-gray-700 hover:text-gray-900">
                           <Settings className="w-4 h-4 mr-2" />
                           Admin Panel
                         </Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer text-slate-300 hover:text-white">
+                      <Link href="/profile" className="cursor-pointer text-gray-700 hover:text-gray-900">
                         <User className="w-4 h-4 mr-2" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-700/50" />
-                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-400 hover:text-red-300">
+                    <DropdownMenuSeparator className="bg-gray-200" />
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 hover:text-red-700">
                       <LogOut className="w-4 h-4 mr-2" />
                       Logout
                     </DropdownMenuItem>
@@ -187,13 +187,13 @@ export default function ModernNavbar() {
               ) : (
                 <div className="flex items-center space-x-3">
                   <Link href="/login">
-                    <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800/50">
+                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100">
                       Login
                     </Button>
                   </Link>
                   <Link href="/register">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-blue-500/50 transition-all">
+                      <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-blue-500/50 transition-all">
                         Get Started
                       </Button>
                     </motion.div>
@@ -205,11 +205,11 @@ export default function ModernNavbar() {
             {/* Mobile Menu Button */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" className="text-slate-300">
+                <Button variant="ghost" size="icon" className="text-gray-700">
                   <Menu className="w-6 h-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="glass-dark border-slate-700/50 w-80">
+              <SheetContent side="right" className="bg-white border-gray-200 w-80">
                 <div className="flex flex-col h-full">
                   {/* Mobile User Info */}
                   {user && (
