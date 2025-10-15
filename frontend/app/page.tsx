@@ -27,7 +27,7 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -38,34 +38,14 @@ export default function Home() {
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full"
           />
-          <p className="text-slate-300 font-medium">Loading your experience...</p>
+          <p className="text-gray-700 font-medium">Loading your experience...</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-1/4 -left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
-        />
-      </div>
-
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Modern Navigation */}
       <ModernNavbar />
 
@@ -103,9 +83,9 @@ export default function Home() {
             transition={{ delay: 0.3 }}
             className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight"
           >
-            <span className="text-white">Learn, Grow, and </span>
+            <span className="text-gray-900">Learn, Grow, and </span>
             <motion.span
-              className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent inline-block"
               animate={{ backgroundPosition: ['0%', '100%', '0%'] }}
               transition={{ duration: 5, repeat: Infinity }}
             >
@@ -118,11 +98,11 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed"
+            className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
           >
             Unlock premium courses and build{' '}
-            <span className="text-emerald-400 font-semibold">passive income</span> through our proven{' '}
-            <span className="text-blue-400 font-semibold">2-level affiliate system</span>
+            <span className="text-emerald-600 font-semibold">passive income</span> through our proven{' '}
+            <span className="text-blue-600 font-semibold">2-level affiliate system</span>
           </motion.p>
 
           {/* CTA Buttons */}
@@ -149,7 +129,7 @@ export default function Home() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto glass-dark border-slate-600 hover:border-blue-500 text-white px-8 py-6 text-lg font-semibold"
+                  className="w-full sm:w-auto border-gray-300 hover:border-blue-500 text-gray-900 px-8 py-6 text-lg font-semibold"
                 >
                   View Packages
                 </Button>

@@ -4,16 +4,8 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
 }
 
 @layer utilities {
@@ -23,15 +15,15 @@
 
   /* Glassmorphism Effects */
   .glass {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+    @apply bg-white/80 backdrop-blur-md border border-gray-200;
   }
 
   .glass-dark {
-    @apply bg-slate-900/40 backdrop-blur-xl border border-slate-700/50;
+    @apply bg-white/90 backdrop-blur-xl border border-gray-200 shadow-lg;
   }
 
   .glass-card {
-    @apply bg-slate-900/60 backdrop-blur-2xl border border-slate-700/50 shadow-2xl;
+    @apply bg-white/95 backdrop-blur-2xl border border-gray-200 shadow-2xl;
   }
 
   /* Gradient Backgrounds */
@@ -41,10 +33,6 @@
 
   .gradient-secondary {
     @apply bg-gradient-to-r from-emerald-500 to-teal-500;
-  }
-
-  .gradient-dark {
-    @apply bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900;
   }
 
   /* Animated Gradients */
@@ -91,35 +79,7 @@
 
 @layer base {
   :root {
-    /* Modern Dark Theme - Default */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
-    --chart-1: 217 91% 60%;
-    --chart-2: 262 83% 58%;
-    --chart-3: 142 76% 36%;
-    --chart-4: 47 96% 53%;
-    --chart-5: 340 82% 52%;
-    --radius: 0.75rem;
-  }
-
-  .light {
+    /* Light Theme - Default */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
@@ -144,6 +104,7 @@
     --chart-3: 142 76% 36%;
     --chart-4: 47 96% 53%;
     --chart-5: 340 82% 52%;
+    --radius: 0.75rem;
   }
 }
 

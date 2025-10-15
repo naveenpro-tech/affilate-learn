@@ -21,23 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark smooth-scroll">
+    <html lang="en" className="smooth-scroll">
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
           {children}
         </AuthProvider>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            className: 'glass-dark border-slate-700/50',
-            style: {
-              background: 'rgba(15, 23, 42, 0.8)',
-              backdropFilter: 'blur(12px)',
-              color: '#fff',
-              border: '1px solid rgba(71, 85, 105, 0.5)',
-            },
-          }}
-        />
+        <Toaster position="top-right" />
       </body>
     </html>
   );
