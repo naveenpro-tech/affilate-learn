@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
-import { Button } from './ui/Button';
+import { Button } from './ui/button';
 import NotificationBell from './NotificationBell';
 import EmailVerificationBanner from './EmailVerificationBanner';
 
