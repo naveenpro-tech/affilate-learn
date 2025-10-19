@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from datetime import timedelta
+from datetime import timedelta, datetime
 import logging
 
 from app.core.database import get_db
@@ -121,8 +121,6 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
             # Continue with registration even if notification fails
 
     # Generate verification token for email verification
-    import secrets
-    from datetime import timedelta
     verification_token = secrets.token_urlsafe(32)
     verification_expires = datetime.utcnow() + timedelta(hours=24)
     new_user.verification_token = verification_token

@@ -13,29 +13,40 @@ class RazorpayService:
     def create_order(self, amount: float, currency: str = "INR", receipt: str = None) -> dict:
         """
         Create a Razorpay order
-        
+
         Args:
             amount: Amount in rupees (will be converted to paise)
             currency: Currency code (default: INR)
             receipt: Receipt ID for reference
-            
+
         Returns:
             Order details from Razorpay
         """
-        # Convert amount to paise (smallest currency unit)
-        amount_in_paise = int(amount * 100)
-        
-        order_data = {
-            "amount": amount_in_paise,
-            "currency": currency,
-            "payment_capture": 1  # Auto capture payment
-        }
-        
-        if receipt:
-            order_data["receipt"] = receipt
-        
-        order = self.client.order.create(data=order_data)
-        return order
+        try:
+            # Convert amount to paise (smallest currency unit)
+            amount_in_paise = int(amount * 100)
+
+            order_data = {
+                "amount": amount_in_paise,
+                "currency": currency,
+                "payment_capture": 1  # Auto capture payment
+            }
+
+            if receipt:
+                order_data["receipt"] = receipt
+
+            print(f"[RAZORPAY] Creating order with amount: {amount_in_paise} paise")
+            print(f"[RAZORPAY] Using key ID: {settings.RAZORPAY_KEY_ID[:10]}...")
+
+            order = self.client.order.create(data=order_data)
+            print(f"[RAZORPAY] Order created successfully: {order.get('id')}")
+            return order
+        except Exception as e:
+            print(f"[RAZORPAY] Error creating order: {str(e)}")
+            print(f"[RAZORPAY] Error type: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
+            raise
     
     def verify_payment_signature(
         self,

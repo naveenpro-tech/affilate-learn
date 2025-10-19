@@ -14,6 +14,8 @@ from app.models.profile import Profile
 from app.models.certificate import Certificate
 from app.models.module import Module
 from app.models.topic import Topic
+from app.models.notification import Notification
+from app.models.wallet import Wallet
 
 __all__ = [
     "User",
@@ -31,5 +33,7 @@ __all__ = [
     "Certificate",
     "Module",
     "Topic",
+    "Notification",
+    "Wallet",
 ]
 
