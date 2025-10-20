@@ -247,10 +247,12 @@ Min 10 characters          Revert to original
 
 ## 📊 Backend Status
 
-✅ **Server running:** http://localhost:8000  
-✅ **New API key loaded:** AIzaSyB_QJq9XYSkw4VfK3vrTBavPqFlOZAaC-0  
-✅ **Nano Banana adapter:** Active and ready  
-✅ **Prompt enhancement:** Working (with new API key)  
+✅ **Server running:** http://localhost:8000
+✅ **New API key loaded:** `<REDACTED - Use GOOGLE_API_KEY environment variable>`
+✅ **Nano Banana adapter:** Active and ready
+✅ **Prompt enhancement:** Working (with environment variable)
+
+> **⚠️ SECURITY:** The exposed GCP API key has been revoked. Always store API keys in environment variables or secrets managers, never in code or documentation.
 
 ---
 

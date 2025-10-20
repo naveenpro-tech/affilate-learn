@@ -102,10 +102,18 @@ class LocalStorageService:
             if len(path_parts) != 2:
                 logger.error(f"Invalid image URL format: {image_url}")
                 return False
-            
+
             relative_path = path_parts[1]
-            file_path = self.base_dir / relative_path
-            
+            file_path = (self.base_dir / relative_path).resolve()
+
+            # Security: Verify the resolved path is within base_dir
+            base_dir_resolved = self.base_dir.resolve()
+            try:
+                file_path.relative_to(base_dir_resolved)
+            except ValueError:
+                logger.error(f"Directory traversal attempt detected: {image_url}")
+                return False
+
             if file_path.exists():
                 file_path.unlink()
                 logger.info(f"Image deleted: {file_path}")
@@ -113,7 +121,7 @@ class LocalStorageService:
             else:
                 logger.warning(f"Image not found: {file_path}")
                 return False
-                
+
         except Exception as e:
             logger.error(f"Failed to delete image: {e}")
             return False
@@ -131,9 +139,18 @@ class LocalStorageService:
         path_parts = image_url.split("/static/generated/")
         if len(path_parts) != 2:
             raise ValueError(f"Invalid image URL format: {image_url}")
-        
+
         relative_path = path_parts[1]
-        return self.base_dir / relative_path
+        file_path = (self.base_dir / relative_path).resolve()
+
+        # Security: Verify the resolved path is within base_dir
+        base_dir_resolved = self.base_dir.resolve()
+        try:
+            file_path.relative_to(base_dir_resolved)
+        except ValueError:
+            raise ValueError(f"Directory traversal attempt detected: {image_url}")
+
+        return file_path
     
     def cleanup_old_images(self, days: int = 30) -> int:
         """

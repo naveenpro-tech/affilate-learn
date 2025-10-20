@@ -27,9 +27,12 @@ HTTP 500 Internal Server Error
 ### Why It's Happening
 
 The Razorpay SDK is attempting to authenticate with the provided test keys:
+
+> **⚠️ SECURITY NOTE:** These are placeholder values. The actual test keys have been rotated/revoked.
+
 ```
-RAZORPAY_KEY_ID=rzp_test_RBrPafmy42Nmd7
-RAZORPAY_KEY_SECRET=5TVK1iA2npjluW6vDb0EXIn1
+RAZORPAY_KEY_ID=rzp_test_XXXXXXXXXXXXX
+RAZORPAY_KEY_SECRET=XXXXXXXXXXXX
 ```
 
 However, the Razorpay API is rejecting these credentials with "Authentication failed", which means:

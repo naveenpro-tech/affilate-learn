@@ -117,23 +117,26 @@ git push origin main
    - **Instance Type**: `Free` (or `Starter` for better performance)
 
 ### 3.4 Add Environment Variables
+
+> **🚨 SECURITY:** Do NOT include real production secrets in this file. All credentials shown below are placeholders.
+
 In Render dashboard, add these environment variables:
 
 ```
-DATABASE_URL = <YOUR_NEW_NEON_CONNECTION_STRING>
-SECRET_KEY = <GENERATE_NEW_WITH: openssl rand -hex 32>
+DATABASE_URL = <YOUR_NEON_CONNECTION_STRING>
+SECRET_KEY = <GENERATE_WITH: openssl rand -hex 32>
 ALGORITHM = HS256
 ACCESS_TOKEN_EXPIRE_MINUTES = 10080
-EMAIL_FROM = roprly@bilvanaturals.online
+EMAIL_FROM = <YOUR_EMAIL_ADDRESS>
 SMTP_HOST = smtp.hostinger.com
 SMTP_PORT = 465
-SMTP_USER = roprly@bilvanaturals.online
-SMTP_PASSWORD = Who@reddamma999
-RAZORPAY_KEY_ID = rzp_live_YOUR_LIVE_KEY
-RAZORPAY_KEY_SECRET = YOUR_LIVE_SECRET
-CLOUDINARY_CLOUD_NAME = dihv0v8hr
-CLOUDINARY_API_KEY = 418925754778477
-CLOUDINARY_API_SECRET = LDeO-I6PgsrABW82WzYtDp1yIp8
+SMTP_USER = <YOUR_SMTP_USERNAME>
+SMTP_PASSWORD = <YOUR_SMTP_PASSWORD>
+RAZORPAY_KEY_ID = <YOUR_LIVE_RAZORPAY_KEY_ID>
+RAZORPAY_KEY_SECRET = <YOUR_LIVE_RAZORPAY_KEY_SECRET>
+CLOUDINARY_CLOUD_NAME = <YOUR_CLOUDINARY_CLOUD_NAME>
+CLOUDINARY_API_KEY = <YOUR_CLOUDINARY_API_KEY>
+CLOUDINARY_API_SECRET = <YOUR_CLOUDINARY_API_SECRET>
 APP_NAME = Affiliate Learning Platform
 FRONTEND_URL = https://your-app.vercel.app
 BACKEND_URL = https://affiliate-learning-backend.onrender.com

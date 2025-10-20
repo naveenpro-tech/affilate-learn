@@ -20,33 +20,35 @@
 
 ## 📋 Environment Variables Configuration
 
+> **🚨 CRITICAL SECURITY ALERT:** All credentials shown below have been **REVOKED and ROTATED**. This file should be excluded from public releases or moved behind access control.
+
 ### Backend Environment Variables (.env)
 
-**Current Configuration** (backend/.env):
+**Configuration Template** (backend/.env):
 ```env
 # Database Configuration
-DATABASE_URL=postgresql://neondb_owner:npg_XVbg9LNkxBu1@ep-wandering-mud-a-adj0z6n6-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DATABASE_URL=<YOUR_DATABASE_URL>  # Format: postgresql://user:password@host/db?sslmode=require
 
-# JWT Secret
-SECRET_KEY=your-secret-key-change-this-in-production-use-openssl-rand-hex-32
+# JWT Secret (Generate with: openssl rand -hex 32)
+SECRET_KEY=<GENERATE_NEW_SECRET_KEY>
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
 
 # Email Configuration
-EMAIL_FROM=roprly@bilvanaturals.online
+EMAIL_FROM=<YOUR_EMAIL_ADDRESS>
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=465
-SMTP_USER=roprly@bilvanaturals.online
-SMTP_PASSWORD=Who@reddamma999
+SMTP_USER=<YOUR_SMTP_USERNAME>
+SMTP_PASSWORD=<YOUR_SMTP_PASSWORD>
 
 # Razorpay Configuration
-RAZORPAY_KEY_ID=rzp_test_RBrPafmy42Nmd7
-RAZORPAY_KEY_SECRET=5TVK1iA2npjluW6vDb0EXIn1
+RAZORPAY_KEY_ID=<YOUR_RAZORPAY_KEY_ID>
+RAZORPAY_KEY_SECRET=<YOUR_RAZORPAY_KEY_SECRET>
 
 # Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=dihv0v8hr
-CLOUDINARY_API_KEY=418925754778477
-CLOUDINARY_API_SECRET=LDeO-I6PgsrABW82WzYtDp1yIp8
+CLOUDINARY_CLOUD_NAME=<YOUR_CLOUD_NAME>
+CLOUDINARY_API_KEY=<YOUR_API_KEY>
+CLOUDINARY_API_SECRET=<YOUR_CLOUDINARY_SECRET>
 
 # Application Settings
 APP_NAME=Affiliate Learning Platform

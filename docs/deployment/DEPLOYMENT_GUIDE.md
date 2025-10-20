@@ -34,20 +34,22 @@
 
 **Required for Render Web Service**:
 
+> **🚨 SECURITY WARNING:** The credentials shown below have been **revoked and rotated**. Never commit real production secrets to version control!
+
 ```bash
 # Database (Neon PostgreSQL)
-DATABASE_URL=postgresql://neondb_owner:npg_XVbg9LNkxBu1@ep-wandering-mud-adj0z6n6-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DATABASE_URL=<YOUR_DATABASE_URL>  # Format: postgresql://user:password@host/db?sslmode=require
 
-# JWT Configuration
+# JWT Configuration (Generate with: openssl rand -hex 32)
 SECRET_KEY=<GENERATE_NEW_SECRET_KEY_FOR_PRODUCTION>
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
 
 # Email Configuration (Hostinger SMTP)
-EMAIL_FROM=roprly@bilvanaturals.online
+EMAIL_FROM=<YOUR_EMAIL_ADDRESS>
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=465
-SMTP_USER=roprly@bilvanaturals.online
+SMTP_USER=<YOUR_SMTP_USERNAME>
 SMTP_PASSWORD=<YOUR_SMTP_PASSWORD>
 
 # Razorpay Configuration (SWITCH TO LIVE KEYS)
@@ -55,8 +57,8 @@ RAZORPAY_KEY_ID=<YOUR_LIVE_RAZORPAY_KEY_ID>
 RAZORPAY_KEY_SECRET=<YOUR_LIVE_RAZORPAY_KEY_SECRET>
 
 # Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=dihv0v8hr
-CLOUDINARY_API_KEY=418925754778477
+CLOUDINARY_CLOUD_NAME=<YOUR_CLOUD_NAME>
+CLOUDINARY_API_KEY=<YOUR_API_KEY>
 CLOUDINARY_API_SECRET=<YOUR_CLOUDINARY_SECRET>
 
 # Application Settings

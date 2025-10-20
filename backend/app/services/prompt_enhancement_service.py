@@ -135,14 +135,23 @@ class PromptEnhancementService:
         return enhanced
 
 
-# Singleton instance
+# Singleton instance with thread-safe initialization
+import threading
+
 _prompt_enhancer_service: Optional[PromptEnhancementService] = None
+_service_lock = threading.Lock()
 
 
 def get_prompt_enhancement_service() -> PromptEnhancementService:
-    """Get or create prompt enhancement service"""
+    """Get or create prompt enhancement service (thread-safe)"""
     global _prompt_enhancer_service
+
+    # Double-checked locking pattern
     if _prompt_enhancer_service is None:
-        _prompt_enhancer_service = PromptEnhancementService()
+        with _service_lock:
+            # Check again inside the lock
+            if _prompt_enhancer_service is None:
+                _prompt_enhancer_service = PromptEnhancementService()
+
     return _prompt_enhancer_service
 

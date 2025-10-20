@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.notification import Notification
 from app.core.database import engine
@@ -9,10 +10,10 @@ def create_notification(
     title: str,
     message: str,
     notification_type: str,
-    link: str = None,
-    post_id: int = None,
-    comment_id: int = None,
-    from_user_id: int = None,
+    link: Optional[str] = None,
+    post_id: Optional[int] = None,
+    comment_id: Optional[int] = None,
+    from_user_id: Optional[int] = None,
 ):
     """
     Create a notification for a user

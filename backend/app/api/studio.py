@@ -4,6 +4,8 @@ Endpoints for image generation, prompt enhancement, and community features
 """
 
 import logging
+import uuid
+import time
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -212,10 +214,15 @@ async def generate_image(
         )
 
         if not debit_result["success"]:
-            # This shouldn't happen since we checked balance, but handle it
-            logger.error(f"Failed to debit credits after successful generation! user={current_user.id}")
-            # Still save the image but log the error
-            pass
+            # Critical: debit failed after generation - abort save and return error
+            logger.error(
+                f"CRITICAL: Failed to debit credits after successful generation! "
+                f"user={current_user.id}, cost={tier_cost}, reason={debit_result.get('error')}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Payment processing failed: {debit_result.get('error')}. Please contact support.",
+            )
         
         # Save to database
         generated_image = GeneratedImage(
@@ -495,6 +502,11 @@ async def purchase_credits(
             wallet.balance -= cost_in_rupees
             wallet.total_spent += cost_in_rupees
 
+            # Generate unique reference_id with timestamp to avoid collisions
+            if not idempotency_key:
+                unique_suffix = str(uuid.uuid4())[:8]
+                ref_id = f"wallet-purchase-{current_user.id}-{int(cost_in_rupees)}-{unique_suffix}"
+
             txn = WalletTransaction(
                 wallet_id=wallet.id,
                 type=TransactionType.DEBIT,
@@ -503,7 +515,7 @@ async def purchase_credits(
                 balance_before=balance_before,
                 balance_after=wallet.balance,
                 description=f"Studio credits purchase ({amount} credits)",
-                reference_id=ref_id if idempotency_key else f"wallet-purchase-{current_user.id}-{int(cost_in_rupees)}",
+                reference_id=ref_id,
             )
             db.add(txn)
 

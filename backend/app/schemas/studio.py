@@ -284,8 +284,8 @@ class VerifyPurchaseResponse(BaseModel):
     new_balance: float
 
 
-# Admin - Templates
-class ImageTemplateCreate(BaseModel):
+# Admin - Templates (renamed to avoid shadowing earlier definition)
+class AdminImageTemplateCreate(BaseModel):
     title: str = Field(..., min_length=5, max_length=255)
     category_id: int
     prompt_text: str = Field(..., min_length=20, max_length=1000)
@@ -293,32 +293,33 @@ class ImageTemplateCreate(BaseModel):
     thumbnail_url: Optional[str] = None
 
 
-class ImageTemplateResponse(BaseModel):
+class AdminImageTemplateResponse(BaseModel):
     id: int
     title: str
     category_id: int
     prompt_text: str
     is_active: bool
     created_at: datetime
-    
+    category_name: Optional[str] = None  # Added for enrichment
+
     class Config:
         from_attributes = True
 
 
-# Admin - Categories
-class ImageCategoryCreate(BaseModel):
+# Admin - Categories (renamed to avoid shadowing earlier definition)
+class AdminImageCategoryCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=100)
     description: Optional[str] = None
     display_order: int = 0
 
 
-class ImageCategoryResponse(BaseModel):
+class AdminImageCategoryResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
     display_order: int
     is_active: bool
-    
+
     class Config:
         from_attributes = True
 

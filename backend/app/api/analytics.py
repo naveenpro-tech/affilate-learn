@@ -140,7 +140,7 @@ async def get_post_analytics(
     from app.models.comment import Comment
     comments_count = db.query(func.count(Comment.id)).filter(
         Comment.post_id == post_id,
-        Comment.is_deleted == False
+        ~Comment.is_deleted
     ).scalar()
     
     return {

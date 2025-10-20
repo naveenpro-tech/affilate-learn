@@ -184,14 +184,29 @@ Complete guide for deploying the application to production.
 
 ## Environment Variables
 
+> **🚨 CRITICAL SECURITY WARNING**
+>
+> **NEVER commit real secrets to version control!**
+>
+> The values below are **placeholders only**. Real secrets must be:
+> - Stored in `.env` files (ensure `.env` is in `.gitignore`)
+> - Set as environment variables in your CI/CD platform (Railway, Render, Vercel, etc.)
+> - Managed via secrets managers (AWS Secrets Manager, GitHub Secrets, HashiCorp Vault)
+>
+> **If you accidentally commit secrets:**
+> 1. **Immediately revoke/rotate** them in the provider's console
+> 2. Remove from git history using `git filter-repo` or BFG Repo-Cleaner
+> 3. Generate new keys and store them securely
+> 4. Never reuse compromised credentials
+
 ### Backend (.env)
 
 ```bash
 # Database
-DATABASE_URL=postgresql://user:password@host:port/database
+DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<database>
 
-# Security
-SECRET_KEY=your-super-secret-key-min-32-chars
+# Security (Generate with: openssl rand -hex 32)
+SECRET_KEY=<GENERATE_NEW_SECRET_KEY_MIN_32_CHARS>
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
@@ -199,17 +214,17 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ALLOWED_ORIGINS=https://your-frontend.vercel.app,https://www.yourdomain.com
 
 # Email (SendGrid)
-SENDGRID_API_KEY=your-sendgrid-api-key
+SENDGRID_API_KEY=<YOUR_SENDGRID_API_KEY>
 FROM_EMAIL=noreply@yourdomain.com
 
 # Payment (Razorpay)
-RAZORPAY_KEY_ID=your-razorpay-key-id
-RAZORPAY_KEY_SECRET=your-razorpay-key-secret
+RAZORPAY_KEY_ID=<YOUR_RAZORPAY_KEY_ID>
+RAZORPAY_KEY_SECRET=<YOUR_RAZORPAY_KEY_SECRET>
 
 # AI Image Generation
-OPENAI_API_KEY=your-openai-api-key
-HUGGINGFACE_API_KEY=your-huggingface-api-key
-GEMINI_API_KEY=your-gemini-api-key
+OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+HUGGINGFACE_API_KEY=<YOUR_HUGGINGFACE_TOKEN>
+GEMINI_API_KEY=<YOUR_GOOGLE_API_KEY>
 
 # Image Generation Settings
 IMAGEGEN_PROVIDER=auto
@@ -217,7 +232,7 @@ IMAGEGEN_MODEL_ID=dall-e-3
 IMAGEGEN_API_BASE=https://api.openai.com/v1
 
 # Sentry (Optional - for error tracking)
-SENTRY_DSN=your-sentry-dsn
+SENTRY_DSN=<YOUR_SENTRY_DSN>
 
 # Environment
 ENVIRONMENT=production

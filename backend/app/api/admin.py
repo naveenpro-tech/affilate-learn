@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
+from datetime import datetime
 import os
 import uuid
 from pathlib import Path
@@ -19,8 +20,8 @@ from app.models.course import Course
 from app.models.video import Video
 from app.models.studio import ImageCategory, ImageTemplate, GeneratedImage, CommunityPost, PostReport
 from app.schemas.studio import (
-    ImageCategoryCreate, ImageCategoryUpdate, ImageCategoryResponse,
-    ImageTemplateCreate, ImageTemplateUpdate, ImageTemplateResponse,
+    AdminImageCategoryCreate, ImageCategoryUpdate, AdminImageCategoryResponse,
+    AdminImageTemplateCreate, ImageTemplateUpdate, AdminImageTemplateResponse,
 )
 
 router = APIRouter()
@@ -102,11 +103,11 @@ def get_admin_dashboard(
 
     # Studio revenue (credits purchased)
     from app.models.studio import CreditLedger
-    credits_purchased = db.query(func.sum(CreditLedger.amount)).filter(
-        CreditLedger.transaction_type == 'purchase'
+    credits_purchased = db.query(func.sum(CreditLedger.delta)).filter(
+        CreditLedger.reason == 'purchase'
     ).scalar() or 0
-    credits_spent = db.query(func.sum(CreditLedger.amount)).filter(
-        CreditLedger.transaction_type == 'generation'
+    credits_spent = db.query(func.sum(CreditLedger.delta)).filter(
+        CreditLedger.reason == 'generation'
     ).scalar() or 0
 
     return {
@@ -794,9 +795,9 @@ def get_studio_stats(
 
 
 # Categories Management
-@router.post("/studio/categories", response_model=ImageCategoryResponse)
+@router.post("/studio/categories", response_model=AdminImageCategoryResponse)
 def create_category(
-    category: ImageCategoryCreate,
+    category: AdminImageCategoryCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
@@ -820,7 +821,7 @@ def create_category(
     return db_category
 
 
-@router.put("/studio/categories/{category_id}", response_model=ImageCategoryResponse)
+@router.put("/studio/categories/{category_id}", response_model=AdminImageCategoryResponse)
 def update_category(
     category_id: int,
     category: ImageCategoryUpdate,
@@ -873,9 +874,9 @@ def delete_category(
 
 
 # Templates Management
-@router.post("/studio/templates", response_model=ImageTemplateResponse)
+@router.post("/studio/templates", response_model=AdminImageTemplateResponse)
 def create_template(
-    template: ImageTemplateCreate,
+    template: AdminImageTemplateCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
@@ -899,13 +900,15 @@ def create_template(
     db.commit()
     db.refresh(db_template)
 
-    # Enrich with category name
-    db_template.category_name = category.name
+    # Return response with category name included
+    response_data = AdminImageTemplateResponse.from_orm(db_template)
+    if category:
+        response_data.category_name = category.name
 
-    return db_template
+    return response_data
 
 
-@router.put("/studio/templates/{template_id}", response_model=ImageTemplateResponse)
+@router.put("/studio/templates/{template_id}", response_model=AdminImageTemplateResponse)
 def update_template(
     template_id: int,
     template: ImageTemplateUpdate,
@@ -931,11 +934,12 @@ def update_template(
     db.commit()
     db.refresh(db_template)
 
-    # Enrich with category name
+    # Return response with category name included
+    response_data = AdminImageTemplateResponse.from_orm(db_template)
     if db_template.category:
-        db_template.category_name = db_template.category.name
+        response_data.category_name = db_template.category.name
 
-    return db_template
+    return response_data
 
 
 @router.delete("/studio/templates/{template_id}")
@@ -1032,15 +1036,15 @@ def get_all_reports(
             'id': report.id,
             'post_id': report.post_id,
             'post_title': post.title if post else None,
-            'post_image_url': post.image_url if post else None,
+            'post_image_url': post.image.image_url if (post and post.image) else None,
             'post_is_hidden': post.is_hidden if post else False,
             'reporter_id': report.user_id,
-            'reporter_name': reporter.name if reporter else 'Unknown',
+            'reporter_name': reporter.full_name if reporter else 'Unknown',
             'reason': report.reason,
             'description': report.description,
             'status': report.status,
             'action_taken': report.action_taken,
-            'acted_by_name': admin.name if admin else None,
+            'acted_by_name': admin.full_name if admin else None,
             'created_at': report.created_at.isoformat(),
             'updated_at': report.updated_at.isoformat(),
         })

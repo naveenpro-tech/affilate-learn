@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc
 from typing import List
 import logging
@@ -95,24 +95,23 @@ def get_comments(
             detail="Post not found"
         )
     
-    # Get comments
-    query = db.query(Comment).join(User).filter(
+    # Get comments with eager loading of user relationship
+    query = db.query(Comment).options(joinedload(Comment.user)).filter(
         Comment.post_id == post_id,
         Comment.is_deleted == False
     ).order_by(desc(Comment.created_at))
-    
+
     total = query.count()
     comments = query.offset(skip).limit(limit).all()
-    
-    # Build responses
+
+    # Build responses using the eagerly loaded user relationship
     items = []
     for comment in comments:
-        user = db.query(User).filter(User.id == comment.user_id).first()
         items.append(CommentResponse(
             id=comment.id,
             post_id=comment.post_id,
             user_id=comment.user_id,
-            user_name=user.username if user else "Unknown",
+            user_name=comment.user.username if comment.user else "Unknown",
             text=comment.text,
             created_at=comment.created_at,
             updated_at=comment.updated_at,

@@ -69,8 +69,16 @@ def main():
             ("Affiliate Marketing Blueprint", 3, "End-to-end system to earn via affiliate marketing.", "https://images.unsplash.com/photo-1551288049-bebda4e38f71", 5),
         ]
 
+        # Validate that package IDs 1, 2, 3 exist
+        required_package_ids = {1, 2, 3}
+        existing_package_ids = {pkg.id for pkg in packages}
+        missing_ids = required_package_ids - existing_package_ids
+        if missing_ids:
+            print(f"Error: Required package IDs {missing_ids} not found. Please create packages 1, 2, 3 first.")
+            return
+
         created_courses = []
-        for idx, (title, pkg_id, desc, thumb, order) in enumerate(courses_data, start=1):
+        for title, pkg_id, desc, thumb, order in courses_data:
             course = upsert_course(db, title, pkg_id, desc, thumb, order)
             created_courses.append(course)
 

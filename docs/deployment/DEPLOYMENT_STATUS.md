@@ -44,9 +44,9 @@ typescript: {
 **File Changed**: `backend/app/main.py`
 - Added `lifespan` event handler
 - Automatically creates admin user on startup if it doesn't exist
-- Admin credentials:
-  - Email: naveenvide@gmail.com
-  - Password: admin123
+- **Admin credentials:** Stored in your secrets manager — see deployment playbook
+
+> **⚠️ SECURITY WARNING:** Rotate/change default credentials immediately after first login. Never commit plaintext credentials to version control.
 
 ---
 

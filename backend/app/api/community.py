@@ -645,7 +645,7 @@ def get_user_profile(
 
         return {
             'user_id': user.id,
-            'user_name': user.name,
+            'user_name': user.full_name,
             'total_posts': total_posts,
             'total_likes_received': total_likes,
             'total_remixes': total_remixes,
@@ -690,9 +690,9 @@ def get_user_posts(
 
             items.append({
                 'id': post.id,
-                'image_url': post.image_url,
+                'image_url': post.image.image_url if post.image else None,
                 'title': post.title,
-                'author_name': user.name if user else 'Unknown',
+                'author_name': user.full_name if user else 'Unknown',
                 'category_name': category.name if category else None,
                 'likes_count': post.likes_count,
                 'reuse_count': post.reuse_count,
