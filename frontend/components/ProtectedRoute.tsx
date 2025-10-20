@@ -14,9 +14,15 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requireAdmin = false, useLayout = true }: ProtectedRouteProps) {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const { isAuthenticated, isLoading, isInitialized, user } = useAuthStore();
 
   useEffect(() => {
+    // CRITICAL FIX: Only redirect if auth has been initialized
+    // This prevents redirect during initial auth check from localStorage
+    if (!isInitialized) {
+      return;
+    }
+
     if (!isLoading && !isAuthenticated) {
       router.push('/login');
     }
@@ -25,9 +31,10 @@ export default function ProtectedRoute({ children, requireAdmin = false, useLayo
       toast.error('Access denied. Admin privileges required.');
       router.push('/dashboard');
     }
-  }, [isAuthenticated, isLoading, requireAdmin, user, router]);
+  }, [isAuthenticated, isLoading, isInitialized, requireAdmin, user, router]);
 
-  if (isLoading) {
+  // Show loading screen if auth is not initialized or still loading
+  if (!isInitialized || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

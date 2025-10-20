@@ -192,6 +192,18 @@ export default function AdminDashboardPage() {
               <div className="font-semibold text-neutral-900 group-hover:text-warning-600 transition-colors">View Analytics</div>
               <div className="text-sm text-neutral-600">Track platform metrics</div>
             </motion.button>
+
+            <motion.button
+              variants={itemVariants}
+              onClick={() => router.push('/admin/studio')}
+              className="bg-white p-6 rounded-xl shadow-soft hover:shadow-medium transition-all text-left group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div className="text-3xl mb-3">✨</div>
+              <div className="font-semibold text-neutral-900 group-hover:text-purple-600 transition-colors">Studio Management</div>
+              <div className="text-sm text-neutral-600">Manage templates & categories</div>
+            </motion.button>
           </motion.div>
 
           {/* Recent Activity */}

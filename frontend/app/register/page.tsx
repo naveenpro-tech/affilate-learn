@@ -137,7 +137,12 @@ export default function RegisterPage() {
 
       router.push('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Registration failed');
+      const message = typeof error?.normalizedMessage === 'string'
+        ? error.normalizedMessage
+        : (error?.response?.data?.detail || 'Registration failed');
+      // Ensure string
+      const safe = typeof message === 'string' ? message : JSON.stringify(message);
+      toast.error(safe);
     }
   };
 

@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
+import os
+import uuid
+from pathlib import Path
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_admin_user
@@ -14,6 +17,11 @@ from app.models.commission import Commission
 from app.models.payout import Payout
 from app.models.course import Course
 from app.models.video import Video
+from app.models.studio import ImageCategory, ImageTemplate, GeneratedImage, CommunityPost, PostReport
+from app.schemas.studio import (
+    ImageCategoryCreate, ImageCategoryUpdate, ImageCategoryResponse,
+    ImageTemplateCreate, ImageTemplateUpdate, ImageTemplateResponse,
+)
 
 router = APIRouter()
 
@@ -82,7 +90,25 @@ def get_admin_dashboard(
     published_courses = db.query(Course).filter(Course.is_published == True).count()
     total_videos = db.query(Video).count()
     published_videos = db.query(Video).filter(Video.is_published == True).count()
-    
+
+    # Studio statistics
+    total_images = db.query(GeneratedImage).count()
+    successful_images = db.query(GeneratedImage).filter(GeneratedImage.status == 'succeeded').count()
+    total_posts = db.query(CommunityPost).count()
+    public_posts = db.query(CommunityPost).filter(CommunityPost.visibility == 'public').count()
+    total_likes = db.query(func.sum(CommunityPost.likes_count)).scalar() or 0
+    total_reports = db.query(PostReport).count()
+    pending_reports = db.query(PostReport).filter(PostReport.status == 'pending').count()
+
+    # Studio revenue (credits purchased)
+    from app.models.studio import CreditLedger
+    credits_purchased = db.query(func.sum(CreditLedger.amount)).filter(
+        CreditLedger.transaction_type == 'purchase'
+    ).scalar() or 0
+    credits_spent = db.query(func.sum(CreditLedger.amount)).filter(
+        CreditLedger.transaction_type == 'generation'
+    ).scalar() or 0
+
     return {
         'users': {
             'total': total_users,
@@ -117,6 +143,17 @@ def get_admin_dashboard(
             'published_courses': published_courses,
             'videos': total_videos,
             'published_videos': published_videos
+        },
+        'studio': {
+            'total_images': total_images,
+            'successful_images': successful_images,
+            'total_posts': total_posts,
+            'public_posts': public_posts,
+            'total_likes': total_likes,
+            'total_reports': total_reports,
+            'pending_reports': pending_reports,
+            'credits_purchased': credits_purchased,
+            'credits_spent': abs(credits_spent),
         }
     }
 
@@ -698,4 +735,439 @@ def complete_payout(
         'status': payout.status,
         'message': 'Payout completed successfully'
     }
+
+
+# ============================================================================
+# ADMIN STUDIO MANAGEMENT
+# ============================================================================
+
+@router.get("/studio/stats")
+def get_studio_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Get studio usage statistics"""
+    total_images = db.query(GeneratedImage).count()
+    succeeded_images = db.query(GeneratedImage).filter(
+        GeneratedImage.status == 'succeeded'
+    ).count()
+    failed_images = db.query(GeneratedImage).filter(
+        GeneratedImage.status == 'failed'
+    ).count()
+
+    total_templates = db.query(ImageTemplate).count()
+    active_templates = db.query(ImageTemplate).filter(
+        ImageTemplate.is_active == True
+    ).count()
+
+    total_categories = db.query(ImageCategory).count()
+    active_categories = db.query(ImageCategory).filter(
+        ImageCategory.is_active == True
+    ).count()
+
+    # Get recent generations
+    recent_generations = db.query(GeneratedImage).order_by(
+        GeneratedImage.created_at.desc()
+    ).limit(10).all()
+
+    return {
+        'total_images': total_images,
+        'succeeded_images': succeeded_images,
+        'failed_images': failed_images,
+        'total_templates': total_templates,
+        'active_templates': active_templates,
+        'total_categories': total_categories,
+        'active_categories': active_categories,
+        'recent_generations': [
+            {
+                'id': img.id,
+                'user_id': img.user_id,
+                'prompt': img.prompt_text[:50] + '...' if len(img.prompt_text) > 50 else img.prompt_text,
+                'provider': img.provider,
+                'status': img.status,
+                'credits_spent': img.credits_spent,
+                'created_at': img.created_at.isoformat()
+            }
+            for img in recent_generations
+        ]
+    }
+
+
+# Categories Management
+@router.post("/studio/categories", response_model=ImageCategoryResponse)
+def create_category(
+    category: ImageCategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Create a new image category"""
+    # Check if category name already exists
+    existing = db.query(ImageCategory).filter(
+        ImageCategory.name == category.name
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Category with this name already exists"
+        )
+
+    db_category = ImageCategory(**category.dict())
+    db.add(db_category)
+    db.commit()
+    db.refresh(db_category)
+
+    return db_category
+
+
+@router.put("/studio/categories/{category_id}", response_model=ImageCategoryResponse)
+def update_category(
+    category_id: int,
+    category: ImageCategoryUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Update an image category"""
+    db_category = db.query(ImageCategory).filter(
+        ImageCategory.id == category_id
+    ).first()
+
+    if not db_category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Category not found"
+        )
+
+    # Update only provided fields
+    update_data = category.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_category, field, value)
+
+    db.commit()
+    db.refresh(db_category)
+
+    return db_category
+
+
+@router.delete("/studio/categories/{category_id}")
+def delete_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Deactivate a category (soft delete)"""
+    db_category = db.query(ImageCategory).filter(
+        ImageCategory.id == category_id
+    ).first()
+
+    if not db_category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Category not found"
+        )
+
+    db_category.is_active = False
+    db.commit()
+
+    return {"message": "Category deactivated successfully"}
+
+
+# Templates Management
+@router.post("/studio/templates", response_model=ImageTemplateResponse)
+def create_template(
+    template: ImageTemplateCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Create a new image template"""
+    # Verify category exists
+    category = db.query(ImageCategory).filter(
+        ImageCategory.id == template.category_id
+    ).first()
+
+    if not category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Category not found"
+        )
+
+    db_template = ImageTemplate(
+        **template.dict(),
+        created_by=current_user.id
+    )
+    db.add(db_template)
+    db.commit()
+    db.refresh(db_template)
+
+    # Enrich with category name
+    db_template.category_name = category.name
+
+    return db_template
+
+
+@router.put("/studio/templates/{template_id}", response_model=ImageTemplateResponse)
+def update_template(
+    template_id: int,
+    template: ImageTemplateUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Update an image template"""
+    db_template = db.query(ImageTemplate).filter(
+        ImageTemplate.id == template_id
+    ).first()
+
+    if not db_template:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found"
+        )
+
+    # Update only provided fields
+    update_data = template.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_template, field, value)
+
+    db.commit()
+    db.refresh(db_template)
+
+    # Enrich with category name
+    if db_template.category:
+        db_template.category_name = db_template.category.name
+
+    return db_template
+
+
+@router.delete("/studio/templates/{template_id}")
+def delete_template(
+    template_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Deactivate a template (soft delete)"""
+    db_template = db.query(ImageTemplate).filter(
+        ImageTemplate.id == template_id
+    ).first()
+
+    if not db_template:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Template not found"
+        )
+
+    db_template.is_active = False
+    db.commit()
+
+    return {"message": "Template deactivated successfully"}
+
+
+@router.post("/studio/upload-thumbnail")
+async def upload_thumbnail(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Upload a thumbnail image for templates"""
+    # Validate file type
+    if not file.content_type or not file.content_type.startswith('image/'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must be an image"
+        )
+
+    # Validate file size (max 5MB)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File size must be less than 5MB"
+        )
+
+    # Create thumbnails directory if it doesn't exist
+    thumbnails_dir = Path("app/static/thumbnails")
+    thumbnails_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate unique filename
+    file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+    file_path = thumbnails_dir / unique_filename
+
+    # Save file
+    with open(file_path, 'wb') as f:
+        f.write(contents)
+
+    # Return URL
+    url = f"/static/thumbnails/{unique_filename}"
+    return {"url": url}
+
+
+# ============================================================================
+# ADMIN MODERATION PANEL
+# ============================================================================
+
+@router.get("/studio/moderation/reports")
+def get_all_reports(
+    status_filter: str = None,  # open, closed, resolved, all
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Get all reported posts with filtering"""
+    query = db.query(PostReport).join(CommunityPost).join(User, PostReport.user_id == User.id)
+
+    if status_filter and status_filter != 'all':
+        query = query.filter(PostReport.status == status_filter)
+
+    total = query.count()
+    reports = query.order_by(PostReport.created_at.desc()).offset(skip).limit(limit).all()
+
+    # Enrich with post and user data
+    items = []
+    for report in reports:
+        post = report.post
+        reporter = report.reporter
+        admin = report.admin if report.acted_by else None
+
+        items.append({
+            'id': report.id,
+            'post_id': report.post_id,
+            'post_title': post.title if post else None,
+            'post_image_url': post.image_url if post else None,
+            'post_is_hidden': post.is_hidden if post else False,
+            'reporter_id': report.user_id,
+            'reporter_name': reporter.name if reporter else 'Unknown',
+            'reason': report.reason,
+            'description': report.description,
+            'status': report.status,
+            'action_taken': report.action_taken,
+            'acted_by_name': admin.name if admin else None,
+            'created_at': report.created_at.isoformat(),
+            'updated_at': report.updated_at.isoformat(),
+        })
+
+    return {
+        'items': items,
+        'total': total,
+        'skip': skip,
+        'limit': limit
+    }
+
+
+@router.get("/studio/moderation/stats")
+def get_moderation_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Get moderation statistics"""
+    total_reports = db.query(PostReport).count()
+    open_reports = db.query(PostReport).filter(PostReport.status == 'open').count()
+    closed_reports = db.query(PostReport).filter(PostReport.status == 'closed').count()
+    resolved_reports = db.query(PostReport).filter(PostReport.status == 'resolved').count()
+    hidden_posts = db.query(CommunityPost).filter(CommunityPost.is_hidden == True).count()
+
+    return {
+        'total_reports': total_reports,
+        'open_reports': open_reports,
+        'closed_reports': closed_reports,
+        'resolved_reports': resolved_reports,
+        'hidden_posts': hidden_posts
+    }
+
+
+@router.post("/studio/moderation/posts/{post_id}/hide")
+def hide_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Hide a community post"""
+    post = db.query(CommunityPost).filter(CommunityPost.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    post.is_hidden = True
+    db.commit()
+
+    return {"message": "Post hidden successfully", "post_id": post_id}
+
+
+@router.post("/studio/moderation/posts/{post_id}/unhide")
+def unhide_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Unhide a community post"""
+    post = db.query(CommunityPost).filter(CommunityPost.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    post.is_hidden = False
+    db.commit()
+
+    return {"message": "Post unhidden successfully", "post_id": post_id}
+
+
+@router.delete("/studio/moderation/posts/{post_id}")
+def delete_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Delete a community post permanently"""
+    post = db.query(CommunityPost).filter(CommunityPost.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    db.delete(post)
+    db.commit()
+
+    return {"message": "Post deleted successfully", "post_id": post_id}
+
+
+@router.put("/studio/moderation/reports/{report_id}/resolve")
+def resolve_report(
+    report_id: int,
+    action_taken: str,  # hide, delete, warn, no_action
+    notes: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Resolve a report with action"""
+    report = db.query(PostReport).filter(PostReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    report.status = 'resolved'
+    report.action_taken = action_taken
+    report.acted_by = current_user.id
+    report.updated_at = datetime.utcnow()
+
+    db.commit()
+
+    return {
+        "message": "Report resolved successfully",
+        "report_id": report_id,
+        "action_taken": action_taken
+    }
+
+
+@router.put("/studio/moderation/reports/{report_id}/close")
+def close_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Close a report without action"""
+    report = db.query(PostReport).filter(PostReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    report.status = 'closed'
+    report.acted_by = current_user.id
+    report.updated_at = datetime.utcnow()
+
+    db.commit()
+
+    return {"message": "Report closed successfully", "report_id": report_id}
 

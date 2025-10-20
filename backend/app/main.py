@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from starlette.middleware.base import BaseHTTPMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -10,6 +11,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 from contextlib import asynccontextmanager
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -153,7 +155,7 @@ async def sentry_test():
 
 
 # Import and include routers
-from app.api import auth, packages, payments, referrals, commissions, courses, payouts, admin, bank_details, profile, modules, certificates, notifications, wallet, course_purchases, video_progress, email_verification
+from app.api import auth, packages, payments, referrals, commissions, courses, payouts, admin, bank_details, profile, modules, certificates, notifications, wallet, course_purchases, video_progress, email_verification, studio, community, comments, analytics
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(email_verification.router, prefix="/api/email-verification", tags=["Email Verification"])
@@ -172,6 +174,18 @@ app.include_router(payouts.router, prefix="/api/payouts", tags=["Payouts"])
 app.include_router(bank_details.router, prefix="/api/bank-details", tags=["Bank Details"])
 app.include_router(profile.router, prefix="/api/profile", tags=["Profile"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
+app.include_router(studio.router, tags=["Community AI Studio"])
+app.include_router(community.router, prefix="/api/studio", tags=["Community Features"])
+app.include_router(comments.router, prefix="/api/studio", tags=["Comments"])
+app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
+
+# Mount static files directory for serving generated images
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    logger.info(f"✅ Static files mounted: {static_dir}")
+else:
+    logger.warning(f"⚠️  Static directory not found: {static_dir}")
 
 
 if __name__ == "__main__":

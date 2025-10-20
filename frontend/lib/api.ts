@@ -1,12 +1,17 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://affilate-learn.onrender.com';
+// Use localhost for development, production URL for production
+const API_URL = process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:8000'
+    : 'https://affilate-learn.onrender.com');
 
 // Debug: Log the API URL being used
 if (typeof window !== 'undefined') {
   console.log('🔧 API Configuration:', {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     API_URL: API_URL,
+    hostname: window.location.hostname,
     environment: process.env.NODE_ENV
   });
 }
@@ -47,6 +52,31 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+
+    // Normalize error message to avoid passing objects to UI toasts
+    const data = error.response?.data;
+    let message: string = 'Request failed';
+
+    if (typeof data === 'string') {
+      message = data;
+    } else if (data?.detail) {
+      // FastAPI error convention
+      if (typeof data.detail === 'string') {
+        message = data.detail;
+      } else if (Array.isArray(data.detail)) {
+        // Pydantic validation error array
+        message = data.detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ');
+      } else if (typeof data.detail === 'object') {
+        message = data.detail.msg || JSON.stringify(data.detail);
+      }
+    } else if (data?.message) {
+      message = data.message;
+    } else if (error.message) {
+      message = error.message;
+    }
+
+    // Attach a safe string message
+    error.normalizedMessage = message;
     return Promise.reject(error);
   }
 );
@@ -247,6 +277,17 @@ export const adminAPI = {
   getTopic: (moduleId: number, topicId: number) => api.get(`/api/modules/${moduleId}/topics/${topicId}`),
   updateTopic: (moduleId: number, topicId: number, data: any) => api.put(`/api/modules/${moduleId}/topics/${topicId}`, data),
   deleteTopic: (moduleId: number, topicId: number) => api.delete(`/api/modules/${moduleId}/topics/${topicId}`),
+
+  // Studio Moderation (Phase 3)
+  getModerationReports: (statusFilter?: string, skip: number = 0, limit: number = 50) =>
+    api.get('/api/admin/studio/moderation/reports', { params: { status_filter: statusFilter, skip, limit } }),
+  getModerationStats: () => api.get('/api/admin/studio/moderation/stats'),
+  hidePost: (postId: number) => api.post(`/api/admin/studio/moderation/posts/${postId}/hide`),
+  unhidePost: (postId: number) => api.post(`/api/admin/studio/moderation/posts/${postId}/unhide`),
+  deletePost: (postId: number) => api.delete(`/api/admin/studio/moderation/posts/${postId}`),
+  resolveReport: (reportId: number, actionTaken: string, notes?: string) =>
+    api.put(`/api/admin/studio/moderation/reports/${reportId}/resolve`, null, { params: { action_taken: actionTaken, notes } }),
+  closeReport: (reportId: number) => api.put(`/api/admin/studio/moderation/reports/${reportId}/close`),
 };
 
 // Video Progress API
@@ -256,5 +297,138 @@ export const videoProgressAPI = {
   getCourseProgress: (courseId: number) => api.get(`/api/video-progress/course/${courseId}`),
   getMyProgress: () => api.get('/api/video-progress/my-progress'),
   markComplete: (topicId: number) => api.post(`/api/video-progress/mark-complete/${topicId}`),
+};
+
+// Community AI Studio API
+export const studioAPI = {
+  // Templates & Categories
+  getCategories: () => api.get('/api/studio/categories'),
+  getTemplates: (categoryId?: number) =>
+    api.get('/api/studio/templates', { params: categoryId ? { category_id: categoryId } : {} }),
+  getTemplate: (templateId: number) =>
+    api.get(`/api/studio/templates/${templateId}`),
+
+  // Prompt Enhancement
+  enhancePrompt: (prompt: string) =>
+    api.post('/api/studio/enhance-prompt', { prompt }),
+
+  // Image Generation
+  generateImage: (
+    prompt: string,
+    tier: string = 'standard',
+    templateId?: number,
+    watermark: boolean = true,
+    enhancePrompt: boolean = false,
+    provider?: string
+  ) =>
+    api.post('/api/studio/generate', {
+      prompt,
+      tier,
+      template_id: templateId,
+      watermark,
+      enhance_prompt: enhancePrompt,
+      provider,
+    }),
+
+  // Check generation status
+  getGenerationStatus: (jobId: string) =>
+    api.get(`/api/studio/generate/${jobId}`),
+
+  // My Creations
+  getMyCreations: (cursor: number = 0, limit: number = 20) =>
+    api.get('/api/studio/my-creations', { params: { cursor, limit } }),
+
+  deleteImage: (imageId: number) =>
+    api.delete(`/api/studio/my-creations/${imageId}`),
+
+  // Credits
+  getCreditsBalance: () => api.get('/api/studio/credits/balance'),
+  purchaseCredits: (amount: number, idempotencyKey?: string) =>
+    api.post('/api/studio/credits/purchase', null, { params: { amount, idempotency_key: idempotencyKey } }),
+
+  // Community Posts (Phase 2)
+  publishPost: (imageId: number, title: string, description: string, categoryId: number, tags?: string[], visibility: string = 'public') =>
+    api.post('/api/studio/community/publish', {
+      image_id: imageId,
+      title,
+      description,
+      category_id: categoryId,
+      tags,
+      visibility,
+    }),
+
+  getCommunityFeed: (
+    cursor: number = 0,
+    limit: number = 20,
+    categoryId?: number,
+    search?: string,
+    tier?: string,
+    provider?: string,
+    sortBy?: string
+  ) => {
+    const params: any = { cursor, limit };
+    if (categoryId) params.category_id = categoryId;
+    if (search) params.search = search;
+    if (tier) params.tier = tier;
+    if (provider) params.provider = provider;
+    if (sortBy) params.sort_by = sortBy;
+    return api.get('/api/studio/community/feed', { params });
+  },
+
+  getPostDetails: (postId: number) =>
+    api.get(`/api/studio/community/posts/${postId}`),
+
+  likePost: (postId: number) =>
+    api.post(`/api/studio/community/posts/${postId}/like`),
+
+  reportPost: (postId: number, reason: string, description?: string) =>
+    api.post(`/api/studio/community/posts/${postId}/report`, { reason, description }),
+
+  getRemixPrompt: (postId: number) =>
+    api.get(`/api/studio/community/posts/${postId}/remix`),
+
+  recordRemix: (postId: number, generatedImageId: number) =>
+    api.post(`/api/studio/community/posts/${postId}/remix/record`, { generated_image_id: generatedImageId }),
+
+  // User Profiles (Phase 3)
+  getUserProfile: (userId: number) =>
+    api.get(`/api/studio/community/users/${userId}/profile`),
+
+  getUserPosts: (userId: number, cursor: number = 0, limit: number = 20) =>
+    api.get(`/api/studio/community/users/${userId}/posts`, { params: { cursor, limit } }),
+
+  // Comments (Phase 4)
+  getComments: (postId: number, skip: number = 0, limit: number = 50) =>
+    api.get(`/api/studio/posts/${postId}/comments`, { params: { skip, limit } }),
+
+  createComment: (postId: number, text: string) =>
+    api.post(`/api/studio/posts/${postId}/comments`, { text }),
+
+  updateComment: (commentId: number, text: string) =>
+    api.put(`/api/studio/comments/${commentId}`, { text }),
+
+  deleteComment: (commentId: number) =>
+    api.delete(`/api/studio/comments/${commentId}`),
+
+  getCommentCount: (postId: number) =>
+    api.get(`/api/studio/posts/${postId}/comments/count`),
+};
+
+// Notification API
+export const notificationAPI = {
+  getNotifications: (cursor: number = 0, limit: number = 20, unreadOnly: boolean = false) =>
+    api.get('/api/notifications/', { params: { cursor, limit, unread_only: unreadOnly } }),
+
+  getStats: () =>
+    api.get('/api/notifications/stats'),
+
+  markAsRead: (notificationId: number) =>
+    api.put(`/api/notifications/${notificationId}/read`),
+
+  markAllAsRead: () =>
+    api.post('/api/notifications/mark-all-read'),
+
+  deleteNotification: (notificationId: number) =>
+    api.delete(`/api/notifications/${notificationId}`),
 };
 

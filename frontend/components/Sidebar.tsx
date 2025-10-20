@@ -39,6 +39,15 @@ export default function Sidebar() {
     { href: '/dashboard', label: 'Dashboard', icon: '📊' },
     { href: '/packages', label: 'Packages', icon: '📦' },
     {
+      label: 'Creative Studio',
+      icon: '✨',
+      children: [
+        { href: '/studio', label: 'Create Images', icon: '🎨' },
+        { href: '/studio/my-creations', label: 'My Creations', icon: '🖼️' },
+        { href: '/studio/buy-credits', label: 'Buy Credits', icon: '⚡' },
+      ]
+    },
+    {
       label: 'Learning',
       icon: '📚',
       children: [

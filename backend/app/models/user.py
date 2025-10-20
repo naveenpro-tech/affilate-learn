@@ -52,7 +52,7 @@ class User(Base):
     payouts = relationship("Payout", back_populates="user")
     payments = relationship("Payment", back_populates="user")
     bank_details = relationship("BankDetails", back_populates="user", uselist=False)
-    notifications = relationship("Notification", back_populates="user")
+    notifications = relationship("Notification", foreign_keys="Notification.user_id", back_populates="user")
     wallet = relationship("Wallet", back_populates="user", uselist=False)
     
     def __repr__(self):

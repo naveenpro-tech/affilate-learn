@@ -17,6 +17,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isInitialized: boolean; // Track if initial auth check is complete
   login: (email: string, password: string) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => void;
@@ -29,6 +30,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   isLoading: false,
   isAuthenticated: false,
+  isInitialized: false, // Start as false
 
   setToken: (token: string) => {
     if (typeof window !== 'undefined') {
@@ -92,17 +94,17 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     const token = localStorage.getItem('token');
     if (!token) {
-      set({ isAuthenticated: false, user: null });
+      set({ isAuthenticated: false, user: null, isInitialized: true });
       return;
     }
 
     set({ isLoading: true, token, isAuthenticated: true });
     try {
       const response = await authAPI.getMe();
-      set({ user: response.data, isLoading: false });
+      set({ user: response.data, isLoading: false, isInitialized: true });
     } catch (error) {
       localStorage.removeItem('token');
-      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+      set({ user: null, token: null, isAuthenticated: false, isLoading: false, isInitialized: true });
     }
   },
 }));

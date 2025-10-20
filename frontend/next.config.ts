@@ -2,8 +2,23 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['res.cloudinary.com'],
+    domains: ['res.cloudinary.com', 'localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000',
+        pathname: '/static/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.railway.app',
+        pathname: '/static/**',
+      },
+    ],
   },
+  // Enable standalone output for Docker
+  output: 'standalone',
   // Disable ESLint during builds
   eslint: {
     ignoreDuringBuilds: true,

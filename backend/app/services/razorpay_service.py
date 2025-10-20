@@ -144,6 +144,12 @@ class RazorpayService:
             return False
 
 
-# Singleton instance
-razorpay_service = RazorpayService()
+# Singleton instance - use mock service if configured
+if settings.USE_RAZORPAY_MOCK:
+    from app.services.razorpay_mock_service import MockRazorpayService
+    razorpay_service = MockRazorpayService()
+    print("[RAZORPAY] Using MOCK service for development")
+else:
+    razorpay_service = RazorpayService()
+    print("[RAZORPAY] Using REAL Razorpay service")
 

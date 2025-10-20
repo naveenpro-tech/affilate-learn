@@ -16,6 +16,17 @@ from app.models.module import Module
 from app.models.topic import Topic
 from app.models.notification import Notification
 from app.models.wallet import Wallet
+from app.models.studio import (
+    ImageTemplate,
+    ImageCategory,
+    GeneratedImage,
+    CommunityPost,
+    PostLike,
+    PostReport,
+    PromptReuseEvent,
+    CreditLedger,
+    ReferralEvent,
+)
 
 __all__ = [
     "User",
@@ -35,5 +46,15 @@ __all__ = [
     "Topic",
     "Notification",
     "Wallet",
+    # Community AI Studio models
+    "ImageTemplate",
+    "ImageCategory",
+    "GeneratedImage",
+    "CommunityPost",
+    "PostLike",
+    "PostReport",
+    "PromptReuseEvent",
+    "CreditLedger",
+    "ReferralEvent",
 ]
 

@@ -48,7 +48,7 @@ def validate_referral_code(code: str, db: Session = Depends(get_db)):
 
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-@limiter.limit("5/hour")  # 5 registrations per hour per IP
+@limiter.limit("100/hour")  # Increased for testing
 def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new user and return JWT token
@@ -59,6 +59,11 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
     - Hashes password
     - Returns access token
     """
+    # Ensure notification table exists
+    from app.models.notification import Notification
+    from app.core.database import engine
+    Notification.__table__.create(bind=engine, checkfirst=True)
+
     # Check if email already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
@@ -101,6 +106,46 @@ def register(request: Request, user_data: UserCreate, db: Session = Depends(get_
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # Create wallet with sign-up bonus
+    try:
+        from app.models.wallet import Wallet, WalletTransaction, TransactionType, TransactionSource
+        from app.core.database import engine
+
+        # Ensure tables exist
+        Wallet.__table__.create(bind=engine, checkfirst=True)
+        WalletTransaction.__table__.create(bind=engine, checkfirst=True)
+
+        # Create wallet with sign-up bonus (₹10 = 10 credits)
+        signup_bonus = 10.0
+        wallet = Wallet(
+            user_id=new_user.id,
+            balance=signup_bonus,
+            total_earned=signup_bonus,
+            total_withdrawn=0.0,
+            total_spent=0.0
+        )
+        db.add(wallet)
+        db.commit()
+        db.refresh(wallet)
+
+        # Create transaction record for sign-up bonus
+        transaction = WalletTransaction(
+            wallet_id=wallet.id,
+            type=TransactionType.CREDIT,
+            source=TransactionSource.ADMIN,
+            amount=signup_bonus,
+            balance_before=0.0,
+            balance_after=signup_bonus,
+            description="Sign-up bonus",
+            reference_id=f"signup-{new_user.id}"
+        )
+        db.add(transaction)
+        db.commit()
+        logger.info(f"Sign-up bonus of ₹{signup_bonus} credited to user {new_user.id}")
+    except Exception as e:
+        logger.error(f"Failed to create wallet with sign-up bonus: {str(e)}")
+        # Continue with registration even if wallet creation fails
 
     # Create notification for referrer if referred
     if referrer:
