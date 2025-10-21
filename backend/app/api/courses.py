@@ -137,6 +137,82 @@ def get_courses(
     return result
 
 
+@router.get("/my-courses", response_model=List[CourseWithAccess])
+def get_my_courses(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get ONLY courses that the user has access to (enrolled/purchased)
+    This is the "My Courses" endpoint - shows only accessible courses
+    """
+    from app.core.database import engine
+    UserCoursePurchase.__table__.create(bind=engine, checkfirst=True)
+
+    # Get all published courses
+    all_courses = db.query(Course).filter(
+        Course.is_published == True
+    ).order_by(Course.display_order).all()
+
+    # Get user's individual course purchases
+    user_purchases = db.query(UserCoursePurchase).filter(
+        UserCoursePurchase.user_id == current_user.id,
+        UserCoursePurchase.is_active == True
+    ).all()
+    purchased_course_ids = {p.course_id for p in user_purchases}
+
+    result = []
+    for course in all_courses:
+        # Check package access
+        has_package_access = check_user_access(current_user, course, db)
+
+        # Check individual purchase
+        has_individual_access = course.id in purchased_course_ids
+
+        # Determine access type
+        has_access = has_package_access or has_individual_access
+
+        # ONLY include courses the user has access to
+        if not has_access:
+            continue
+
+        access_type = None
+        if has_package_access:
+            access_type = "package"
+        elif has_individual_access:
+            access_type = "individual"
+
+        # Count topics (new structure) - fallback to videos for backward compatibility
+        topic_count = 0
+        for module in course.modules:
+            topic_count += db.query(Topic).filter(
+                Topic.module_id == module.id,
+                Topic.is_published == True
+            ).count()
+
+        # Fallback to video count if no topics
+        if topic_count == 0:
+            topic_count = db.query(Video).filter(
+                Video.course_id == course.id,
+                Video.is_published == True
+            ).count()
+
+        # Get package name
+        package = db.query(Package).filter(Package.id == course.package_id).first()
+
+        course_data = {
+            **course.__dict__,
+            "package_name": package.name if package else None,
+            "video_count": topic_count,  # Using topic_count for consistency
+            "has_access": True,  # Always true for my-courses
+            "access_type": access_type,
+            "is_locked": False  # Always false for my-courses
+        }
+        result.append(course_data)
+
+    return result
+
+
 @router.get("/all-with-access", response_model=List[CourseWithAccess])
 def get_all_courses_with_access(
     current_user: User = Depends(get_current_user),
@@ -144,7 +220,7 @@ def get_all_courses_with_access(
 ):
     """
     Get ALL courses with access status for current user
-    Shows locked and unlocked courses
+    Shows locked and unlocked courses - for browsing/discovery
     """
     from app.core.database import engine
     UserCoursePurchase.__table__.create(bind=engine, checkfirst=True)

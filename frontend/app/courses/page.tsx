@@ -50,8 +50,8 @@ export default function CoursesPage() {
       setLoading(true);
       setError(null);
 
-      // Load courses with access info
-      const coursesResponse = await coursesAPI.getAllWithAccess();
+      // Load ONLY courses user has access to (My Courses)
+      const coursesResponse = await coursesAPI.getMyCourses();
       const coursesData = coursesResponse.data;
 
       // Load progress for all courses
@@ -95,8 +95,8 @@ export default function CoursesPage() {
         <div className="min-h-screen bg-neutral-50 py-8">
           <div className="container mx-auto px-4">
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Courses</h1>
-              <p className="text-gray-600">Loading your courses...</p>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">My Courses</h1>
+              <p className="text-gray-600">Loading your enrolled courses...</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <CardSkeleton />
@@ -141,7 +141,7 @@ export default function CoursesPage() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-neutral-900 mb-2">All Courses</h1>
+            <h1 className="text-4xl font-bold text-neutral-900 mb-2">My Courses</h1>
             {user?.current_package ? (
               <div className="text-neutral-600">
                 Your current package:{' '}
@@ -155,7 +155,7 @@ export default function CoursesPage() {
               </div>
             ) : (
               <p className="text-neutral-600">
-                Browse all courses. Purchase a package or buy individual courses to get access.
+                You don't have any active courses. Purchase a package or buy individual courses to get started.
               </p>
             )}
           </motion.div>
@@ -216,13 +216,29 @@ export default function CoursesPage() {
                 <CardContent className="py-16 text-center">
                   <div className="text-6xl mb-4">🎓</div>
                   <h2 className="text-2xl font-bold text-neutral-900 mb-2">
-                    {courses.length === 0 ? 'No Courses Available' : 'No Courses Found'}
+                    {courses.length === 0 ? 'No Enrolled Courses' : 'No Courses Found'}
                   </h2>
-                  <p className="text-neutral-600">
+                  <p className="text-neutral-600 mb-4">
                     {courses.length === 0
-                      ? 'Courses will be added soon!'
+                      ? 'You haven\'t enrolled in any courses yet. Purchase a package or buy individual courses to get started!'
                       : 'Try adjusting your search or filters'}
                   </p>
+                  {courses.length === 0 && (
+                    <div className="flex gap-4 justify-center mt-6">
+                      <button
+                        onClick={() => router.push('/packages')}
+                        className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                      >
+                        View Packages
+                      </button>
+                      <button
+                        onClick={() => router.push('/courses/browse')}
+                        className="px-6 py-3 bg-neutral-200 text-neutral-900 rounded-lg hover:bg-neutral-300 transition-colors"
+                      >
+                        Browse All Courses
+                      </button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

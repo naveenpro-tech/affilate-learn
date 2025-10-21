@@ -49,11 +49,24 @@ def get_module(
     """Get a module with its topics"""
     Module.__table__.create(bind=engine, checkfirst=True)
     Topic.__table__.create(bind=engine, checkfirst=True)
-    
+
     module = db.query(Module).filter(Module.id == module_id).first()
     if not module:
         raise HTTPException(status_code=404, detail="Module not found")
-    
+
+    # Check course access - users must have access to the course to view modules
+    course = db.query(Course).filter(Course.id == module.course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # Import check_user_access from courses API
+    from app.api.courses import check_user_access
+    if not current_user.is_admin and not check_user_access(current_user, course, db):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have access to this course"
+        )
+
     return module
 
 
@@ -185,15 +198,32 @@ def get_topic(
 ):
     """Get a specific topic"""
     Topic.__table__.create(bind=engine, checkfirst=True)
-    
+
     topic = db.query(Topic).filter(
         Topic.id == topic_id,
         Topic.module_id == module_id
     ).first()
-    
+
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
-    
+
+    # Check course access - users must have access to the course to view topics
+    module = db.query(Module).filter(Module.id == module_id).first()
+    if not module:
+        raise HTTPException(status_code=404, detail="Module not found")
+
+    course = db.query(Course).filter(Course.id == module.course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # Import check_user_access from courses API
+    from app.api.courses import check_user_access
+    if not current_user.is_admin and not check_user_access(current_user, course, db):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have access to this course"
+        )
+
     return topic
 
 

@@ -130,7 +130,8 @@ export const commissionsAPI = {
 
 export const coursesAPI = {
   getAll: () => api.get('/api/courses/'),
-  getAllWithAccess: () => api.get('/api/courses/all-with-access'),
+  getMyCourses: () => api.get('/api/courses/my-courses'), // Only courses user has access to
+  getAllWithAccess: () => api.get('/api/courses/all-with-access'), // All courses with lock status
   getById: (id: number) => api.get(`/api/courses/${id}`),
   getWithModules: (id: number) => api.get(`/api/courses/${id}/with-modules`),
   getVideo: (courseId: number, videoId: number) =>

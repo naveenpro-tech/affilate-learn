@@ -52,6 +52,7 @@ export default function Sidebar() {
       icon: '📚',
       children: [
         { href: '/courses', label: 'My Courses', icon: '📖' },
+        { href: '/courses/browse', label: 'Browse Courses', icon: '🔍' },
         { href: '/certificates', label: 'Certificates', icon: '🎓' },
       ]
     },
