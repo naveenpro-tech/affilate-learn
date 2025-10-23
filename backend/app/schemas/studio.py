@@ -95,6 +95,8 @@ class GenerateImageRequest(BaseModel):
     watermark: bool = True
     enhance_prompt: bool = False
     provider: Optional[str] = Field(default=None, pattern="^(auto|openai_dalle|huggingface|gemini_nano_banana|mock)?$")
+    source_image_url: Optional[str] = None  # For remix/style transfer
+    source_post_id: Optional[int] = None  # Track which post is being remixed
 
 
 class GenerateImageResponse(BaseModel):
@@ -156,12 +158,14 @@ class CommunityPostCard(BaseModel):
     image_url: str
     title: str
     author_name: str
+    author_avatar_url: Optional[str] = None  # Added for mobile feed
     category_name: str
     likes_count: int
     reuse_count: int
+    comments_count: int = 0  # Added for mobile feed
     user_liked: bool
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 

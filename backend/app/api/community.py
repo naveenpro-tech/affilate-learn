@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, get_current_admin_user
-from app.models import User, GeneratedImage, CommunityPost, PostLike, PostReport, PromptReuseEvent, ImageCategory
+from app.models import User, GeneratedImage, CommunityPost, PostLike, PostReport, PromptReuseEvent, ImageCategory, Profile, Comment
 from app.schemas.studio import (
     PublishPostRequest, PublishPostResponse,
     CommunityPostCard, CommunityFeedResponse, CommunityPostDetail,
@@ -206,24 +206,35 @@ async def get_community_feed(
         for post in items:
             # Get user info
             user = db.query(User).filter(User.id == post.user_id).first()
-            
+
+            # Get user profile for avatar
+            profile = db.query(Profile).filter(Profile.user_id == post.user_id).first()
+
             # Get category info
             category = db.query(ImageCategory).filter(ImageCategory.id == post.category_id).first()
-            
+
             # Check if current user liked this post
             user_liked = db.query(PostLike).filter(
                 PostLike.post_id == post.id,
                 PostLike.user_id == current_user.id
             ).first() is not None
-            
+
+            # Count comments for this post
+            comments_count = db.query(Comment).filter(
+                Comment.post_id == post.id,
+                Comment.is_deleted == False
+            ).count()
+
             result_items.append(CommunityPostCard(
                 id=post.id,
                 image_url=post.image.image_url if post.image else "",
                 title=post.title,
                 author_name=user.full_name if user else "Unknown",
+                author_avatar_url=profile.avatar_url if profile else None,
                 category_name=category.name if category else "Uncategorized",
                 likes_count=post.likes_count,
                 reuse_count=post.reuse_count,
+                comments_count=comments_count,
                 user_liked=user_liked,
                 created_at=post.created_at,
             ))

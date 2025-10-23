@@ -6,7 +6,10 @@ Endpoints for image generation, prompt enhancement, and community features
 import logging
 import uuid
 import time
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+import os
+import tempfile
+from pathlib import Path
+from fastapi import APIRouter, Depends, HTTPException, status, Request, UploadFile, File
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
@@ -22,6 +25,7 @@ from app.schemas.studio import (
 from app.services.prompt_enhancement_service import get_prompt_enhancement_service
 from app.services.image_generation_service import get_image_generation_service
 from app.services.credit_ledger_service import CreditLedgerService
+from app.services.cloudinary_service import CloudinaryService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/studio", tags=["studio"])
@@ -299,6 +303,86 @@ async def get_generation_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get generation status",
+        )
+
+
+@router.post("/upload-source-image")
+async def upload_source_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Upload a source image for remixing
+    POST /api/studio/upload-source-image
+
+    Accepts: JPEG, PNG images up to 10MB
+    Returns: {url: string, public_id: string}
+    """
+    try:
+        # Validate file type
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File must be an image (JPEG or PNG)"
+            )
+
+        # Validate file type specifically
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png']
+        if file.content_type not in allowed_types:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only JPEG and PNG images are supported"
+            )
+
+        # Read file contents
+        contents = await file.read()
+
+        # Validate file size (max 10MB)
+        max_size = 10 * 1024 * 1024  # 10MB in bytes
+        if len(contents) > max_size:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File size must be less than 10MB (current: {len(contents) / 1024 / 1024:.1f}MB)"
+            )
+
+        # Save to temporary file
+        file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp:
+            tmp.write(contents)
+            tmp_path = tmp.name
+
+        try:
+            # Upload to Cloudinary
+            cloudinary_service = CloudinaryService()
+            result = cloudinary_service.upload_image(
+                file_path=tmp_path,
+                folder=f"remix/user_{current_user.id}",
+                public_id=None  # Auto-generate unique ID
+            )
+
+            logger.info(f"Source image uploaded: user={current_user.id}, url={result['url']}")
+
+            return {
+                "url": result["url"],
+                "public_id": result["public_id"],
+                "width": result.get("width"),
+                "height": result.get("height"),
+            }
+
+        finally:
+            # Clean up temporary file
+            try:
+                os.remove(tmp_path)
+            except:
+                pass
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error uploading source image: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upload image"
         )
 
 
