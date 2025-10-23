@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { coursesAPI, coursePurchasesAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { initiatePayment } from '@/lib/razorpay';
+import { useAuthStore } from '@/store/authStore';
+
 
 declare global {
   interface Window {
@@ -28,8 +31,10 @@ interface Course {
 export default function CoursePurchasePage() {
   const router = useRouter();
   const params = useParams();
+  const { user } = useAuthStore();
+
   const courseId = parseInt(params.id as string);
-  
+
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -79,70 +84,38 @@ export default function CoursePurchasePage() {
   const handlePurchase = async () => {
     try {
       setPurchasing(true);
-      
-      // Initiate purchase
+
+      // Initiate purchase (creates Razorpay order server-side)
       const response = await coursePurchasesAPI.initiate(courseId);
-      const { order_id, amount, currency, course_title, razorpay_key } = response.data;
-      
-      // Load Razorpay script
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-      
-      script.onload = () => {
-        const options = {
-          key: razorpay_key,
-          amount: amount * 100,
-          currency: currency,
-          name: 'MLM Learning Platform',
-          description: `Purchase: ${course_title}`,
-          order_id: order_id,
-          handler: async function (response: any) {
-            try {
-              console.log('[PURCHASE] Verifying payment...', {
-                order_id: response.razorpay_order_id,
-                payment_id: response.razorpay_payment_id,
-                course_id: courseId
-              });
+      const { order_id, amount, course_title } = response.data;
 
-              // Verify payment
-              const verifyResponse = await coursePurchasesAPI.verify(
-                response.razorpay_order_id,
-                response.razorpay_payment_id,
-                response.razorpay_signature,
-                courseId
-              );
-
-              console.log('[PURCHASE] Verification successful:', verifyResponse.data);
-              toast.success('Course purchased successfully!');
-              router.push(`/courses/${courseId}/learn`);
-            } catch (error: any) {
-              console.error('[PURCHASE] Payment verification failed:', error);
-              console.error('[PURCHASE] Error response:', error.response?.data);
-              const errorMessage = error.response?.data?.detail || error.message || 'Payment verification failed';
-              toast.error(`Payment verification failed: ${errorMessage}`);
-            }
-          },
-          prefill: {
-            name: '',
-            email: '',
-            contact: ''
-          },
-          theme: {
-            color: '#667eea'
-          },
-          modal: {
-            ondismiss: function() {
-              setPurchasing(false);
-              toast.error('Payment cancelled');
-            }
+      await initiatePayment({
+        orderId: order_id,
+        amount: amount,
+        packageName: course_title,
+        userEmail: user?.email || '',
+        userPhone: user?.phone || '',
+        onSuccess: async (resp: any) => {
+          try {
+            await coursePurchasesAPI.verify(
+              resp.razorpay_order_id,
+              resp.razorpay_payment_id,
+              resp.razorpay_signature,
+              courseId
+            );
+            toast.success('Course purchased successfully!');
+            router.push(`/courses/${courseId}/learn`);
+          } catch (err: any) {
+            toast.error(err.response?.data?.detail || 'Payment verification failed');
+          } finally {
+            setPurchasing(false);
           }
-        };
-        
-        const razorpay = new window.Razorpay(options);
-        razorpay.open();
-      };
+        },
+        onFailure: (err: any) => {
+          toast.error(err.message || 'Payment failed');
+          setPurchasing(false);
+        },
+      });
     } catch (error: any) {
       console.error('Error initiating purchase:', error);
       toast.error(error.response?.data?.detail || 'Failed to initiate purchase');
@@ -244,7 +217,7 @@ export default function CoursePurchasePage() {
                       >
                         {purchasing ? 'Processing...' : '🛒 Purchase Now'}
                       </Button>
-                      
+
                       <Button
                         onClick={() => router.push('/courses')}
                         variant="outline"

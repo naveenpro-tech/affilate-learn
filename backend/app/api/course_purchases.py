@@ -66,36 +66,22 @@ def initiate_course_purchase(
             detail="You have already purchased this course"
         )
     
-    # Check if user has package access to this course
-    from app.api.courses import check_user_access
-    if check_user_access(current_user, course, db):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You already have access to this course through your package"
-        )
-    
+    # Allow individual purchase regardless of package access (as per requirements)
+
     # Get course price
     amount = course.individual_price or 199.0
     amount_in_paise = int(amount * 100)
-    
-    # Create Razorpay order
+
+    # Create Razorpay order using the same service as package purchases
     try:
-        razorpay_order = razorpay_client.order.create({
-            "amount": amount_in_paise,
-            "currency": "INR",
-            "payment_capture": 1,
-            "notes": {
-                "user_id": current_user.id,
-                "course_id": course.id,
-                "purchase_type": "individual_course"
-            }
-        })
+        receipt = f"user_{current_user.id}_course_{course.id}_{int(datetime.utcnow().timestamp())}"
+        razorpay_order = razorpay_service.create_order(amount=amount, currency="INR", receipt=receipt)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create payment order: {str(e)}"
         )
-    
+
     return {
         "order_id": razorpay_order["id"],
         "amount": amount,
@@ -149,9 +135,9 @@ def verify_course_purchase(
     
     # Get payment details from Razorpay
     try:
-        payment_details = razorpay_client.payment.fetch(razorpay_payment_id)
-        amount_paid = payment_details["amount"] / 100  # Convert paise to rupees
-    except:
+        payment_details = razorpay_service.get_payment_details(razorpay_payment_id)
+        amount_paid = (payment_details.get("amount", 0) / 100) if payment_details else (course.individual_price or 199.0)
+    except Exception:
         amount_paid = course.individual_price or 199.0
     
     # Create payment record

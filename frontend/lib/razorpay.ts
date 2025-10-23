@@ -43,8 +43,9 @@ export const initiatePayment = async ({
   onSuccess,
   onFailure,
 }: RazorpayOptions) => {
+  // Always use real Razorpay checkout flow
   const loaded = await loadRazorpay();
-  
+
   if (!loaded) {
     onFailure(new Error('Failed to load Razorpay SDK'));
     return;
