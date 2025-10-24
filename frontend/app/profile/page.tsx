@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,8 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useAuthStore } from '@/store/authStore';
 import { authAPI, profileAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { CreditCard, ShoppingBag, FileText, ArrowRight } from 'lucide-react';
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { user, fetchUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -146,6 +149,83 @@ export default function ProfilePage() {
           >
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Profile</h1>
             <p className="text-gray-600 text-lg">Manage your account information</p>
+          </motion.div>
+
+          {/* Quick Access Links */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05, duration: 0.5 }}
+            className="mb-6"
+          >
+            <Card className="bg-white/90 backdrop-blur-sm border-gray-200/50 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-gray-900 flex items-center gap-2">
+                  <span className="text-2xl">⚡</span>
+                  Quick Access
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Bank Details Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/profile/bank-details')}
+                    className="cursor-pointer group"
+                  >
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg border border-blue-200 hover:border-blue-400 transition-all hover:shadow-md">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 bg-blue-500 rounded-lg">
+                          <CreditCard className="w-6 h-6 text-white" />
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Bank Details</h3>
+                      <p className="text-sm text-gray-600">Manage payout information</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Purchase History Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/purchases')}
+                    className="cursor-pointer group"
+                  >
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-lg border border-purple-200 hover:border-purple-400 transition-all hover:shadow-md">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 bg-purple-500 rounded-lg">
+                          <ShoppingBag className="w-6 h-6 text-white" />
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-purple-600 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Purchase History</h3>
+                      <p className="text-sm text-gray-600">View all your purchases</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Invoices Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/purchases')}
+                    className="cursor-pointer group"
+                  >
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-lg border border-emerald-200 hover:border-emerald-400 transition-all hover:shadow-md">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 bg-emerald-500 rounded-lg">
+                          <FileText className="w-6 h-6 text-white" />
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-emerald-600 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Invoices</h3>
+                      <p className="text-sm text-gray-600">Download your invoices</p>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
           {/* Profile Info Card */}
