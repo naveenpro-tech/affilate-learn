@@ -17,7 +17,7 @@ from app.models.invoice import Invoice
 from app.schemas.purchase import PurchaseHistoryResponse, PurchaseHistoryItem
 
 
-router = APIRouter(prefix="/purchases", tags=["purchases"])
+router = APIRouter()
 
 
 @router.get("/history", response_model=PurchaseHistoryResponse)
