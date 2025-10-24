@@ -62,6 +62,7 @@ class User(Base):
     bank_details = relationship("BankDetails", back_populates="user", uselist=False)
     notifications = relationship("Notification", foreign_keys="Notification.user_id", back_populates="user")
     wallet = relationship("Wallet", back_populates="user", uselist=False)
+    invoices = relationship("Invoice", back_populates="user")
     
     def __repr__(self):
         return f"<User {self.email}>"

@@ -21,7 +21,11 @@ export default function BankDetailsPage() {
     bank_name: '',
     account_number: '',
     ifsc_code: '',
+    branch_name: '',
+    account_type: 'Savings',
     upi_id: '',
+    pan_number: '',
+    gst_number: '',
   });
 
   useEffect(() => {
@@ -78,7 +82,11 @@ export default function BankDetailsPage() {
         bank_name: '',
         account_number: '',
         ifsc_code: '',
+        branch_name: '',
+        account_type: 'Savings',
         upi_id: '',
+        pan_number: '',
+        gst_number: '',
       });
       setHasDetails(false);
     } catch (error: any) {
@@ -180,6 +188,34 @@ export default function BankDetailsPage() {
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Branch Name *
+                    </label>
+                    <Input
+                      type="text"
+                      required
+                      value={formData.branch_name}
+                      onChange={(e) => setFormData({ ...formData, branch_name: e.target.value })}
+                      placeholder="Main Branch, Mumbai"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Account Type *
+                    </label>
+                    <select
+                      required
+                      value={formData.account_type}
+                      onChange={(e) => setFormData({ ...formData, account_type: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Savings">Savings</option>
+                      <option value="Current">Current</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
                       UPI ID (Optional)
                     </label>
                     <Input
@@ -188,6 +224,41 @@ export default function BankDetailsPage() {
                       onChange={(e) => setFormData({ ...formData, upi_id: e.target.value })}
                       placeholder="yourname@paytm"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      PAN Number *
+                    </label>
+                    <Input
+                      type="text"
+                      required
+                      value={formData.pan_number}
+                      onChange={(e) => setFormData({ ...formData, pan_number: e.target.value.toUpperCase() })}
+                      placeholder="ABCDE1234F"
+                      pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                      maxLength={10}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      10-character PAN (e.g., ABCDE1234F)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      GST Number (Optional)
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.gst_number}
+                      onChange={(e) => setFormData({ ...formData, gst_number: e.target.value.toUpperCase() })}
+                      placeholder="22AAAAA0000A1Z5"
+                      pattern="[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}"
+                      maxLength={15}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      15-character GST number (e.g., 22AAAAA0000A1Z5)
+                    </p>
                   </div>
 
                   <div className="flex gap-4">

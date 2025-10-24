@@ -17,6 +17,7 @@ from app.models.topic import Topic
 from app.models.notification import Notification
 from app.models.wallet import Wallet
 from app.models.comment import Comment
+from app.models.invoice import Invoice
 from app.models.studio import (
     ImageTemplate,
     ImageCategory,
@@ -48,6 +49,7 @@ __all__ = [
     "Notification",
     "Wallet",
     "Comment",
+    "Invoice",
     # Community AI Studio models
     "ImageTemplate",
     "ImageCategory",

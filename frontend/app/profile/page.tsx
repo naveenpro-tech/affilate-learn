@@ -27,6 +27,12 @@ export default function ProfilePage() {
     instagram_url: '',
     twitter_url: '',
     linkedin_url: '',
+    address_line1: '',
+    address_line2: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country: 'India',
   });
 
   const [passwordFormData, setPasswordFormData] = useState({
@@ -45,6 +51,12 @@ export default function ProfilePage() {
         instagram_url: (user as any).instagram_url || '',
         twitter_url: (user as any).twitter_url || '',
         linkedin_url: (user as any).linkedin_url || '',
+        address_line1: (user as any).address_line1 || '',
+        address_line2: (user as any).address_line2 || '',
+        city: (user as any).city || '',
+        state: (user as any).state || '',
+        postal_code: (user as any).postal_code || '',
+        country: (user as any).country || 'India',
       });
     }
   }, [user]);
@@ -448,6 +460,90 @@ export default function ProfilePage() {
                 onChange={(e) => setEditFormData({ ...editFormData, linkedin_url: e.target.value })}
               />
             </div>
+
+            {/* Address Section */}
+            <div className="pt-4 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Address Information</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Address Line 1
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Street address, P.O. box"
+                    value={editFormData.address_line1}
+                    onChange={(e) => setEditFormData({ ...editFormData, address_line1: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Address Line 2 (Optional)
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Apartment, suite, unit, building, floor, etc."
+                    value={editFormData.address_line2}
+                    onChange={(e) => setEditFormData({ ...editFormData, address_line2: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      City
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="City"
+                      value={editFormData.city}
+                      onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      State/Province
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="State"
+                      value={editFormData.state}
+                      onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Postal Code
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Postal code"
+                      value={editFormData.postal_code}
+                      onChange={(e) => setEditFormData({ ...editFormData, postal_code: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Country
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Country"
+                      value={editFormData.country}
+                      onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-3 justify-end pt-4 border-t">
               <Button
                 type="button"
