@@ -46,41 +46,45 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Animated Background Orbs */}
+      {/* Animated Background Orbs - Optimized for mobile performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Reduced blur from blur-3xl to blur-2xl, reduced opacity for better performance */}
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
+            opacity: [0.2, 0.3, 0.2],
             x: [0, 100, 0],
             y: [0, 50, 0],
           }}
           transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-3xl"
+          className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-2xl will-change-transform"
+          style={{ transform: 'translateZ(0)' }}
         />
         <motion.div
           animate={{
             scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
+            opacity: [0.15, 0.25, 0.15],
             x: [0, -100, 0],
             y: [0, 100, 0],
           }}
           transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl"
+          className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-2xl will-change-transform"
+          style={{ transform: 'translateZ(0)' }}
         />
         <motion.div
           animate={{
             scale: [1, 1.1, 1],
-            opacity: [0.25, 0.45, 0.25],
+            opacity: [0.18, 0.28, 0.18],
             x: [0, 50, 0],
             y: [0, -50, 0],
           }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-0 left-1/3 w-96 h-96 bg-gradient-to-br from-pink-400/30 to-blue-400/30 rounded-full blur-3xl"
+          className="absolute bottom-0 left-1/3 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-blue-400/20 rounded-full blur-2xl will-change-transform"
+          style={{ transform: 'translateZ(0)' }}
         />
 
-        {/* Grid Pattern Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
+        {/* Grid Pattern Overlay - Hidden on mobile for better performance */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] hidden md:block" />
       </div>
 
       {/* Modern Navigation */}
@@ -463,6 +467,57 @@ export default function Home() {
           </div>
         </motion.div>
       </section>
+
+      {/* Footer */}
+      <footer className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div>
+              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Affiliate Learning
+              </h3>
+              <p className="text-slate-300 text-sm">
+                Learn, grow, and earn with our comprehensive affiliate learning platform.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/courses" className="text-slate-300 hover:text-white transition-colors">Courses</Link></li>
+                <li><Link href="/packages" className="text-slate-300 hover:text-white transition-colors">Packages</Link></li>
+                <li><Link href="/register" className="text-slate-300 hover:text-white transition-colors">Sign Up</Link></li>
+                <li><Link href="/login" className="text-slate-300 hover:text-white transition-colors">Login</Link></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/terms" className="text-slate-300 hover:text-white transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="/privacy" className="text-slate-300 hover:text-white transition-colors">Privacy Policy</Link></li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="font-semibold mb-4">Contact</h4>
+              <ul className="space-y-2 text-sm text-slate-300">
+                <li>Email: support@affiliatelearning.com</li>
+                <li>Phone: +91 XXXXX XXXXX</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="border-t border-slate-700 pt-8 text-center text-sm text-slate-400">
+            <p>&copy; 2025 Affiliate Learning Platform. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
