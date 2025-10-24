@@ -368,15 +368,13 @@ def update_profile(
     """
     Update current user's profile
 
-    - Updates full_name and/or phone
+    - Updates full_name, phone, and address fields
     - Returns updated user data
     """
     # Update only provided fields
-    if profile_data.full_name is not None:
-        current_user.full_name = profile_data.full_name
-
-    if profile_data.phone is not None:
-        current_user.phone = profile_data.phone
+    update_data = profile_data.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
 
     db.commit()
     db.refresh(current_user)

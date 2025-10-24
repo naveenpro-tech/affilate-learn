@@ -1,6 +1,22 @@
 # Mobile Testing Guide
-**Date:** 2025-10-24  
+**Date:** 2025-10-24
 **Purpose:** Guide for testing the platform on mobile devices on the same network
+
+---
+
+## ✅ CURRENT CONFIGURATION (ALREADY SET UP!)
+
+**Your Local IP:** `192.168.0.104`
+**Frontend URL:** `http://192.168.0.104:3000`
+**Backend API URL:** `http://192.168.0.104:8000`
+**Status:** ✅ Already configured in `frontend/.env.local`
+
+**To test on mobile:**
+1. Make sure mobile is on the same WiFi network
+2. Start backend: `cd backend && source venv/bin/activate && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
+3. Start frontend: `cd frontend && npm run dev`
+4. Open mobile browser and go to: `http://192.168.0.104:3000`
+5. Login should work now! ✅
 
 ---
 

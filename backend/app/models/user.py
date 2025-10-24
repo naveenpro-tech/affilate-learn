@@ -21,6 +21,14 @@ class User(Base):
     instagram_url = Column(String(200), nullable=True)
     twitter_url = Column(String(200), nullable=True)
     linkedin_url = Column(String(200), nullable=True)
+
+    # Address fields
+    address_line1 = Column(String(200), nullable=True)
+    address_line2 = Column(String(200), nullable=True)
+    city = Column(String(100), nullable=True)
+    state = Column(String(100), nullable=True)
+    postal_code = Column(String(20), nullable=True)
+    country = Column(String(100), nullable=True, default='India')
     
     # Referral system
     referral_code = Column(String(12), unique=True, index=True, nullable=False)

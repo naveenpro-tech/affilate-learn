@@ -8,7 +8,11 @@ class BankDetailsBase(BaseModel):
     bank_name: str = Field(..., min_length=2, max_length=200)
     account_number: str = Field(..., min_length=9, max_length=18)
     ifsc_code: str = Field(..., min_length=11, max_length=11)
+    branch_name: Optional[str] = Field(None, max_length=200)
+    account_type: Optional[str] = Field('Savings', max_length=50)
     upi_id: Optional[str] = Field(None, max_length=100)
+    pan_number: Optional[str] = Field(None, min_length=10, max_length=10)
+    gst_number: Optional[str] = Field(None, min_length=15, max_length=15)
 
     @validator('ifsc_code')
     def validate_ifsc(cls, v):
@@ -34,6 +38,26 @@ class BankDetailsBase(BaseModel):
                 raise ValueError('Invalid UPI ID format')
         return v
 
+    @validator('pan_number')
+    def validate_pan(cls, v):
+        if v:
+            # PAN format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)
+            pattern = r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'
+            if not re.match(pattern, v.upper()):
+                raise ValueError('Invalid PAN number format (e.g., ABCDE1234F)')
+            return v.upper()
+        return v
+
+    @validator('gst_number')
+    def validate_gst(cls, v):
+        if v:
+            # GST format: 15 characters (2 state code + 10 PAN + 1 entity + 1 Z + 1 checksum)
+            pattern = r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$'
+            if not re.match(pattern, v.upper()):
+                raise ValueError('Invalid GST number format')
+            return v.upper()
+        return v
+
 class BankDetailsCreate(BankDetailsBase):
     pass
 
@@ -42,7 +66,11 @@ class BankDetailsUpdate(BaseModel):
     bank_name: Optional[str] = Field(None, min_length=2, max_length=200)
     account_number: Optional[str] = Field(None, min_length=9, max_length=18)
     ifsc_code: Optional[str] = Field(None, min_length=11, max_length=11)
+    branch_name: Optional[str] = Field(None, max_length=200)
+    account_type: Optional[str] = Field(None, max_length=50)
     upi_id: Optional[str] = Field(None, max_length=100)
+    pan_number: Optional[str] = Field(None, min_length=10, max_length=10)
+    gst_number: Optional[str] = Field(None, min_length=15, max_length=15)
 
 class BankDetailsResponse(BankDetailsBase):
     id: int

@@ -26,6 +26,12 @@ class UserUpdate(BaseModel):
     """Schema for updating user profile"""
     full_name: Optional[str] = Field(None, min_length=2, max_length=100)
     phone: Optional[str] = Field(None, max_length=20)
+    address_line1: Optional[str] = Field(None, max_length=200)
+    address_line2: Optional[str] = Field(None, max_length=200)
+    city: Optional[str] = Field(None, max_length=100)
+    state: Optional[str] = Field(None, max_length=100)
+    postal_code: Optional[str] = Field(None, max_length=20)
+    country: Optional[str] = Field(None, max_length=100)
 
 
 class UserResponse(UserBase):

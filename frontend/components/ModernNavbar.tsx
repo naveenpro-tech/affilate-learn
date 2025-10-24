@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 
 export default function ModernNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -218,6 +218,7 @@ export default function ModernNavbar() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="bg-white border-gray-200 w-80">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col h-full">
                   {/* Mobile User Info */}
                   {user && (
