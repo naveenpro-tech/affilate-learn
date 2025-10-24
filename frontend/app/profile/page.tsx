@@ -128,6 +128,28 @@ export default function ProfilePage() {
     toast.success('Referral link copied!');
   };
 
+  const shareOnWhatsApp = () => {
+    const link = `${window.location.origin}/register?ref=${user?.referral_code}`;
+    const text = `Join Affiliate Learning Platform and start earning! Use my referral code: ${user?.referral_code}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + link)}`, '_blank');
+  };
+
+  const shareOnFacebook = () => {
+    const link = `${window.location.origin}/register?ref=${user?.referral_code}`;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, '_blank');
+  };
+
+  const shareOnTwitter = () => {
+    const link = `${window.location.origin}/register?ref=${user?.referral_code}`;
+    const text = `Join Affiliate Learning Platform and start earning! Use my referral code: ${user?.referral_code}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`, '_blank');
+  };
+
+  const shareOnLinkedIn = () => {
+    const link = `${window.location.origin}/register?ref=${user?.referral_code}`;
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`, '_blank');
+  };
+
   if (!user) {
     return (
       <ProtectedRoute>        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
@@ -388,35 +410,99 @@ export default function ProfilePage() {
           >
             <Card className="bg-white/90 backdrop-blur-sm border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <CardTitle className="text-gray-900">Referral Information</CardTitle>
+                <CardTitle className="text-gray-900 flex items-center gap-2">
+                  <span className="text-2xl">🎁</span>
+                  Referral & Earnings
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
+                  {/* Referral Code Section */}
                   <div>
                     <label className="text-sm text-gray-600 font-medium mb-2 block">Your Referral Code</label>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                       <div className="flex-1 bg-gradient-to-br from-blue-50 to-purple-50 px-4 py-3 rounded-lg border border-blue-200">
                         <code className="text-2xl font-bold text-blue-600">{user.referral_code}</code>
                       </div>
-                      <Button onClick={copyReferralLink}>
-                        Copy Link
+                      <Button onClick={copyReferralLink} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                        📋 Copy Link
                       </Button>
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 shadow-sm">
+                  {/* Stats Section */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg border border-blue-200 shadow-sm">
                       <div className="text-sm text-blue-700 font-medium mb-1">Direct Referrals</div>
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-3xl font-bold text-blue-600">
                         {user.direct_referrals || 0}
                       </div>
+                      <div className="text-xs text-blue-600 mt-1">People you referred</div>
                     </div>
-                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200 shadow-sm">
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-5 rounded-lg border border-emerald-200 shadow-sm">
                       <div className="text-sm text-emerald-700 font-medium mb-1">Total Earnings</div>
-                      <div className="text-2xl font-bold text-emerald-600">
+                      <div className="text-3xl font-bold text-emerald-600">
                         ₹{user.total_earnings?.toFixed(2) || '0.00'}
                       </div>
+                      <div className="text-xs text-emerald-600 mt-1">Commission earned</div>
                     </div>
+                  </div>
+
+                  {/* Social Sharing Section */}
+                  <div>
+                    <label className="text-sm text-gray-600 font-medium mb-3 block">Share on Social Media</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {/* WhatsApp */}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={shareOnWhatsApp}
+                        className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 hover:border-green-400 transition-all hover:shadow-md"
+                      >
+                        <div className="text-3xl mb-2">💬</div>
+                        <span className="text-sm font-medium text-gray-700">WhatsApp</span>
+                      </motion.button>
+
+                      {/* Facebook */}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={shareOnFacebook}
+                        className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 hover:border-blue-400 transition-all hover:shadow-md"
+                      >
+                        <div className="text-3xl mb-2">📘</div>
+                        <span className="text-sm font-medium text-gray-700">Facebook</span>
+                      </motion.button>
+
+                      {/* Twitter */}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={shareOnTwitter}
+                        className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-sky-50 to-sky-100 rounded-lg border border-sky-200 hover:border-sky-400 transition-all hover:shadow-md"
+                      >
+                        <div className="text-3xl mb-2">🐦</div>
+                        <span className="text-sm font-medium text-gray-700">Twitter</span>
+                      </motion.button>
+
+                      {/* LinkedIn */}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={shareOnLinkedIn}
+                        className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200 hover:border-indigo-400 transition-all hover:shadow-md"
+                      >
+                        <div className="text-3xl mb-2">💼</div>
+                        <span className="text-sm font-medium text-gray-700">LinkedIn</span>
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  {/* Info Box */}
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-200">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-semibold">💡 Tip:</span> Share your referral link on social media to earn more commissions! You'll earn when your referrals purchase packages.
+                    </p>
                   </div>
                 </div>
               </CardContent>
