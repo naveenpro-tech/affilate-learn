@@ -123,7 +123,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <ProtectedRoute>      <div className="min-h-screen bg-neutral-50 py-8">
+    <ProtectedRoute>      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <motion.div
@@ -132,8 +132,8 @@ export default function ProfilePage() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-neutral-900 mb-2">My Profile</h1>
-            <p className="text-neutral-600">Manage your account information</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Profile</h1>
+            <p className="text-gray-600 text-lg">Manage your account information</p>
           </motion.div>
 
           {/* Profile Info Card */}
@@ -143,16 +143,16 @@ export default function ProfilePage() {
             transition={{ delay: 0.1, duration: 0.5 }}
             className="mb-6"
           >
-            <Card>
+            <Card className="bg-white/90 backdrop-blur-sm border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <img
                       src={profile?.avatar_url || '/avatar-placeholder.png'}
                       alt="avatar"
-                      className="w-14 h-14 rounded-full object-cover border"
+                      className="w-14 h-14 rounded-full object-cover border-2 border-gray-200"
                     />
-                    <CardTitle>Personal Information</CardTitle>
+                    <CardTitle className="text-gray-900">Personal Information</CardTitle>
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="cursor-pointer">
@@ -186,45 +186,45 @@ export default function ProfilePage() {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="text-sm text-neutral-600">Full Name</label>
-                    <div className="font-semibold text-neutral-900 text-lg">{user.full_name}</div>
+                    <label className="text-sm text-gray-600 font-medium">Full Name</label>
+                    <div className="font-semibold text-gray-900 text-lg">{user.full_name}</div>
                   </div>
                   <div>
-                    <label className="text-sm text-neutral-600">Email</label>
-                    <div className="font-semibold text-neutral-900 text-lg">{user.email}</div>
+                    <label className="text-sm text-gray-600 font-medium">Email</label>
+                    <div className="font-semibold text-gray-900 text-lg">{user.email}</div>
                   </div>
                   <div>
-                    <label className="text-sm text-neutral-600">Phone</label>
-                    <div className="font-semibold text-neutral-900 text-lg">{user.phone || 'Not provided'}</div>
+                    <label className="text-sm text-gray-600 font-medium">Phone</label>
+                    <div className="font-semibold text-gray-900 text-lg">{user.phone || 'Not provided'}</div>
                   </div>
                   <div>
-                    <label className="text-sm text-neutral-600">Username</label>
-                    <div className="font-semibold text-neutral-900 text-lg">{(user as any).username || 'Not set'}</div>
+                    <label className="text-sm text-gray-600 font-medium">Username</label>
+                    <div className="font-semibold text-gray-900 text-lg">{(user as any).username || 'Not set'}</div>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="text-sm text-neutral-600">Bio</label>
-                    <div className="text-neutral-900">{(user as any).bio || 'No bio added yet'}</div>
+                    <label className="text-sm text-gray-600 font-medium">Bio</label>
+                    <div className="text-gray-900">{(user as any).bio || 'No bio added yet'}</div>
                   </div>
                   <div>
-                    <label className="text-sm text-neutral-600">Social Links</label>
+                    <label className="text-sm text-gray-600 font-medium">Social Links</label>
                     <div className="flex gap-2 mt-1">
                       {(user as any).instagram_url && (
-                        <a href={(user as any).instagram_url} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700">
+                        <a href={(user as any).instagram_url} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700 font-medium">
                           📷 Instagram
                         </a>
                       )}
                       {(user as any).twitter_url && (
-                        <a href={(user as any).twitter_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 ml-3">
+                        <a href={(user as any).twitter_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 ml-3 font-medium">
                           🐦 Twitter
                         </a>
                       )}
                       {(user as any).linkedin_url && (
-                        <a href={(user as any).linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-800 ml-3">
+                        <a href={(user as any).linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-800 ml-3 font-medium">
                           💼 LinkedIn
                         </a>
                       )}
                       {!(user as any).instagram_url && !(user as any).twitter_url && !(user as any).linkedin_url && (
-                        <span className="text-neutral-500">No social links added</span>
+                        <span className="text-gray-500">No social links added</span>
                       )}
                     </div>
                   </div>
@@ -251,15 +251,15 @@ export default function ProfilePage() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="mb-6"
           >
-            <Card>
+            <Card className="bg-white/90 backdrop-blur-sm border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <CardTitle>Package Information</CardTitle>
+                <CardTitle className="text-gray-900">Package Information</CardTitle>
               </CardHeader>
               <CardContent>
                 {user.current_package ? (
-                  <div className="flex items-center justify-between bg-neutral-50 p-6 rounded-lg">
+                  <div className="flex items-center justify-between bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-100">
                     <div>
-                      <div className="text-sm text-neutral-600 mb-1">Current Package</div>
+                      <div className="text-sm text-gray-600 font-medium mb-1">Current Package</div>
                       <Badge
                         variant={
                           user.current_package === 'Platinum' ? 'default' :
@@ -277,7 +277,7 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-neutral-600 mb-4">You haven't purchased a package yet</p>
+                    <p className="text-gray-600 mb-4">You haven't purchased a package yet</p>
                     <Button onClick={() => window.location.href = '/packages'}>
                       View Packages
                     </Button>
@@ -294,17 +294,17 @@ export default function ProfilePage() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="mb-6"
           >
-            <Card>
+            <Card className="bg-white/90 backdrop-blur-sm border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <CardTitle>Referral Information</CardTitle>
+                <CardTitle className="text-gray-900">Referral Information</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm text-neutral-600 mb-2 block">Your Referral Code</label>
+                    <label className="text-sm text-gray-600 font-medium mb-2 block">Your Referral Code</label>
                     <div className="flex items-center gap-3">
-                      <div className="flex-1 bg-neutral-50 px-4 py-3 rounded-lg border border-neutral-200">
-                        <code className="text-2xl font-bold text-primary-600">{user.referral_code}</code>
+                      <div className="flex-1 bg-gradient-to-br from-blue-50 to-purple-50 px-4 py-3 rounded-lg border border-blue-200">
+                        <code className="text-2xl font-bold text-blue-600">{user.referral_code}</code>
                       </div>
                       <Button onClick={copyReferralLink}>
                         Copy Link
@@ -313,15 +313,15 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-primary-50 p-4 rounded-lg border border-primary-200">
-                      <div className="text-sm text-primary-700 mb-1">Direct Referrals</div>
-                      <div className="text-2xl font-bold text-primary-600">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 shadow-sm">
+                      <div className="text-sm text-blue-700 font-medium mb-1">Direct Referrals</div>
+                      <div className="text-2xl font-bold text-blue-600">
                         {user.direct_referrals || 0}
                       </div>
                     </div>
-                    <div className="bg-success-50 p-4 rounded-lg border border-success-200">
-                      <div className="text-sm text-success-700 mb-1">Total Earnings</div>
-                      <div className="text-2xl font-bold text-success-600">
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200 shadow-sm">
+                      <div className="text-sm text-emerald-700 font-medium mb-1">Total Earnings</div>
+                      <div className="text-2xl font-bold text-emerald-600">
                         ₹{user.total_earnings?.toFixed(2) || '0.00'}
                       </div>
                     </div>
@@ -337,15 +337,15 @@ export default function ProfilePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            <Card>
+            <Card className="bg-white/90 backdrop-blur-sm border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <CardTitle>Security</CardTitle>
+                <CardTitle className="text-gray-900">Security</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-semibold text-neutral-900">Password</div>
-                    <div className="text-sm text-neutral-600">••••••••</div>
+                    <div className="font-semibold text-gray-900">Password</div>
+                    <div className="text-sm text-gray-600">••••••••</div>
                   </div>
                   <Button
                     variant="outline"

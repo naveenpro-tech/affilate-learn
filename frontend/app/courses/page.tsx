@@ -132,7 +132,7 @@ export default function CoursesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-neutral-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
           <motion.div
@@ -141,9 +141,9 @@ export default function CoursesPage() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-4xl font-bold text-neutral-900 mb-2">My Courses</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Courses</h1>
             {user?.current_package ? (
-              <div className="text-neutral-600">
+              <div className="text-gray-600 text-lg">
                 Your current package:{' '}
                 <Badge variant={
                   user.current_package === 'Platinum' ? 'default' :
@@ -154,7 +154,7 @@ export default function CoursesPage() {
                 </Badge>
               </div>
             ) : (
-              <p className="text-neutral-600">
+              <p className="text-gray-600 text-lg">
                 You don't have any active courses. Purchase a package or buy individual courses to get started.
               </p>
             )}
@@ -252,7 +252,7 @@ export default function CoursesPage() {
                   transition={{ delay: index * 0.1, duration: 0.5 }}
                 >
                   <Card
-                    className={`overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group ${
+                    className={`overflow-hidden bg-white/90 backdrop-blur-sm border-gray-200/50 hover:border-blue-400/50 hover:shadow-2xl transition-all duration-300 cursor-pointer group ${
                       course.is_locked ? 'opacity-75' : ''
                     }`}
                     onClick={() => !course.is_locked && router.push(`/courses/${course.id}/learn`)}
@@ -314,12 +314,12 @@ export default function CoursesPage() {
                     {/* Content */}
                     <CardContent className="pt-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-xl font-bold text-neutral-900 group-hover:text-primary-600 transition-colors flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors flex-1">
                           {course.title}
                         </h3>
                       </div>
 
-                      <p className="text-neutral-600 text-sm mb-4 line-clamp-2">
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                         {course.description || 'No description available'}
                       </p>
 

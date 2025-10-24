@@ -195,12 +195,12 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.7 + index * 0.1 }}
-                className="glass-dark p-6 rounded-2xl border border-slate-700/50"
+                className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow"
               >
-                <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   {stat.value}
                 </div>
-                <div className="text-sm text-slate-400 mt-2">{stat.label}</div>
+                <div className="text-sm text-gray-600 mt-2 font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -247,26 +247,26 @@ export default function Home() {
               whileHover={{ y: -8, transition: { duration: 0.3 } }}
               className="group"
             >
-              <Card className="h-full glass-card border-slate-700/50 hover:border-blue-500/50 transition-all duration-500 relative overflow-hidden">
+              <Card className="h-full bg-white/90 backdrop-blur-sm border-gray-200/50 hover:border-blue-400/50 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
                 {/* Glow Effect on Hover */}
                 <motion.div
-                  className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-xl`}
+                  className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
                 />
 
                 <CardHeader className="relative z-10">
                   <motion.div
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.6 }}
-                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-lg group-hover:shadow-${feature.glowColor}-500/50 transition-shadow`}
+                    className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-shadow`}
                   >
                     <feature.icon className="w-7 h-7 text-white" />
                   </motion.div>
-                  <CardTitle className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                  <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="relative z-10">
-                  <p className="text-slate-300 leading-relaxed text-lg">
+                  <p className="text-gray-600 leading-relaxed text-lg">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -288,10 +288,10 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-black text-white mb-4"
+            className="text-4xl md:text-5xl font-black text-gray-900 mb-4"
           >
             Choose Your{' '}
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Package
             </span>
           </motion.h3>
@@ -300,7 +300,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-slate-300 text-xl max-w-2xl mx-auto"
+            className="text-gray-600 text-xl max-w-2xl mx-auto"
           >
             Select the perfect plan to start your learning and earning journey
           </motion.p>
@@ -341,8 +341,8 @@ export default function Home() {
             >
               <Card className={`h-full relative overflow-hidden ${
                 pkg.popular
-                  ? 'glass-card border-2 border-blue-500/50 shadow-2xl shadow-blue-500/20'
-                  : 'glass-card border-slate-700/50'
+                  ? 'bg-white/95 backdrop-blur-sm border-2 border-blue-500 shadow-2xl shadow-blue-500/20'
+                  : 'bg-white/90 backdrop-blur-sm border-gray-200/50 hover:border-gray-300 hover:shadow-xl transition-all'
               }`}>
                 {/* Popular Badge */}
                 {pkg.popular && (
@@ -363,11 +363,11 @@ export default function Home() {
                 />
 
                 <CardHeader className={`text-center ${pkg.popular ? 'pt-16' : 'pt-8'} pb-8 relative z-10`}>
-                  <CardTitle className="text-3xl font-black text-white mb-4">
+                  <CardTitle className="text-3xl font-black text-gray-900 mb-4">
                     {pkg.name}
                   </CardTitle>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-slate-400 text-xl">₹</span>
+                    <span className="text-gray-600 text-xl">₹</span>
                     <motion.span
                       whileHover={{ scale: 1.1 }}
                       className={`text-6xl font-black bg-gradient-to-r ${pkg.gradient} bg-clip-text text-transparent`}
@@ -389,9 +389,9 @@ export default function Home() {
                         className="flex items-start gap-3"
                       >
                         <div className="mt-1">
-                          <Check className="w-5 h-5 text-emerald-400" />
+                          <Check className="w-5 h-5 text-emerald-500" />
                         </div>
-                        <span className="text-slate-300 text-lg">{feature}</span>
+                        <span className="text-gray-700 text-lg">{feature}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -425,20 +425,20 @@ export default function Home() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden glass-card border-2 border-blue-500/30 rounded-3xl p-12 md:p-16 text-center"
+          className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-200 rounded-3xl p-12 md:p-16 text-center shadow-xl"
         >
           {/* Animated Background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-100/30 via-purple-100/30 to-pink-100/30 animate-pulse" />
 
           <div className="relative z-10">
             <motion.h3
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-black text-white mb-6"
+              className="text-4xl md:text-5xl font-black text-gray-900 mb-6"
             >
               Ready to Start Your{' '}
-              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Journey?
               </span>
             </motion.h3>
@@ -447,10 +447,10 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-xl md:text-2xl text-slate-300 mb-10 max-w-2xl mx-auto"
+              className="text-xl md:text-2xl text-gray-700 mb-10 max-w-2xl mx-auto"
             >
               Join thousands of learners who are already{' '}
-              <span className="text-emerald-400 font-semibold">earning while they learn</span>
+              <span className="text-emerald-600 font-semibold">earning while they learn</span>
             </motion.p>
             <Link href="/register">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
