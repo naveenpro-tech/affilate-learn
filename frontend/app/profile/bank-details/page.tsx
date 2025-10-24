@@ -152,6 +152,8 @@ export default function BankDetailsPage() {
                     </label>
                     <Input
                       type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       required
                       value={formData.account_number}
                       onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}

@@ -199,7 +199,7 @@ export default function ProfessionalCertificate({
                   <div className="w-48 h-px bg-gray-900" />
                 </div>
                 <p className="text-sm text-gray-600 font-semibold">Director</p>
-                <p className="text-xs text-gray-500">MLM Learning Platform</p>
+                <p className="text-xs text-gray-500">Affiliate Learning Platform</p>
               </div>
             </div>
 

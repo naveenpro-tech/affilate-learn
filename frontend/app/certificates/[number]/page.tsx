@@ -125,7 +125,7 @@ export default function CertificateViewerPage() {
                     <div>
                       <h3 className="font-semibold text-green-900 mb-1">Verified Certificate</h3>
                       <p className="text-sm text-green-800">
-                        This certificate has been verified and is authentic. It was issued by MLM Learning Platform.
+                        This certificate has been verified and is authentic. It was issued by Affiliate Learning Platform.
                       </p>
                       <p className="text-xs text-green-700 mt-2">
                         Certificate ID: <span className="font-mono font-semibold">{certificate.certificate_number}</span>

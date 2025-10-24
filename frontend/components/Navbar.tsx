@@ -92,7 +92,8 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-3 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Toggle mobile menu"
           >
             <svg
               className="w-6 h-6 text-gray-700"
@@ -115,45 +116,57 @@ export default function Navbar() {
         {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden border-t border-gray-200"
-            >
-              <div className="py-4 space-y-2">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                      isActive(link.href)
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="px-4 py-3 border-t border-gray-200 mt-2">
-                  <div className="text-sm font-semibold text-gray-900 mb-1">{user?.full_name}</div>
-                  <div className="text-xs text-gray-500 mb-3">{user?.email}</div>
-                  <Button
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    variant="destructive"
-                    size="sm"
-                    className="w-full"
-                  >
-                    Logout
-                  </Button>
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              {/* Mobile Menu Content */}
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="md:hidden border-t border-gray-200 relative z-50 bg-white"
+              >
+                <div className="py-4 space-y-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                        isActive(link.href)
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <div className="px-4 py-3 border-t border-gray-200 mt-2">
+                    <div className="text-sm font-semibold text-gray-900 mb-1">{user?.full_name}</div>
+                    <div className="text-xs text-gray-500 mb-3">{user?.email}</div>
+                    <Button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      variant="destructive"
+                      size="sm"
+                      className="w-full"
+                    >
+                      Logout
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
