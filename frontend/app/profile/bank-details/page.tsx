@@ -37,7 +37,19 @@ export default function BankDetailsPage() {
     try {
       const response = await bankDetailsAPI.get();
       if (response.data) {
-        setFormData(response.data);
+        // Convert null values to empty strings to avoid React warnings
+        const cleanedData = {
+          account_holder_name: response.data.account_holder_name || '',
+          bank_name: response.data.bank_name || '',
+          account_number: response.data.account_number || '',
+          ifsc_code: response.data.ifsc_code || '',
+          branch_name: response.data.branch_name || '',
+          account_type: response.data.account_type || 'Savings',
+          upi_id: response.data.upi_id || '',
+          pan_number: response.data.pan_number || '',
+          gst_number: response.data.gst_number || '',
+        };
+        setFormData(cleanedData);
         setHasDetails(true);
       }
     } catch (error: any) {
