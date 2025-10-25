@@ -1,0 +1,131 @@
+services:
+  # Backend API Service
+  - type: web
+    name: affiliate-learning-backend
+    env: python
+    region: singapore  # Choose closest region to your users
+    plan: starter  # Free tier (can upgrade to paid plans)
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    envVars:
+      # Database (Turso)
+      - key: DATABASE_URL
+        value: libsql://affilate-learn-naveenvide.aws-ap-south-1.turso.io
+      - key: TURSO_DATABASE_URL
+        value: libsql://affilate-learn-naveenvide.aws-ap-south-1.turso.io
+      - key: TURSO_AUTH_TOKEN
+        sync: false  # Set this in Render dashboard (secret)
+      
+      # JWT
+      - key: SECRET_KEY
+        generateValue: true  # Auto-generate secure secret
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 10080
+      
+      # Email (Hostinger SMTP)
+      - key: EMAIL_FROM
+        value: roprly@bilvanaturals.online
+      - key: SMTP_HOST
+        value: smtp.hostinger.com
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_USER
+        value: roprly@bilvanaturals.online
+      - key: SMTP_PASSWORD
+        sync: false  # Set this in Render dashboard (secret)
+      - key: SMTP_FROM_EMAIL
+        value: roprly@bilvanaturals.online
+      - key: SMTP_USE_TLS
+        value: true
+      
+      # Razorpay (IMPORTANT: Use LIVE keys for production)
+      - key: RAZORPAY_KEY_ID
+        sync: false  # Set this in Render dashboard
+      - key: RAZORPAY_KEY_SECRET
+        sync: false  # Set this in Render dashboard (secret)
+      
+      # Cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dihv0v8hr
+      - key: CLOUDINARY_API_KEY
+        value: 418925754778477
+      - key: CLOUDINARY_API_SECRET
+        sync: false  # Set this in Render dashboard (secret)
+      
+      # Application URLs (Update after deployment)
+      - key: FRONTEND_URL
+        value: https://your-app.vercel.app  # Update with actual Vercel URL
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: affiliate-learning-backend
+          property: url
+      - key: API_BASE_URL
+        fromService:
+          type: web
+          name: affiliate-learning-backend
+          property: url
+      
+      # Payout
+      - key: PAYOUT_DAY
+        value: MONDAY
+      - key: MINIMUM_PAYOUT_AMOUNT
+        value: 500.0
+      
+      # Environment
+      - key: ENVIRONMENT
+        value: production
+      - key: SENTRY_DSN
+        value: ""  # Optional: Add Sentry DSN for error tracking
+      
+      # Mock Services
+      - key: USE_RAZORPAY_MOCK
+        value: false
+      
+      # Image Generation
+      - key: IMAGEGEN_PROVIDER
+        value: auto
+      - key: OPENAI_API_KEY
+        value: ""
+      - key: HUGGINGFACE_API_KEY
+        value: ""
+      - key: GEMINI_API_KEY
+        value: ""
+      
+      # Prompt Enhancement
+      - key: PROMPT_ENHANCER_PROVIDER
+        value: gemini
+      - key: PROMPT_ENHANCER_TIMEOUT_SECONDS
+        value: 3.0
+      
+      # Storage
+      - key: STORAGE_PROVIDER
+        value: cloudinary
+      
+      # Credit Economy
+      - key: CREDIT_PRICE_INR
+        value: 5.0
+      - key: CREDIT_STANDARD_TIER_COST
+        value: 1
+      - key: CREDIT_PREMIUM_TIER_2_COST
+        value: 2
+      - key: CREDIT_PREMIUM_TIER_4_COST
+        value: 4
+      - key: CREDIT_REUSE_REWARD
+        value: 0.5
+      - key: CREDIT_REUSE_CAP_PER_ASSET
+        value: 20
+      - key: CREDIT_REUSE_CAP_PER_DAY
+        value: 10
+      
+      # Feature Flags
+      - key: FEATURE_FLAGS
+        value: '{"premium_tiers":true,"ab_test_pricing":true,"community_feed":true}'
+      
+      # Admin Key Management
+      - key: KEY_ENCRYPTION_SECRET
+        generateValue: true  # Auto-generate secure secret
+

@@ -142,6 +142,16 @@ async def root():
 
 @app.get("/health")
 async def health_check():
+    """Health check endpoint for monitoring and deployment platforms"""
+    return {
+        "status": "healthy",
+        "environment": settings.ENVIRONMENT,
+        "database": "connected"
+    }
+
+
+@app.get("/health")
+async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
 

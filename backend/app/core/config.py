@@ -4,9 +4,11 @@ from typing import Optional
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
-    
+
     # Database
     DATABASE_URL: str
+    TURSO_DATABASE_URL: Optional[str] = None  # Turso database URL
+    TURSO_AUTH_TOKEN: Optional[str] = None  # Turso auth token
     
     # JWT
     SECRET_KEY: str

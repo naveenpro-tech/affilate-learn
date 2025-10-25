@@ -8,6 +8,7 @@ setuptools>=65.0.0
 sqlalchemy==2.0.36
 psycopg2-binary==2.9.10
 alembic==1.14.0
+libsql-experimental==0.10.1  # Turso LibSQL support
 
 # Authentication
 python-jose[cryptography]==3.3.0

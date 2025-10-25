@@ -3,13 +3,41 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-# Create database engine with appropriate settings for SQLite or PostgreSQL
+# Create database engine with appropriate settings for SQLite, LibSQL (Turso), or PostgreSQL
 if settings.DATABASE_URL.startswith("sqlite"):
     # SQLite-specific configuration
     engine = create_engine(
         settings.DATABASE_URL,
         connect_args={"check_same_thread": False}
     )
+elif settings.DATABASE_URL.startswith("libsql"):
+    # Turso LibSQL configuration
+    # Format: libsql://[database-name].turso.io?authToken=[token]
+    # Or use TURSO_DATABASE_URL and TURSO_AUTH_TOKEN separately
+    from libsql_experimental import dbapi2 as libsql
+
+    # Extract database URL and auth token
+    db_url = settings.TURSO_DATABASE_URL if hasattr(settings, 'TURSO_DATABASE_URL') else settings.DATABASE_URL
+    auth_token = settings.TURSO_AUTH_TOKEN if hasattr(settings, 'TURSO_AUTH_TOKEN') else None
+
+    # Create connection URL for SQLAlchemy
+    if auth_token:
+        # Use libsql connector with auth token
+        def creator():
+            return libsql.connect(db_url, auth_token=auth_token)
+
+        engine = create_engine(
+            "sqlite://",  # Dummy URL for SQLAlchemy
+            creator=creator,
+            connect_args={"check_same_thread": False},
+            pool_pre_ping=True
+        )
+    else:
+        # Fallback to direct URL (if auth token is in URL)
+        engine = create_engine(
+            settings.DATABASE_URL,
+            connect_args={"check_same_thread": False}
+        )
 else:
     # PostgreSQL-specific configuration
     engine = create_engine(
