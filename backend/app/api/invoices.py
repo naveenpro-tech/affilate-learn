@@ -13,7 +13,7 @@ from app.schemas.invoice import InvoiceResponse
 from app.services.invoice_service import InvoiceService
 
 
-router = APIRouter(prefix="/invoices", tags=["invoices"])
+router = APIRouter()
 
 
 @router.post("/generate/{payment_id}", response_model=InvoiceResponse, status_code=status.HTTP_201_CREATED)

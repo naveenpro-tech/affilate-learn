@@ -219,6 +219,16 @@ def verify_payment(
         print(f"Error processing referral commissions: {e}")
         # Don't fail the payment if commission calculation fails
 
+    # Auto-generate invoice for the payment
+    try:
+        from app.services.invoice_service import InvoiceService
+        invoice_service = InvoiceService(db)
+        invoice = invoice_service.create_invoice(payment.id)
+        print(f"[PAYMENT VERIFY] Invoice generated: {invoice.invoice_number}")
+    except Exception as e:
+        print(f"Error generating invoice: {e}")
+        # Don't fail the payment if invoice generation fails
+
     # Send purchase confirmation email
     try:
         from app.utils.email import send_purchase_confirmation_email
