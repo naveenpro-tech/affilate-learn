@@ -300,11 +300,11 @@ export default function BrowseCoursesPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            router.push('/packages');
+                            router.push(`/courses/${course.id}/purchase`);
                           }}
                           className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                         >
-                          Unlock Course
+                          Purchase Course
                         </button>
                       ) : (
                         <button
