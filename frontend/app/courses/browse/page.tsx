@@ -297,15 +297,38 @@ export default function BrowseCoursesPage() {
 
                       {/* Action Button */}
                       {course.is_locked ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/courses/${course.id}/purchase`);
-                          }}
-                          className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                        >
-                          Purchase Course
-                        </button>
+                        <div className="space-y-3">
+                          {/* Individual Purchase Option */}
+                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-semibold text-gray-700">Individual Purchase</span>
+                              <span className="text-lg font-bold text-primary-600">₹199</span>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/courses/${course.id}/purchase`);
+                              }}
+                              className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                            >
+                              Purchase Course - ₹199
+                            </button>
+                          </div>
+
+                          {/* Package Requirement Info */}
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 mb-1">Or unlock with package:</p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push('/packages');
+                              }}
+                              className="text-xs text-primary-600 hover:text-primary-700 font-medium underline"
+                            >
+                              View {course.package_tier} Package
+                            </button>
+                          </div>
+                        </div>
                       ) : (
                         <button
                           onClick={(e) => {
