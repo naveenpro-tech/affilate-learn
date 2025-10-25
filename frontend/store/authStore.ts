@@ -9,6 +9,8 @@ interface User {
   referral_code: string;
   is_active: boolean;
   is_admin: boolean;
+  onboarding_completed: boolean;
+  onboarding_completed_at?: string;
   current_package?: string;
 }
 

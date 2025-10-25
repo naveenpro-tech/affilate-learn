@@ -40,8 +40,10 @@ class UserResponse(UserBase):
     referral_code: str
     is_active: bool
     is_admin: bool
+    onboarding_completed: bool = False
+    onboarding_completed_at: Optional[datetime] = None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 

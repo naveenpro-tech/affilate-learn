@@ -14,7 +14,25 @@ elif settings.DATABASE_URL.startswith("libsql"):
     # Turso LibSQL configuration
     # Format: libsql://[database-name].turso.io?authToken=[token]
     # Or use TURSO_DATABASE_URL and TURSO_AUTH_TOKEN separately
-    from libsql_experimental import dbapi2 as libsql
+    import libsql_experimental as libsql
+    from sqlalchemy.pool import StaticPool
+
+    # Wrapper class to add missing methods
+    class LibSQLConnectionWrapper:
+        def __init__(self, conn):
+            self._conn = conn
+
+        def __getattr__(self, name):
+            # Add dummy create_function method
+            if name == 'create_function':
+                return lambda *args, **kwargs: None
+            return getattr(self._conn, name)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return self._conn.__exit__(*args)
 
     # Extract database URL and auth token
     db_url = settings.TURSO_DATABASE_URL if hasattr(settings, 'TURSO_DATABASE_URL') else settings.DATABASE_URL
@@ -24,13 +42,14 @@ elif settings.DATABASE_URL.startswith("libsql"):
     if auth_token:
         # Use libsql connector with auth token
         def creator():
-            return libsql.connect(db_url, auth_token=auth_token)
+            conn = libsql.connect(db_url, auth_token=auth_token)
+            return LibSQLConnectionWrapper(conn)
 
         engine = create_engine(
             "sqlite://",  # Dummy URL for SQLAlchemy
             creator=creator,
-            connect_args={"check_same_thread": False},
-            pool_pre_ping=True
+            poolclass=StaticPool,
+            connect_args={"check_same_thread": False}
         )
     else:
         # Fallback to direct URL (if auth token is in URL)

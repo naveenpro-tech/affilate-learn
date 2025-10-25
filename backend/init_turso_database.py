@@ -28,21 +28,24 @@ from app.models.course import Course
 from app.models.module import Module
 from app.models.topic import Topic
 from app.models.video import Video
-from app.models.progress import Progress
+from app.models.video_progress import VideoProgress
 from app.models.certificate import Certificate
 from app.models.invoice import Invoice
 from app.models.bank_details import BankDetails
+from app.models.user_package import UserPackage
+from app.models.user_course_purchase import UserCoursePurchase
 from app.models.studio import (
     ImageCategory,
     ImageTemplate,
     GeneratedImage,
     CommunityPost,
     PostLike,
-    PostComment,
     PostReport,
-    CreditTransaction,
-    CreditPurchase
+    PromptReuseEvent,
+    CreditLedger,
+    ReferralEvent
 )
+from app.models.comment import Comment
 
 
 def init_database():

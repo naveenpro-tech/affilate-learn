@@ -382,6 +382,27 @@ def update_profile(
     return current_user
 
 
+@router.patch("/me/onboarding", response_model=UserResponse)
+def complete_onboarding(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Mark onboarding as completed for the current user
+
+    - Sets onboarding_completed to True
+    - Records completion timestamp
+    - Returns updated user data
+    """
+    current_user.onboarding_completed = True
+    current_user.onboarding_completed_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user
+
+
 @router.post("/change-password")
 def change_password(
     current_password: str,

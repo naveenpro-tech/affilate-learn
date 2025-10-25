@@ -97,6 +97,7 @@ export const authAPI = {
     api.post('/api/auth/forgot-password', null, {
       params: { email }
     }),
+  completeOnboarding: () => api.patch('/api/auth/me/onboarding'),
   resetPassword: (token: string, newPassword: string) =>
     api.post('/api/auth/reset-password', null, {
       params: { token, new_password: newPassword }

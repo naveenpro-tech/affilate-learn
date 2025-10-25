@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
+// import OnboardingTour from '@/components/OnboardingTour'; // Temporarily disabled due to React 19 compatibility
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useAuthStore } from '@/store/authStore';
 import { authAPI, profileAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { CreditCard, ShoppingBag, FileText, ArrowRight } from 'lucide-react';
+import { CreditCard, ShoppingBag, FileText, ArrowRight, HelpCircle } from 'lucide-react';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const [editFormData, setEditFormData] = useState({
     full_name: '',
@@ -188,7 +190,7 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Bank Details Card */}
                   <motion.div
                     whileHover={{ scale: 1.02 }}
@@ -243,6 +245,28 @@ export default function ProfilePage() {
                       </div>
                       <h3 className="font-semibold text-gray-900 mb-1">Invoices</h3>
                       <p className="text-sm text-gray-600">Download your invoices</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Tutorial Card */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setShowTutorial(true);
+                      toast.success('Starting tutorial... 🎓');
+                    }}
+                    className="cursor-pointer group"
+                  >
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-5 rounded-lg border border-orange-200 hover:border-orange-400 transition-all hover:shadow-md">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 bg-orange-500 rounded-lg">
+                          <HelpCircle className="w-6 h-6 text-white" />
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-orange-600 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Show Tutorial</h3>
+                      <p className="text-sm text-gray-600">Restart platform tour</p>
                     </div>
                   </motion.div>
                 </div>
@@ -794,6 +818,12 @@ export default function ProfilePage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Onboarding Tour */}
+      {/* <OnboardingTour
+        run={showTutorial}
+        onComplete={() => setShowTutorial(false)}
+      /> */}
     </ProtectedRoute>
   );
 }

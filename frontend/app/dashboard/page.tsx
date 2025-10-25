@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
+// import OnboardingTour from '@/components/OnboardingTour'; // Temporarily disabled due to React 19 compatibility
 import { useAuthStore } from '@/store/authStore';
 import { commissionsAPI, referralsAPI, authAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -148,6 +149,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
+      {/* <OnboardingTour /> */}
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 via-white to-neutral-50 py-6 md:py-8">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
